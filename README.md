@@ -40,6 +40,7 @@ Or from Python: `swcc_texture.estimate(h, theta)`.
 - `verify_carsel_parrish.py` — independent verification vs Carsel & Parrish (1988)
 - `verify_rosetta.py` — independent verification vs ROSETTA class means
 - `verify_gshp.py` — leave-one-out verification vs source GSHP soils
+- `verify_groups.py` — accuracy at the 4 aggregated texture groups
 - `data/gshp_reference.csv` — the distributed reduced GSHP reference table
   (~10 k curated layers), derived from the raw GSHP file via `prepare_gshp.py`.
   The 80 MB raw file (`WRC_dataset_surya_et_al_2021_final.csv`, Zenodo 6640246)
@@ -169,6 +170,34 @@ and Ks — not class centroids.
 This is the fair "does it work on real soils it wasn't allowed to memorize"
 test, and it is the strongest of the three (7/12 vs 4/12 Carsel, 2/12 ROSETTA)
 precisely because the inputs come from the same population as the reference.
+
+## Accuracy at aggregated texture groups (verify_groups.py)
+
+The 12 USDA classes collapsed into four broad groups; a prediction is scored
+correct if it lands in the true class's group (a same-group miss is a
+"near miss"). This re-scores the three verifications above — the tool itself is
+unchanged; only the evaluation is coarsened.
+
+| Group | Classes |
+|---|---|
+| Sandy | sand, loamy sand |
+| Loamy | sandy loam, loam, sandy clay loam, clay loam |
+| Silty | silt, silt loam, silty clay loam |
+| Clayey | sandy clay, silty clay, clay |
+
+| Benchmark | Class-level (exact) | Group-level |
+|---|---|---|
+| Carsel & Parrish (1988) | 4/12 | 6/12 (50 %) |
+| ROSETTA class means | 2/12 | 4/12 (33 %) |
+| GSHP leave-one-out | 7/12 | 8/12 (67 %) |
+
+Grouping helps least where it might be expected to help most: the **Clayey**
+group is the persistent failure across all three benchmarks — real/typical clays
+(sandy clay, silty clay, clay) are pulled into the Loamy or Silty clay-loam
+family, because in van Genuchten space the fine classes overlap heavily and GSHP
+has few of them. The other recurring near-misses are the adjacent
+sandy-loam/loamy-sand and loam/silt-loam boundaries. On the in-distribution GSHP
+test the four group misses are all single-step, adjacent-group confusions.
 
 ## References
 
