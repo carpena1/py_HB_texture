@@ -1,0 +1,7 @@
+.venv/
+__pycache__/
+*.pyc
+.DS_Store
+~$*
+# 80 MB raw GSHP file — download via prepare_gshp.py (Zenodo 6640246).
+data/WRC_dataset_surya_et_al_2021_final.csv
