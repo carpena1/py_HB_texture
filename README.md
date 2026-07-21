@@ -175,3 +175,14 @@ precisely because the inputs come from the same population as the reference.
 - van Genuchten, M.Th. (1980). A closed-form equation for predicting the
   hydraulic conductivity of unsaturated soils. *Soil Science Society of
   America Journal* 44:892–898.
+
+## License
+
+Released under the Creative Commons Attribution 4.0 International license
+(CC BY 4.0); full text in `LICENSE`. You may share and adapt this work,
+including commercially, provided you give appropriate credit. Suggested
+attribution: "R. Muñoz-Carpena, py_HB_texture, https://github.com/carpena1/py_HB_texture".
+
+The bundled GSHP reference data (`data/gshp_reference.csv`, derived from
+Gupta et al. 2022) is itself CC BY 4.0 — cite Gupta et al. and Zenodo record
+6640246 when reusing it.
