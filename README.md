@@ -16,6 +16,11 @@ Monte Carlo sampling of the fit covariance.
     python3 -m venv .venv
     .venv/bin/pip install -r requirements.txt
 
+Calling `.venv/bin/python` directly (as in Usage below) runs inside the
+virtual environment without activating it, so no extra step is needed. If you
+prefer to type `python` instead of the full path, activate the environment
+first with `source .venv/bin/activate` (`deactivate` to exit).
+
 The derived reference table `data/gshp_reference.csv` is included, so the tool
 runs out of the box. The 80 MB raw GSHP file is not committed; to regenerate
 the reference, download it from Zenodo (record 6640246) into `data/` and run
@@ -35,7 +40,10 @@ Or from Python: `swcc_texture.estimate(h, theta)`.
 - `verify_benchmark.py` — independent verification vs Carsel & Parrish (1988)
 - `verify_rosetta.py` — independent verification vs ROSETTA class means
 - `verify_gshp.py` — leave-one-out verification vs source GSHP soils
-- `data/WRC_dataset_surya_et_al_2021_final.csv` — raw GSHP (Zenodo 6640246)
+- `data/gshp_reference.csv` — the distributed reduced GSHP reference table
+  (~10 k curated layers), derived from the raw GSHP file via `prepare_gshp.py`.
+  The 80 MB raw file (`WRC_dataset_surya_et_al_2021_final.csv`, Zenodo 6640246)
+  is not included; download it only if you want to rebuild the reference.
 - `Testing/` — per-class test curves: `<i>_<code>_CnP.csv` (Carsel & Parrish
   1988) and `<i>_<code>_GHSP.csv` (a representative GSHP soil for each class)
 
