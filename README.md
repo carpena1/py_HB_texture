@@ -33,6 +33,11 @@ the reference, download it from Zenodo (record 6640246) into `data/` and run
 `mydata.csv`: two columns (comma or whitespace), h_kPa and theta.
 Or from Python: `swcc_texture.estimate(h, theta)`.
 
+Optional flags (see "Improving accuracy" below):
+
+    --depth 25                 sample mid-depth in cm; +3.5 pp exact-class accuracy
+    --reference merged         add the 588 UNSODA 2.0 soils to the reference
+
 ## Files
 
 - `swcc_texture.py` — the tool (fit + inference + CLI)
@@ -205,6 +210,60 @@ has few of them. The other recurring near-misses are the adjacent
 sandy-loam/loamy-sand and loam/silt-loam boundaries. On the in-distribution GSHP
 test the four group misses are all single-step, adjacent-group confusions.
 
+## Improving accuracy: reference database and covariates
+
+Two routes to better classification were tested (`verify_variants.py`,
+`verify_variants_large.py`):
+
+1. **Merge a second database.** HYPRES was the original candidate, but its
+   per-sample data was never publicly released — only the class-average PTFs of
+   Wösten et al. (1999). **UNSODA 2.0** (Nemes et al. 2001) was used instead: a
+   genuinely public, sample-level database. 588 of its 790 soils yielded usable
+   retention curves, fitted here with the same vG routine (median RMSE 0.0065).
+2. **Add a covariate.** Sample **mid-depth** (98 % coverage in GSHP) is used as
+   a fifth, equally weighted kNN feature. *Organic matter was dropped*: it is
+   measured for only 15 % of curated GSHP layers, so using it would shrink the
+   reference to a small, sand-skewed subset.
+
+Because the Carsel and ROSETTA benchmarks are class-typical parameter sets with
+no depth attached, covariates can only be scored on real soils. The decisive
+test is therefore a **large paired leave-one-out** over 2,680 real soils
+(2,121 GSHP + 559 UNSODA, stratified by class), each predicted with itself
+removed from the reference and compared variant-vs-baseline on the *same* soils
+(McNemar).
+
+93 % of GSHP layers belong to multi-layer profiles (median 4 horizons), and
+sibling horizons share both depth and texture — so a naive test could let depth
+find siblings instead of genuinely similar soils. The run is therefore repeated
+dropping the target's **whole profile**. The depth gain survives intact
+(+3.5 pp vs +3.2 pp), confirming real pedological signal rather than site
+leakage.
+
+Profile-level leave-one-out, n = 2,680 paired soils:
+
+| Variant | Class | vs base | p | Group | vs base | p |
+|---|---|---|---|---|---|---|
+| GSHP (baseline) | 39.8 % | — | — | 62.3 % | — | — |
+| GSHP + depth | 43.3 % | **+3.5 pp** | <0.001 | 62.8 % | +0.6 pp | 0.52 |
+| GSHP + UNSODA | 40.5 % | +0.7 pp | 0.052 | 62.7 % | +0.4 pp | 0.29 |
+| GSHP + UNSODA + depth | 44.4 % | **+4.7 pp** | <0.001 | 63.6 % | +1.3 pp | 0.12 |
+
+Conclusions:
+
+- **Depth is worth using**: +3.5 pp exact-class accuracy, highly significant and
+  robust to profile-level leave-one-out. Pass it with `--depth <cm>`.
+- **Merging UNSODA gives little**: +0.7 pp, at the edge of significance
+  (p = 0.052). It adds sample diversity at no cost, so it is available via
+  `--reference merged`, but it is not the default and should not be expected to
+  change results much.
+- **Both gains are at the class level only.** Group-level accuracy barely moves
+  (+0.6 pp, p = 0.52), i.e. depth sharpens distinctions *within* a texture group
+  (sand vs loamy sand) but does not fix the coarse Clayey-group confusions that
+  dominate the group-level error.
+- The 12-soil benchmark tables are too small to see these effects: there, depth
+  appears to *hurt* (16/24 -> 15/24). A one-soil difference at n = 12 is noise;
+  the n = 2,680 paired test is the one to trust.
+
 ## References
 
 - Carsel, R.F. and Parrish, R.S. (1988). Developing joint probability
@@ -221,6 +280,14 @@ test the four group misses are all single-step, adjacent-group confusions.
   program for estimating soil hydraulic parameters with hierarchical
   pedotransfer functions. *Journal of Hydrology* 251:163–176.
   (Source of the ROSETTA class-mean parameters used in `verify_rosetta.py`.)
+- Nemes, A., Schaap, M.G., Leij, F.J. and Wösten, J.H.M. (2001). Description of
+  the unsaturated soil hydraulic database UNSODA version 2.0. *Journal of
+  Hydrology* 251:151–162. Data: Ag Data Commons / figshare 24851832.
+  (Second reference database, used by `--reference merged`.)
+- Wösten, J.H.M., Lilly, A., Nemes, A. and Le Bas, C. (1999). Development and
+  use of a database of hydraulic properties of European soils (HYPRES).
+  *Geoderma* 90:169–185. (Considered as a second database; only its
+  class-average PTFs are public, so UNSODA was used instead.)
 - van Genuchten, M.Th. (1980). A closed-form equation for predicting the
   hydraulic conductivity of unsaturated soils. *Soil Science Society of
   America Journal* 44:892–898.

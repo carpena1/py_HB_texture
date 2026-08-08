@@ -309,10 +309,27 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("datafile", help="two-column file: h_kPa, theta (fraction or %%)")
     ap.add_argument("--json", metavar="FILE", help="also write full results as JSON")
+    ap.add_argument("--depth", type=float, metavar="CM",
+                    help="sample mid-depth in cm; used as an extra matching "
+                         "feature (raises exact-class accuracy by ~3.5 points)")
+    ap.add_argument("--reference", choices=["gshp", "merged"], default="gshp",
+                    help="reference database: gshp (default) or merged, "
+                         "which adds the 588 UNSODA 2.0 soils")
     args = ap.parse_args()
 
     h, theta = _read_data(args.datafile)
-    res = estimate(h, theta)
+
+    ref = None
+    if args.reference == "merged" or args.depth is not None:
+        import pandas as pd
+        df = pd.read_csv(REFERENCE_CSV)
+        if args.reference == "merged":
+            unsoda = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                  "data", "unsoda_reference.csv")
+            df = pd.concat([df, pd.read_csv(unsoda)], ignore_index=True)
+        ref = GshpReference(df=df, use_depth=args.depth is not None)
+
+    res = estimate(h, theta, ref=ref, depth=args.depth)
 
     vg = res["vg_fit"]
     print(f"van Genuchten fit (m = 1-1/n, alpha in kPa^-1):")
