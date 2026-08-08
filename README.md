@@ -215,11 +215,20 @@ test the four group misses are all single-step, adjacent-group confusions.
 Two routes to better classification were tested (`verify_variants.py`,
 `verify_variants_large.py`):
 
-1. **Merge a second database.** HYPRES was the original candidate, but its
-   per-sample data was never publicly released — only the class-average PTFs of
-   Wösten et al. (1999). **UNSODA 2.0** (Nemes et al. 2001) was used instead: a
-   genuinely public, sample-level database. 588 of its 790 soils yielded usable
+1. **Merge a second database.** HYPRES was the original candidate. Its
+   sample-level data does exist in exactly the form this tool needs — the JRC
+   metadata documents RAWRET/RAWK tables with ~197,000 theta(h) pairs and a
+   HYDRAULIC_PROPS table of per-sample Mualem-van Genuchten parameters for
+   5,521 samples from 4,486 horizons — but it is not offered as a download on
+   the ESDAC soil-properties page, and ESDAC's terms grant use "on condition
+   that, under NO CIRCUMSTANCES are these data passed to third parties".
+   A derived HYPRES reference table therefore could not be redistributed in
+   this public CC BY 4.0 repository (see "Using HYPRES locally" below).
+   **UNSODA 2.0** (Nemes et al. 2001) was used instead: a genuinely
+   redistributable, sample-level database. 588 of its 790 soils yielded usable
    retention curves, fitted here with the same vG routine (median RMSE 0.0065).
+   Note that GSHP already contains 218 UNSODA-sourced layers, so the merge is
+   partly redundant — a likely reason its benefit is small.
 2. **Add a covariate.** Sample **mid-depth** (98 % coverage in GSHP) is used as
    a fifth, equally weighted kNN feature. *Organic matter was dropped*: it is
    measured for only 15 % of curated GSHP layers, so using it would shrink the
@@ -263,6 +272,24 @@ Conclusions:
 - The 12-soil benchmark tables are too small to see these effects: there, depth
   appears to *hurt* (16/24 -> 15/24). A one-soil difference at n = 12 is noise;
   the n = 2,680 paired test is the one to trust.
+
+### Using HYPRES locally
+
+Europe is thinly represented in GSHP — only 954 of 15,259 layers (6 %) fall in
+a European bounding box — so HYPRES's 4,486 European horizons would be a
+genuine addition, and the merge machinery here supports it. What blocks it is
+licensing, not capability: ESDAC data require registration and may not be
+passed to third parties, which is incompatible with redistributing a derived
+table from this repository.
+
+If you obtain HYPRES under your own ESDAC registration (or from Wageningen
+Environmental Research, successor to the Winand Staring Centre), you can build
+a reference table locally and keep it out of version control. Any table with
+the columns of `data/gshp_reference.csv` (`layer_id, profile_id,
+texture_class, alpha_kpa, n, thetar, thetas, sand, silt, clay, ksat_cmh,
+depth_cm`) can be concatenated onto the reference exactly as
+`verify_variants.py` does for UNSODA. Add the file to `.gitignore` so the
+licensed data is never redistributed.
 
 ## References
 
