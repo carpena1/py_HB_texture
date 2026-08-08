@@ -49,6 +49,8 @@ Optional flags (see "Improving accuracy" below):
 - `prepare_unsoda.py` — one-time: UNSODA 2.0 .mdb -> `data/unsoda_reference.csv`
 - `verify_variants.py` — reference/covariate variants on the 4 benchmarks
 - `verify_variants_large.py` — same variants, large paired leave-one-out test
+- `verify_region.py` — how much region-matched reference data is worth
+- `prepare_hypres.py` — build a local (git-ignored) HYPRES reference table
 - `data/gshp_reference.csv` — the distributed reduced GSHP reference table
   (~10 k curated layers), derived from the raw GSHP file via `prepare_gshp.py`.
   The 80 MB raw file (`WRC_dataset_surya_et_al_2021_final.csv`, Zenodo 6640246)
@@ -273,23 +275,67 @@ Conclusions:
   appears to *hurt* (16/24 -> 15/24). A one-soil difference at n = 12 is noise;
   the n = 2,680 paired test is the one to trust.
 
-### Using HYPRES locally
+### Would HYPRES help? Evidence from a regional hold-out (verify_region.py)
 
-Europe is thinly represented in GSHP — only 954 of 15,259 layers (6 %) fall in
-a European bounding box — so HYPRES's 4,486 European horizons would be a
-genuine addition, and the merge machinery here supports it. What blocks it is
-licensing, not capability: ESDAC data require registration and may not be
-passed to third parties, which is incompatible with redistributing a derived
-table from this repository.
+HYPRES cannot be tested without the data, but its *mechanism* can: it would add
+~4,486 European horizons to a reference holding only 778 (7.8 % of curated
+GSHP). So we measured what region-matched reference data is worth, by removing
+European soils from the reference and re-classifying European targets. Three
+conditions, target's own profile always excluded, n = 778 European soils:
 
-If you obtain HYPRES under your own ESDAC registration (or from Wageningen
-Environmental Research, successor to the Winand Staring Centre), you can build
-a reference table locally and keep it out of version control. Any table with
-the columns of `data/gshp_reference.csv` (`layer_id, profile_id,
-texture_class, alpha_kpa, n, thetar, thetas, sand, silt, clay, ksat_cmh,
-depth_cm`) can be concatenated onto the reference exactly as
-`verify_variants.py` does for UNSODA. Add the file to `.gitignore` so the
-licensed data is never redistributed.
+| Condition | Reference | Class | Group |
+|---|---|---|---|
+| A full | 9,996 | 36.2 % | 60.2 % |
+| B Europe removed | 9,218 | **27.5 %** | **52.3 %** |
+| C 778 random non-European removed | 9,218 | 36.8 % | 61.7 % |
+
+B vs C is the informative contrast — same reference size, only the region match
+differs: **-9.3 pp class and -9.4 pp group (both p < 0.001)**. Simply having a
+smaller reference costs nothing (A vs C: +0.5 pp, p = 0.50). A non-European
+control group is unaffected by removing European data (+0.0 pp, p = 1.00),
+confirming the effect is regional and not an artifact of reference size.
+
+Two further points make the case: European soils are currently classified far
+worse than non-European ones (36.2 % vs 52.8 % exact class — a 16.6 pp deficit
+consistent with under-representation), and HYPRES would raise European coverage
+roughly six-fold. This is a much larger prospective gain than either the depth
+covariate (+3.5 pp) or the UNSODA merge (+0.7 pp) delivered — though it is an
+estimate of the mechanism, not a measurement of HYPRES itself.
+
+### Obtaining and testing HYPRES
+
+Access (ESDAC, JRC): the [European Soil Database v2.0 page]
+(https://esdac.jrc.ec.europa.eu/content/european-soil-database-v20-vector-and-attribute-data)
+carries an online request form asking for name, e-mail, organisation and type,
+country, and a purpose statement (>= 30 characters); download instructions
+follow by e-mail. HYPRES is described as a component of the ESDB but is not
+offered as a standalone download, so state explicitly that you need the
+**sample-level HYPRES tables (RAWRET / RAWK / HYDRAULIC_PROPS)**. The original
+custodian is Wageningen Environmental Research (successor to the Winand Staring
+Centre; the JRC metadata names J.H.M. Wösten as contact).
+
+Licence, in short: registration is required; ESDB v2.0 terms prohibit passing
+data to third parties and prohibit commercial use. **This is incompatible with
+redistributing a derived HYPRES table from this public CC BY 4.0 repository**,
+so `data/hypres_reference.csv` and `data/hypres*` are git-ignored. Keep the
+data local unless you obtain written permission to redistribute a derivative.
+
+Once you have the data:
+
+    python prepare_hypres.py --inspect <file-or-dir>   # see detected columns
+    python prepare_hypres.py <file-or-dir>             # write data/hypres_reference.csv
+
+`prepare_hypres.py` accepts .csv/.xlsx/.mdb, uses fitted van Genuchten
+parameters when present and otherwise fits the raw theta(h) pairs, and matches
+columns by pattern — override anything mis-detected with `--map alpha=ALFA`,
+and set `--alpha-units/--head-units/--ksat-units` if they differ from the
+defaults (1/cm, cm, cm/day). It prints class-median alpha and n against GSHP as
+a unit check: a ~10x offset means the units flag is wrong.
+
+To measure the benefit, add the table as a third variant in
+`verify_variants_large.py` (concatenate it exactly as UNSODA is) and re-run the
+paired profile-level leave-one-out, ideally reporting European targets
+separately — that is where the gain is predicted to land.
 
 ## References
 

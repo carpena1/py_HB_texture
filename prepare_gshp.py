@@ -29,7 +29,8 @@ def main():
     lay = df.drop_duplicates("layer_id").copy()
 
     for c in ["alpha", "n", "thetar", "thetas", "sand_tot_psa", "silt_tot_psa",
-              "clay_tot_psa", "ksat_lab", "ksat_field", "hzn_top", "hzn_bot"]:
+              "clay_tot_psa", "ksat_lab", "ksat_field", "hzn_top", "hzn_bot",
+              "latitude_decimal_degrees", "longitude_decimal_degrees"]:
         lay[c] = pd.to_numeric(lay[c], errors="coerce")
 
     lay["tex_psda"] = lay["tex_psda"].astype(str).str.strip().str.lower()
@@ -61,6 +62,11 @@ def main():
 
     # Sample mid-depth (cm), used as an optional covariate.
     out["depth_cm"] = (lay["hzn_top"] + lay["hzn_bot"]) / 2.0
+
+    # Coordinates, used to test how much region-matched reference data matters
+    # (see verify_region.py).
+    out["lat"] = lay["latitude_decimal_degrees"]
+    out["lon"] = lay["longitude_decimal_degrees"]
 
     out.to_csv("data/gshp_reference.csv", index=False)
     print(f"reference layers: {len(out)}")

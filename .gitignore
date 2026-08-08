@@ -9,6 +9,12 @@ data/WRC_dataset_surya_et_al_2021_final.csv
 # prepare_unsoda.py (Ag Data Commons / figshare 24851832).
 data/unsoda_raw/
 data/unsoda.zip
+# HYPRES is ESDAC-licensed and MUST NOT be redistributed: neither the raw
+# distribution nor the derived reference table may be committed.
+data/hypres_reference.csv
+data/hypres_raw/
+data/HYPRES*
+data/hypres*
 data/unsoda_ht.csv
 data/unsoda_general.csv
 data/unsoda_props.csv
