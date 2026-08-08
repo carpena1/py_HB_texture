@@ -107,7 +107,12 @@ def main():
         dl = gen["depth_lower"].get(code, np.nan)
         depth = (du + dl) / 2.0 if pd.notna(du) and pd.notna(dl) else np.nan
 
-        records.append(dict(layer_id=f"UNSODA_{code}", texture_class=cls,
+        # UNSODA soil codes are NNNL, where the leading digits identify the
+        # profile/site and the last digit the horizon within it (e.g. 1010-1015
+        # are successive horizons of one Troup profile).
+        records.append(dict(layer_id=f"UNSODA_{code}",
+                            profile_id=f"UNSODA_P{code // 10}",
+                            texture_class=cls,
                             alpha_kpa=alpha, n=n, thetar=thetar, thetas=thetas,
                             sand=sand, silt=silt, clay=clay,
                             ksat_cmh=ksat_cmh, depth_cm=depth, rmse=rmse))

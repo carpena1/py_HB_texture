@@ -6,6 +6,11 @@ four variants over a large stratified sample of real soils, leaving each target
 out of the reference, and compares the variants *pairwise on the same soils*
 (a McNemar-style test), which is what makes small differences interpretable.
 
+It is run twice: once with plain layer-level leave-one-out, and once dropping
+the target's whole profile (sibling horizons share depth AND texture, so the
+grouped run is the one that shows whether a covariate carries real signal or
+is just finding siblings).
+
 Usage:  python verify_variants_large.py [n_per_class] [n_mc]
 """
 
@@ -30,13 +35,24 @@ def sample_targets(df, n_per_class, seed=0):
     return pd.concat(parts).reset_index(drop=True)
 
 
-def predict_all(ref_df, use_depth, targets, n_mc):
+def predict_all(ref_df, use_depth, targets, n_mc, by_profile=False):
+    """Leave-one-out predictions for every target soil.
+
+    by_profile=True drops the target's WHOLE profile from the reference, not
+    just the target layer. Sibling horizons of one profile share both depth
+    and texture, so plain layer-level LOO can let a covariate like depth find
+    siblings rather than genuinely similar soils; the grouped version removes
+    that shortcut.
+    """
     ref = st.GshpReference(df=ref_df.reset_index(drop=True),
                            use_depth=use_depth)
     preds = []
     for row in targets.itertuples():
         theta = st.vg_theta(H, row.thetar, row.thetas, row.alpha_kpa, row.n)
-        ref.set_excluded(row.layer_id)
+        if by_profile:
+            ref.set_excluded_profile(row.profile_id)
+        else:
+            ref.set_excluded(row.layer_id)
         depth = row.depth_cm if use_depth else None
         preds.append(st.estimate(H, theta, ref=ref, n_mc=n_mc,
                                  depth=depth)["texture_class"])
@@ -75,37 +91,42 @@ def main():
                 ("GSHP+UNSODA", merged, False),
                 ("GSHP+UNSODA+depth", merged, True)]
 
-    results = {}
-    for vname, vdf, vdepth in variants:
-        ok_cls, ok_grp = [], []
-        for targets in (tg, tu):
-            preds = predict_all(vdf, vdepth, targets, n_mc)
-            truth = targets.texture_class.to_numpy()
-            ok_cls.append(preds == truth)
-            ok_grp.append(np.array([GROUP[p] == GROUP[t]
-                                    for p, t in zip(preds, truth)]))
-        results[vname] = (np.concatenate(ok_cls), np.concatenate(ok_grp),
-                          [a.mean() for a in ok_cls])
-        c, g, per = results[vname]
-        print(f"{vname:<20s} class {c.mean()*100:5.1f} %   "
-              f"group {g.mean()*100:5.1f} %   "
-              f"(GSHP {per[0]*100:.0f} % / UNSODA {per[1]*100:.0f} % class)")
+    for by_profile in (False, True):
+        mode = ("profile-level LOO (whole profile removed)" if by_profile
+                else "layer-level LOO (only the target layer removed)")
+        print(f"\n{'=' * 68}\n{mode}\n{'=' * 68}")
 
-    print("\n=== paired comparisons vs the GSHP baseline (same soils) ===")
-    base_c, base_g, _ = results["GSHP"]
-    n = len(base_c)
-    print(f"{'variant':<20s} {'level':<6s} {'delta':>8s} {'b':>4s} {'c':>4s} "
-          f"{'p':>8s}")
-    for vname in ["GSHP+depth", "GSHP+UNSODA", "GSHP+UNSODA+depth"]:
-        vc, vg, _ = results[vname]
-        for level, base, var in [("class", base_c, vc), ("group", base_g, vg)]:
-            b, c, p = mcnemar(base, var)
-            delta = (var.mean() - base.mean()) * 100
-            print(f"{vname:<20s} {level:<6s} {delta:+7.1f}pp {b:4d} {c:4d} "
-                  f"{p:8.3f}")
-    print(f"\nn = {n} paired soils. b = baseline right/variant wrong, "
-          f"c = variant right/baseline wrong.\np < 0.05 means the difference "
-          f"is unlikely to be chance.")
+        results = {}
+        for vname, vdf, vdepth in variants:
+            ok_cls, ok_grp = [], []
+            for targets in (tg, tu):
+                preds = predict_all(vdf, vdepth, targets, n_mc, by_profile)
+                truth = targets.texture_class.to_numpy()
+                ok_cls.append(preds == truth)
+                ok_grp.append(np.array([GROUP[p] == GROUP[t]
+                                        for p, t in zip(preds, truth)]))
+            results[vname] = (np.concatenate(ok_cls), np.concatenate(ok_grp),
+                              [a.mean() for a in ok_cls])
+            c, g, per = results[vname]
+            print(f"{vname:<20s} class {c.mean()*100:5.1f} %   "
+                  f"group {g.mean()*100:5.1f} %   "
+                  f"(GSHP {per[0]*100:.0f} % / UNSODA {per[1]*100:.0f} % class)")
+
+        print("\npaired comparisons vs the GSHP baseline (same soils):")
+        base_c, base_g, _ = results["GSHP"]
+        n = len(base_c)
+        print(f"  {'variant':<20s} {'level':<6s} {'delta':>8s} {'b':>4s} "
+              f"{'c':>4s} {'p':>8s}")
+        for vname in ["GSHP+depth", "GSHP+UNSODA", "GSHP+UNSODA+depth"]:
+            vc, vg, _ = results[vname]
+            for level, base, var in [("class", base_c, vc),
+                                     ("group", base_g, vg)]:
+                b, c, p = mcnemar(base, var)
+                delta = (var.mean() - base.mean()) * 100
+                print(f"  {vname:<20s} {level:<6s} {delta:+7.1f}pp {b:4d} "
+                      f"{c:4d} {p:8.3f}")
+        print(f"  n = {n} paired soils. b = baseline right/variant wrong, "
+              f"c = variant right/baseline wrong; p < 0.05 = unlikely chance.")
 
 
 if __name__ == "__main__":

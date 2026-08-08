@@ -143,6 +143,8 @@ class GshpReference:
         if use_depth:
             df = df[df["depth_cm"].notna()].reset_index(drop=True)
         self.layer_id = df["layer_id"].to_numpy()
+        self.profile_id = (df["profile_id"].to_numpy()
+                           if "profile_id" in df.columns else None)
         self.classes = df["texture_class"].to_numpy()
         # Inverse class-frequency weights: votes assume a uniform prior over
         # the 12 USDA classes rather than GSHP's sampling distribution
@@ -161,11 +163,24 @@ class GshpReference:
         self.z = (feats - self.mean) / self.std
 
     def set_excluded(self, layer_id):
-        """Hide one reference row from all subsequent lookups. Used for
-        large leave-one-out runs, where rebuilding the whole reference per
-        target soil would be wasteful."""
-        self._excluded = (self.layer_id == layer_id) if layer_id is not None \
-            else None
+        """Hide reference rows from all subsequent lookups. Accepts a single
+        layer_id or a boolean mask over the reference rows (the latter is used
+        to drop a whole profile at once). Used for large leave-one-out runs,
+        where rebuilding the whole reference per target soil would be
+        wasteful. Pass None to clear."""
+        if layer_id is None:
+            self._excluded = None
+        elif isinstance(layer_id, np.ndarray) and layer_id.dtype == bool:
+            self._excluded = layer_id
+        else:
+            self._excluded = (self.layer_id == layer_id)
+
+    def set_excluded_profile(self, profile_id):
+        """Hide every reference row belonging to one profile (all sibling
+        horizons of a site), for grouped leave-one-out."""
+        if self.profile_id is None:
+            raise ValueError("reference has no profile_id column")
+        self._excluded = (self.profile_id == profile_id)
 
     def neighbors(self, thetar, thetas, alpha, n, k, depth=None):
         f = [np.log10(alpha), np.log10(n - 1.0), thetar, thetas]

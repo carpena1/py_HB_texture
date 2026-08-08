@@ -39,6 +39,7 @@ def main():
 
     out = pd.DataFrame({
         "layer_id": lay["layer_id"],
+        "profile_id": lay["profile_id"],
         "texture_class": lay["tex_psda"],
         "alpha_kpa": lay["alpha"] / M_HEAD_TO_KPA,
         "n": lay["n"],

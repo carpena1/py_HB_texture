@@ -41,10 +41,16 @@ Or from Python: `swcc_texture.estimate(h, theta)`.
 - `verify_rosetta.py` — independent verification vs ROSETTA class means
 - `verify_gshp.py` — leave-one-out verification vs source GSHP soils
 - `verify_groups.py` — accuracy at the 4 aggregated texture groups
+- `prepare_unsoda.py` — one-time: UNSODA 2.0 .mdb -> `data/unsoda_reference.csv`
+- `verify_variants.py` — reference/covariate variants on the 4 benchmarks
+- `verify_variants_large.py` — same variants, large paired leave-one-out test
 - `data/gshp_reference.csv` — the distributed reduced GSHP reference table
   (~10 k curated layers), derived from the raw GSHP file via `prepare_gshp.py`.
   The 80 MB raw file (`WRC_dataset_surya_et_al_2021_final.csv`, Zenodo 6640246)
   is not included; download it only if you want to rebuild the reference.
+- `data/unsoda_reference.csv` — 588 UNSODA 2.0 soils in the same schema, used
+  by the merged-reference variant (raw .mdb not committed; rebuild with
+  `prepare_unsoda.py`, which needs `mdbtools`)
 - `Testing/` — per-class test curves: `<i>_<code>_CnP.csv` (Carsel & Parrish
   1988) and `<i>_<code>_GHSP.csv` (a representative GSHP soil for each class)
 

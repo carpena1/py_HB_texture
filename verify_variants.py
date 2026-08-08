@@ -29,8 +29,8 @@ import verify_rosetta as vr
 from verify_groups import GROUP
 
 H = np.arange(0.0, 150.0 + 0.1, 5.0)
-COLS = ["layer_id", "texture_class", "alpha_kpa", "n", "thetar", "thetas",
-        "sand", "silt", "clay", "ksat_cmh", "depth_cm"]
+COLS = ["layer_id", "profile_id", "texture_class", "alpha_kpa", "n", "thetar",
+        "thetas", "sand", "silt", "clay", "ksat_cmh", "depth_cm"]
 ORDER = ["sand", "loamy sand", "sandy loam", "loam", "silt", "silt loam",
          "sandy clay loam", "clay loam", "silty clay loam", "sandy clay",
          "silty clay", "clay"]
