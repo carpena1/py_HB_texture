@@ -127,13 +127,21 @@ def usda_centroids(step=0.25):
 # ---------------------------------------------------------------------------
 
 class GshpReference:
-    def __init__(self, path=REFERENCE_CSV, df=None):
+    def __init__(self, path=REFERENCE_CSV, df=None, use_depth=False):
         """Build the reference from the CSV at `path`, or from a preloaded
         DataFrame `df` (used for leave-one-out verification, where the target
-        soil is dropped before constructing the reference)."""
+        soil is dropped before constructing the reference).
+
+        `use_depth=True` adds the sample mid-depth as a fifth, equally
+        weighted feature (log10(1+depth_cm), standardized); reference rows
+        without a depth are dropped in that case.
+        """
         if df is None:
             import pandas as pd
             df = pd.read_csv(path)
+        self.use_depth = use_depth
+        if use_depth:
+            df = df[df["depth_cm"].notna()].reset_index(drop=True)
         self.layer_id = df["layer_id"].to_numpy()
         self.classes = df["texture_class"].to_numpy()
         # Inverse class-frequency weights: votes assume a uniform prior over
@@ -143,23 +151,39 @@ class GshpReference:
         self.class_weight = (1.0 / counts)[df["texture_class"]].to_numpy()
         self.fractions = df[["sand", "silt", "clay"]].to_numpy()
         self.ksat = df["ksat_cmh"].to_numpy()
-        feats = np.column_stack([
-            np.log10(df["alpha_kpa"]), np.log10(df["n"] - 1.0),
-            df["thetar"], df["thetas"],
-        ])
+        cols = [np.log10(df["alpha_kpa"]), np.log10(df["n"] - 1.0),
+                df["thetar"], df["thetas"]]
+        if use_depth:
+            cols.append(np.log10(1.0 + df["depth_cm"].clip(lower=0)))
+        feats = np.column_stack(cols)
         self.mean = feats.mean(axis=0)
         self.std = feats.std(axis=0)
         self.z = (feats - self.mean) / self.std
 
-    def neighbors(self, thetar, thetas, alpha, n, k):
-        f = np.array([np.log10(alpha), np.log10(n - 1.0), thetar, thetas])
+    def set_excluded(self, layer_id):
+        """Hide one reference row from all subsequent lookups. Used for
+        large leave-one-out runs, where rebuilding the whole reference per
+        target soil would be wasteful."""
+        self._excluded = (self.layer_id == layer_id) if layer_id is not None \
+            else None
+
+    def neighbors(self, thetar, thetas, alpha, n, k, depth=None):
+        f = [np.log10(alpha), np.log10(n - 1.0), thetar, thetas]
+        if self.use_depth:
+            if depth is None:
+                raise ValueError("this reference uses depth; pass depth=...")
+            f.append(np.log10(1.0 + max(depth, 0.0)))
+        f = np.array(f)
         d = np.sqrt(((self.z - (f - self.mean) / self.std) ** 2).sum(axis=1))
+        excluded = getattr(self, "_excluded", None)
+        if excluded is not None:
+            d = np.where(excluded, np.inf, d)
         idx = np.argpartition(d, k)[:k]
         w = 1.0 / (d[idx] ** 2 + 1e-6)
         return idx, w / w.sum()
 
 
-def estimate(h, theta, ref=None, n_mc=300, k=30, seed=0):
+def estimate(h, theta, ref=None, n_mc=300, k=30, seed=0, depth=None):
     """Full pipeline: fit vG, then kNN inference with MC uncertainty.
 
     Returns a dict with fitted parameters, class probabilities, particle
@@ -187,7 +211,8 @@ def estimate(h, theta, ref=None, n_mc=300, k=30, seed=0):
     ks_vals, ks_w = [], []
     ks_neighbor_counts = []
     for tr, ts, la_i, ln1_i in draws:
-        idx, w = ref.neighbors(tr, ts, 10.0 ** la_i, 1.0 + 10.0 ** ln1_i, k)
+        idx, w = ref.neighbors(tr, ts, 10.0 ** la_i, 1.0 + 10.0 ** ln1_i, k,
+                               depth=depth)
         w = w * ref.class_weight[idx]
         w = w / w.sum()
         ks_neighbor_counts.append(int(np.isfinite(ref.ksat[idx]).sum()))
@@ -207,14 +232,17 @@ def estimate(h, theta, ref=None, n_mc=300, k=30, seed=0):
     frac_hi = [_wpercentile(frac_vals[:, j], frac_w, 95) for j in range(3)]
 
     ks_vals = np.array(ks_vals); ks_w = np.array(ks_w)
-    log_ks = np.log10(ks_vals)
-    ks = {
-        "median_cmh": 10.0 ** _wpercentile(log_ks, ks_w, 50),
-        "p5_cmh": 10.0 ** _wpercentile(log_ks, ks_w, 5),
-        "p95_cmh": 10.0 ** _wpercentile(log_ks, ks_w, 95),
-        "n_neighbors_with_ksat": float(np.mean(ks_neighbor_counts)),
-        "k": k,
-    }
+    ks = {"n_neighbors_with_ksat": float(np.mean(ks_neighbor_counts)), "k": k}
+    if len(ks_vals):
+        log_ks = np.log10(ks_vals)
+        ks.update(median_cmh=10.0 ** _wpercentile(log_ks, ks_w, 50),
+                  p5_cmh=10.0 ** _wpercentile(log_ks, ks_w, 5),
+                  p95_cmh=10.0 ** _wpercentile(log_ks, ks_w, 95))
+    else:
+        # No neighbor carried a measured Ksat -- report no estimate rather
+        # than inventing one.
+        ks.update(median_cmh=float("nan"), p5_cmh=float("nan"),
+                  p95_cmh=float("nan"))
 
     return {
         "vg_fit": {

@@ -5,3 +5,11 @@ __pycache__/
 ~$*
 # 80 MB raw GSHP file — download via prepare_gshp.py (Zenodo 6640246).
 data/WRC_dataset_surya_et_al_2021_final.csv
+# Raw UNSODA Access database — rebuild data/unsoda_reference.csv with
+# prepare_unsoda.py (Ag Data Commons / figshare 24851832).
+data/unsoda_raw/
+data/unsoda.zip
+data/unsoda_ht.csv
+data/unsoda_general.csv
+data/unsoda_props.csv
+data/unsoda_psd.csv

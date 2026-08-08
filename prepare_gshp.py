@@ -29,7 +29,7 @@ def main():
     lay = df.drop_duplicates("layer_id").copy()
 
     for c in ["alpha", "n", "thetar", "thetas", "sand_tot_psa", "silt_tot_psa",
-              "clay_tot_psa", "ksat_lab", "ksat_field"]:
+              "clay_tot_psa", "ksat_lab", "ksat_field", "hzn_top", "hzn_bot"]:
         lay[c] = pd.to_numeric(lay[c], errors="coerce")
 
     lay["tex_psda"] = lay["tex_psda"].astype(str).str.strip().str.lower()
@@ -58,10 +58,14 @@ def main():
     ksat = lay["ksat_lab"].fillna(lay["ksat_field"])
     out["ksat_cmh"] = ksat.where(ksat > 0) / 24.0
 
+    # Sample mid-depth (cm), used as an optional covariate.
+    out["depth_cm"] = (lay["hzn_top"] + lay["hzn_bot"]) / 2.0
+
     out.to_csv("data/gshp_reference.csv", index=False)
     print(f"reference layers: {len(out)}")
     print(f"  with fractions:  {out['sand'].notna().sum()}")
     print(f"  with ksat:       {out['ksat_cmh'].notna().sum()}")
+    print(f"  with depth:      {out['depth_cm'].notna().sum()}")
     print(out["texture_class"].value_counts())
 
 
