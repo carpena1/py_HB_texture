@@ -48,6 +48,28 @@ def vg_theta(h, thetar, thetas, alpha, n):
     return thetar + (thetas - thetar) * (1.0 + (alpha * np.asarray(h)) ** n) ** (-m)
 
 
+# Matric potentials (kPa) at which retention is sampled for curve-space
+# matching: log-spaced from near saturation to the wilting point, and
+# including the two classical anchors, field capacity (33) and 1500.
+CURVE_HEADS = np.array([1.0, 3.0, 10.0, 33.0, 100.0, 330.0, 1000.0, 1500.0])
+
+
+def _curve_features(thetar, thetas, alpha, n):
+    """Retention sampled at CURVE_HEADS, shape (n_rows, n_heads).
+
+    Matching on the curve rather than on (alpha, n) sidesteps the fit ridge:
+    alpha and n trade off against each other, so two soils with nearly
+    identical curves can sit far apart in parameter space, and two soils that
+    are close in parameter space can have visibly different curves.
+    """
+    thetar, thetas, alpha, n = (np.atleast_1d(np.asarray(x, dtype=float))
+                                for x in (thetar, thetas, alpha, n))
+    m = 1.0 - 1.0 / n
+    ah = alpha[:, None] * CURVE_HEADS[None, :]
+    return (thetar[:, None] + (thetas - thetar)[:, None]
+            * (1.0 + ah ** n[:, None]) ** (-m[:, None]))
+
+
 def _vg_transformed(h, thetar, thetas, la, ln1):
     return vg_theta(h, thetar, thetas, 10.0 ** la, 1.0 + 10.0 ** ln1)
 
@@ -127,7 +149,8 @@ def usda_centroids(step=0.25):
 # ---------------------------------------------------------------------------
 
 class GshpReference:
-    def __init__(self, path=REFERENCE_CSV, df=None, use_depth=False):
+    def __init__(self, path=REFERENCE_CSV, df=None, use_depth=False, tau=1.0,
+                 feature_mode="vg"):
         """Build the reference from the CSV at `path`, or from a preloaded
         DataFrame `df` (used for leave-one-out verification, where the target
         soil is dropped before constructing the reference).
@@ -146,21 +169,48 @@ class GshpReference:
         self.profile_id = (df["profile_id"].to_numpy()
                            if "profile_id" in df.columns else None)
         self.classes = df["texture_class"].to_numpy()
-        # Inverse class-frequency weights: votes assume a uniform prior over
-        # the 12 USDA classes rather than GSHP's sampling distribution
-        # (sand alone is ~39 % of the database).
+        # Class-frequency vote weighting, w = (1/count)^tau.
+        #
+        # tau = 1 imposes a uniform prior over the 12 USDA classes instead of
+        # GSHP's own distribution (sand alone is ~39 % of the database). That
+        # maximises macro-recall but is brutal for rare classes: silt has 32
+        # layers against sand's 3,930, so a single silt neighbour outvotes 123
+        # sand neighbours and silt gets predicted 2.7x more often than it
+        # occurs (precision 18.6 %). tau = 0 disables the correction entirely
+        # and lets sand dominate. Intermediate values trade recall against
+        # precision; see verify_tau.py.
+        self.tau = tau
         counts = df["texture_class"].value_counts()
-        self.class_weight = (1.0 / counts)[df["texture_class"]].to_numpy()
+        self.class_weight = ((1.0 / counts) ** tau)[df["texture_class"]].to_numpy()
+        self.feature_mode = feature_mode
         self.fractions = df[["sand", "silt", "clay"]].to_numpy()
         self.ksat = df["ksat_cmh"].to_numpy()
-        cols = [np.log10(df["alpha_kpa"]), np.log10(df["n"] - 1.0),
-                df["thetar"], df["thetas"]]
+        if feature_mode in ("curve", "curve_white"):
+            cols = list(_curve_features(
+                df["thetar"].to_numpy(), df["thetas"].to_numpy(),
+                df["alpha_kpa"].to_numpy(), df["n"].to_numpy()).T)
+        elif feature_mode == "vg":
+            cols = [np.log10(df["alpha_kpa"]), np.log10(df["n"] - 1.0),
+                    df["thetar"], df["thetas"]]
+        else:
+            raise ValueError(f"unknown feature_mode {feature_mode!r}")
         if use_depth:
             cols.append(np.log10(1.0 + df["depth_cm"].clip(lower=0)))
         feats = np.column_stack(cols)
         self.mean = feats.mean(axis=0)
         self.std = feats.std(axis=0)
-        self.z = (feats - self.mean) / self.std
+        z = (feats - self.mean) / self.std
+        # Curve features sampled at nearby heads are almost collinear (8 heads
+        # carry only ~1.6 effective dimensions, mean |corr| 0.73), so plain
+        # Euclidean distance over them collapses to "how wet is this soil" and
+        # throws away curve shape. Whitening restores shape to equal footing.
+        self._W = None
+        if feature_mode == "curve_white":
+            cov = np.cov(z, rowvar=False)
+            ev, evec = np.linalg.eigh(cov)
+            self._W = evec / np.sqrt(np.maximum(ev, 1e-8))
+            z = z @ self._W
+        self.z = z
 
     def set_excluded(self, layer_id):
         """Hide reference rows from all subsequent lookups. Accepts a single
@@ -183,13 +233,18 @@ class GshpReference:
         self._excluded = (self.profile_id == profile_id)
 
     def neighbors(self, thetar, thetas, alpha, n, k, depth=None):
-        f = [np.log10(alpha), np.log10(n - 1.0), thetar, thetas]
+        if self.feature_mode in ("curve", "curve_white"):
+            f = list(_curve_features(thetar, thetas, alpha, n).ravel())
+        else:
+            f = [np.log10(alpha), np.log10(n - 1.0), thetar, thetas]
         if self.use_depth:
             if depth is None:
                 raise ValueError("this reference uses depth; pass depth=...")
             f.append(np.log10(1.0 + max(depth, 0.0)))
-        f = np.array(f)
-        d = np.sqrt(((self.z - (f - self.mean) / self.std) ** 2).sum(axis=1))
+        f = (np.array(f) - self.mean) / self.std
+        if self._W is not None:
+            f = f @ self._W
+        d = np.sqrt(((self.z - f) ** 2).sum(axis=1))
         excluded = getattr(self, "_excluded", None)
         if excluded is not None:
             d = np.where(excluded, np.inf, d)
@@ -316,6 +371,15 @@ def main():
                          "for the soil's region -- it LOWERS accuracy by ~7 "
                          "points for European soils, which are sparsely "
                          "represented. See README.")
+    ap.add_argument("--tau", type=float, default=1.0, metavar="T",
+                    help="class-prior exponent for neighbour votes, weight = "
+                         "(1/class_count)^T. 1.0 (default) imposes a uniform "
+                         "prior over the 12 classes and maximises recall for "
+                         "rare classes, but over-predicts them: silt is "
+                         "returned 2.6x more often than it occurs "
+                         "(precision 20%%). 0.75 gives the best macro-F1 and "
+                         "0.5 roughly calibrates silt, at almost no cost in "
+                         "recall. 0 disables the correction. See README.")
     ap.add_argument("--reference", choices=["gshp", "merged", "kssl", "all"],
                     default="gshp",
                     help="reference database: gshp (default); merged adds the "
@@ -329,7 +393,7 @@ def main():
     h, theta = _read_data(args.datafile)
 
     ref = None
-    if args.reference != "gshp" or args.depth is not None:
+    if args.reference != "gshp" or args.depth is not None or args.tau != 1.0:
         import pandas as pd
         here = os.path.dirname(os.path.abspath(__file__))
         df = pd.read_csv(REFERENCE_CSV)
@@ -339,7 +403,8 @@ def main():
         for name in extra.get(args.reference, []):
             df = pd.concat([df, pd.read_csv(os.path.join(here, "data", name))],
                            ignore_index=True)
-        ref = GshpReference(df=df, use_depth=args.depth is not None)
+        ref = GshpReference(df=df, use_depth=args.depth is not None,
+                            tau=args.tau)
 
     res = estimate(h, theta, ref=ref, depth=args.depth)
 

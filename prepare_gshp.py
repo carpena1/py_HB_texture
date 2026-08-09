@@ -68,6 +68,13 @@ def main():
     out["lat"] = lay["latitude_decimal_degrees"]
     out["lon"] = lay["longitude_decimal_degrees"]
 
+    # Contributing database. GSHP is dominated by one source (Florida is ~57 %
+    # of the curated layers), so profile-level leave-one-out still lets a
+    # target be matched against siblings measured by the same lab with the same
+    # protocol. verify_source_blocked.py holds out a whole source to measure
+    # how much that inflates the accuracy estimates.
+    out["source_db"] = lay["source_db"]
+
     out.to_csv("data/gshp_reference.csv", index=False)
     print(f"reference layers: {len(out)}")
     print(f"  with fractions:  {out['sand'].notna().sum()}")

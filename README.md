@@ -559,6 +559,116 @@ measured Ksat and every Ksat metric is unchanged.
 Exposed as `--reference kssl` (and `all`, which adds UNSODA too). **Defaults
 are unchanged**, since neither merge reaches significance on its own.
 
+## Method levers (not more data)
+
+Adding databases gave diminishing returns (UNSODA +0.7 pp p=0.052, KSSL
++1.2 pp p=0.090), so three changes to the *method* were tested instead.
+
+### How optimistic are our numbers? (verify_source_blocked.py)
+
+Every accuracy figure above comes from leave-one-out with the target's
+*profile* removed. That rules out site leakage but not **source** leakage:
+GSHP is a compilation, and Florida_database alone supplies 57 % of the curated
+layers, so a Florida target is still matched against thousands of layers from
+the same lab, protocol and region. Real users are not in that position.
+
+Holding out an entire contributing database:
+
+| source | size | n | profile LOO | source-blocked | delta | p |
+|---|---|---|---|---|---|---|
+| Florida_database | 5735 | 104 | 44.2 % | 27.9 % | −16.3 pp | 0.002 |
+| WOSIS | 1011 | 108 | 29.6 % | 20.4 % | −9.3 pp | 0.110 |
+| Russia_EGRPR | 1001 | 115 | 20.0 % | 5.2 % | −14.8 pp | 0.002 |
+| HYBRAS | 605 | 70 | 32.9 % | 18.6 % | −14.3 pp | 0.013 |
+| ETH_Literature | 522 | 99 | 54.5 % | 17.2 % | −37.4 pp | <0.001 |
+| AfSPDB | 501 | 111 | 23.4 % | 20.7 % | −2.7 pp | 0.508 |
+| UNSODA | 146 | 88 | 40.9 % | 40.9 % | +0.0 pp | 1.000 |
+| Belgium_database | 144 | 57 | 35.1 % | 35.1 % | +0.0 pp | 1.000 |
+| **POOLED** | 9996 | 925 | **33.8 %** | **22.5 %** | **−11.4 pp** | **<0.001** |
+
+Group accuracy falls 59.4 % → 50.1 % (−9.3 pp, p<0.001). Ksat degrades harder:
+within a factor of 2 drops from 25 % to 12 %, Spearman 0.56 → 0.24, and
+interval coverage 72 % → 53 %.
+
+**Read the headline numbers accordingly.** Against a soil from an unseen
+laboratory, expect roughly **22 % exact class and 50 % group**, not 38/62 %.
+Two checks that the design is sound: UNSODA and Belgium show exactly 0.0 pp,
+as expected since GSHP ingests near-duplicates of those horizons from other
+contributors, so blocking them removes nothing; and AfSPDB, the most
+methodologically heterogeneous source, leaks least.
+
+### Tempering the class prior (verify_tau.py, `--tau`)
+
+Votes are weighted by (1/class_count)^tau. At the long-standing tau = 1 the
+prior is uniform over the 12 classes, which maximises recall for rare classes
+but wrecks their precision: GSHP holds 32 silt layers against 3,930 sand, so
+one silt neighbour outvotes 123 sand neighbours.
+
+| tau | overall | macro-R | macro-P | macro-F1 | group | silt precision | silt predicted |
+|---|---|---|---|---|---|---|---|
+| 0.00 | 38.9 % | 37.0 % | 43.8 % | 34.2 % | 63.1 % | 80.0 % | 5 |
+| 0.25 | 39.5 % | 38.4 % | 41.1 % | 36.6 % | 62.9 % | 53.3 % | 15 |
+| 0.50 | 39.9 % | 39.7 % | 39.9 % | 38.3 % | 62.9 % | 41.4 % | 29 |
+| **0.75** | **39.9 %** | 39.9 % | 39.3 % | **39.0 %** | 62.4 % | 28.3 % | 46 |
+| 1.00 (default) | 39.3 % | 40.0 % | 38.7 % | 38.6 % | 61.8 % | 19.5 % | 82 |
+
+There are 32 true silt soils. At tau = 1 the tool answers "silt" 82 times; at
+tau = 0.5, 29 times. Macro-recall barely moves (40.0 → 39.7), so the precision
+gain is close to free, and Ksat is flat across the sweep. The overall gain is
+not significant (+0.7 pp, p=0.33), so **the default stays tau = 1**; use
+`--tau 0.75` for best macro-F1 or `--tau 0.5` to calibrate the rare classes.
+
+Note the evaluation is stratified, which makes the target population roughly
+uniform — the very prior tau = 1 assumes. This comparison therefore *flatters*
+tau = 1; on a natural-frequency evaluation, lowering tau would look better.
+
+### Curve-space matching — tested and rejected (verify_features.py)
+
+The expectation was that measuring distance in (log alpha, log(n−1), thetar,
+thetas) distorts curve similarity, because alpha and n trade off along the fit
+ridge. Matching on theta at eight fixed potentials (1, 3, 10, 33, 100, 330,
+1000, 1500 kPa) should have been closer to a true curve distance.
+
+It is not. Paired against the current default:
+
+| features | tau | overall | macro-R | macro-P | macro-F1 | group | vs default |
+|---|---|---|---|---|---|---|---|
+| vg (default) | 1.00 | 39.3 % | 40.0 % | 38.7 % | 38.6 % | 61.8 % | — |
+| curve | 1.00 | 38.7 % | 38.2 % | 37.9 % | 37.4 % | 62.2 % | −0.6 pp, p=0.60 |
+| curve whitened | 1.00 | 37.9 % | 37.7 % | 37.4 % | 36.9 % | 61.6 % | −1.3 pp, p=0.14 |
+| vg | 0.75 | 39.9 % | 39.9 % | 39.3 % | 39.0 % | 62.4 % | +0.7 pp, p=0.33 |
+| curve whitened | 0.75 | 39.2 % | 38.6 % | 38.0 % | 37.7 % | 62.7 % | −0.1 pp, p=1.00 |
+
+**The premise was backwards.** The eight curve features carry only ~1.6
+effective dimensions (PC1 = 77.5 % of variance, mean |correlation| 0.73)
+because a retention curve is smooth and every head reports much the same
+thing — how wet the soil is. Standardized Euclidean distance over them
+collapses to a wetness metric that discards shape, which is why silt, a
+shape-defined class, lost 15–19 pp. The vG parameters are the *better*
+conditioned space: 3.74 effective dimensions of 4, mean |correlation| 0.12.
+
+Whitening the curve features (`feature_mode="curve_white"`) restores full rank
+and fixes the Ksat regression, but makes texture slightly worse still: it
+amplifies the near-degenerate directions, which in a smooth curve are mostly
+fit noise. Both modes remain available for future experiments; the default is
+unchanged.
+
+### Where this leaves things
+
+Five interventions have now been tested on the same paired design — two data
+merges (UNSODA, KSSL) and three method changes (tau, curve, curve whitened).
+None produced a statistically significant accuracy gain. Together with the
+GSHP leave-one-out ceiling, that is converging evidence that ~38–40 % exact
+class under profile-level LOO — and ~22 % against an unseen laboratory — is a
+real limit for nearest-neighbour lookup on van Genuchten parameters, not a
+tuning problem.
+
+The two clearest remaining opportunities are therefore about *reporting*
+rather than accuracy: the Ks p5–p95 interval is overconfident (it covers
+72–84 % of measurements against a nominal 90 %, and only 53 % source-blocked),
+and calibrated prediction *sets* would turn irreducible ambiguity into a
+defensible output.
+
 ## References
 
 - Soil Survey Staff, Natural Resources Conservation Service, United States
