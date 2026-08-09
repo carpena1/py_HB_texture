@@ -349,6 +349,52 @@ very fine: clay >= 60).
   is the same fine-texture weakness the Carsel, ROSETTA and group-level results
   all show, now confirmed on European data.
 
+### Survey: what European hydraulic data is actually obtainable
+
+Prompted by the ~9 pp regional deficit, the candidate sources were surveyed.
+The requirement is strict: *sample-level* data pairing a retention curve (or
+fitted vG parameters) **with** a particle-size analysis. That combination is
+rare.
+
+| Source | Size | Status |
+|---|---|---|
+| GSHP | 9,996 curated (778 European) | **in use**, CC BY 4.0 |
+| UNSODA 2.0 | 588 usable | **in use**, public (Ag Data Commons) |
+| HYPRES | 4,486 horizons | **unavailable** — raw data never released |
+| EU-HYDI | >18,000 samples, 29 institutions, 18 countries | **unavailable** — see below |
+| SoilKsatDB | 13,258 Ksat + 11,584 texture | open (Zenodo) but **no retention curves**, so it cannot join a vG-matched reference; its Ksat also overlaps GSHP (same authors) |
+| HYDROS | 173 samples | too small to matter |
+| HYBRAS | 445 sites | Brazilian; already contributes 814 layers to GSHP |
+
+EU-HYDI is the only remaining large European candidate, and its report
+(EUR 26053 EN, section 2 "Notice on data access") is explicit:
+
+> All raw data contained in the EU-HYDI database are accessible only to the
+> contributing participants and the EU-HYDI coordinators at the JRC. … The
+> EU-HYDI database is not distributed outside the participating institutions.
+> External partners can access only derivatives for joint publications.
+
+So it cannot be downloaded at all, by anyone outside the consortium — a
+stricter bar than HYPRES's. The same section does, however, name a legitimate
+route:
+
+> scientists from any institution are welcome to contact any author of this
+> report for cooperative research. In such research projects handling and
+> analysis of raw data has to be done by the EU-HYDI contributing participant
+> without giving access to the raw data to the external partner. Results of the
+> analysis and derived information can be published together with external
+> partners.
+
+**Conclusion.** There is no openly licensed, sample-level European retention
+database to merge, and the open sources that do exist (GSHP, UNSODA) are
+already integrated — GSHP in particular already carries the European
+contributions of Nemes et al. 2001, Vereecken et al. 2017, Stolbovoy et al.
+2016, Richard & Lüscher and Schindler & Müller. Closing the European gap
+therefore requires a *collaboration* with an EU-HYDI participant, who would run
+this tool's evaluation on their side, rather than any data transfer. Failing
+that, the gap is a documented limitation, which is why the tool reports class
+probabilities and uncertainty ranges instead of a single answer.
+
 ### Obtaining HYPRES (for reference)
 
 Access (ESDAC, JRC): the [European Soil Database v2.0 page]
