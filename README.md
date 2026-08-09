@@ -50,7 +50,8 @@ Optional flags (see "Improving accuracy" below):
 - `verify_variants.py` — reference/covariate variants on the 4 benchmarks
 - `verify_variants_large.py` — same variants, large paired leave-one-out test
 - `verify_region.py` — how much region-matched reference data is worth
-- `prepare_hypres.py` — build a local (git-ignored) HYPRES reference table
+- `verify_hypres.py` — European benchmark from the HYPRES class PTFs
+- `prepare_hypres.py` — loader kept in case sample-level HYPRES is ever released
 - `data/gshp_reference.csv` — the distributed reduced GSHP reference table
   (~10 k curated layers), derived from the raw GSHP file via `prepare_gshp.py`.
   The 80 MB raw file (`WRC_dataset_surya_et_al_2021_final.csv`, Zenodo 6640246)
@@ -217,18 +218,15 @@ test the four group misses are all single-step, adjacent-group confusions.
 Two routes to better classification were tested (`verify_variants.py`,
 `verify_variants_large.py`):
 
-1. **Merge a second database.** HYPRES was the original candidate. Its
-   sample-level data does exist in exactly the form this tool needs — the JRC
-   metadata documents RAWRET/RAWK tables with ~197,000 theta(h) pairs and a
-   HYDRAULIC_PROPS table of per-sample Mualem-van Genuchten parameters for
-   5,521 samples from 4,486 horizons — but it is not offered as a download on
-   the ESDAC soil-properties page, and ESDAC's terms grant use "on condition
-   that, under NO CIRCUMSTANCES are these data passed to third parties".
-   A derived HYPRES reference table therefore could not be redistributed in
-   this public CC BY 4.0 repository (see "Using HYPRES locally" below).
-   **UNSODA 2.0** (Nemes et al. 2001) was used instead: a genuinely
-   redistributable, sample-level database. 588 of its 790 soils yielded usable
-   retention curves, fitted here with the same vG routine (median RMSE 0.0065).
+1. **Merge a second database.** HYPRES was the original candidate. The database
+   as *built* holds exactly what this tool needs (the JRC metadata documents
+   RAWRET/RAWK tables with ~197,000 theta(h) pairs and per-sample Mualem-van
+   Genuchten parameters for 5,521 samples from 4,486 horizons), but the
+   released package contains none of it — see "Outcome: HYPRES cannot be
+   merged" below. **UNSODA 2.0** (Nemes et al. 2001) was used instead: a
+   genuinely redistributable, sample-level database. 588 of its 790 soils
+   yielded usable retention curves, fitted here with the same vG routine
+   (median RMSE 0.0065).
    Note that GSHP already contains 218 UNSODA-sourced layers, so the merge is
    partly redundant — a likely reason its benefit is small.
 2. **Add a covariate.** Sample **mid-depth** (98 % coverage in GSHP) is used as
@@ -302,7 +300,56 @@ roughly six-fold. This is a much larger prospective gain than either the depth
 covariate (+3.5 pp) or the UNSODA merge (+0.7 pp) delivered — though it is an
 estimate of the mechanism, not a measurement of HYPRES itself.
 
-### Obtaining and testing HYPRES
+### Outcome: HYPRES cannot be merged (data was never released)
+
+The ESDB v2.0 distribution was obtained (ESDAC access ID 132133, August 2026).
+`Hypres.zip` contains three documents and no data tables. `HYPRES_Readme.doc`
+states that the release contains the metadata and "the actual functions and
+function Parameters", and that it
+
+> does not contain ... HYPRES project source data and results as no agreement
+> has been reached with the participating institutions regarding their
+> distribution.
+
+So the sample-level tables (RAWRET / RAWK / HYDRAULIC_PROPS) were never
+distributed. This is not an ESDAC licensing decision that could be waived on
+request: rights rest with the 20 contributing institutions from 12 countries,
+and no distribution agreement was reached. The JRC metadata describes the
+*internal* structure of the database as built, which is why it lists those
+tables; the released package is a different, much smaller thing.
+
+The companion Soil Profile Analytical Database (SPADBE) was also checked, since
+it carries water-retention fields at -1, -10, -100 and -1500 kPa. Of its
+measured-profile horizons, exactly **2** have both a texture analysis and >= 4
+real retention values (the rest are the -999 missing-data sentinel), so it
+cannot contribute to the reference either.
+
+What HYPRES *does* provide is 11 class-average Mualem-van Genuchten parameter
+sets (5 topsoil, 5 subsoil, 1 organic) plus continuous PTFs. Eleven points
+among ~10,000 cannot move a kNN reference, but they make a useful **European
+benchmark** — see below. The continuous PTFs run texture -> vG, the opposite of
+this tool's direction, so they are not usable here either.
+
+### Verification vs HYPRES class PTFs (verify_hypres.py)
+
+A European counterpart to the US-centric Carsel and ROSETTA benchmarks.
+Synthetic curves are generated from the 10 mineral class PTFs; since HYPRES
+uses FAO/SGDBE classes rather than USDA ones, the tool's predicted
+sand/silt/clay is scored against the FAO class envelope (coarse: clay < 18 and
+sand > 65; medium; medium fine: clay < 35 and sand < 15; fine: 35 <= clay < 60;
+very fine: clay >= 60).
+
+- FAO texture class correct: **5/10**, and **6/10** when `--depth` is supplied
+  (topsoil 15 cm, subsoil 60 cm) — independent corroboration that the depth
+  covariate helps.
+- Ks: HYPRES value inside the 5-95 % range for 9/10 classes, but the median is
+  off by a typical factor of 10 — worse than on the other benchmarks.
+- The failures are concentrated at the fine end: the "very fine" class
+  (clay >= 60 %) is never recovered, with the tool predicting 41-48 % clay. This
+  is the same fine-texture weakness the Carsel, ROSETTA and group-level results
+  all show, now confirmed on European data.
+
+### Obtaining HYPRES (for reference)
 
 Access (ESDAC, JRC): the [European Soil Database v2.0 page]
 (https://esdac.jrc.ec.europa.eu/content/european-soil-database-v20-vector-and-attribute-data)
@@ -359,8 +406,10 @@ separately — that is where the gain is predicted to land.
   (Second reference database, used by `--reference merged`.)
 - Wösten, J.H.M., Lilly, A., Nemes, A. and Le Bas, C. (1999). Development and
   use of a database of hydraulic properties of European soils (HYPRES).
-  *Geoderma* 90:169–185. (Considered as a second database; only its
-  class-average PTFs are public, so UNSODA was used instead.)
+  *Geoderma* 90:169–185. Class PTFs obtained from the European Soil Database
+  v2.0 (ESDAC, JRC). Only the class and continuous pedotransfer functions were
+  ever released, so HYPRES serves here as a European benchmark
+  (`verify_hypres.py`), not as reference data.
 - van Genuchten, M.Th. (1980). A closed-form equation for predicting the
   hydraulic conductivity of unsaturated soils. *Soil Science Society of
   America Journal* 44:892–898.
