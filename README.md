@@ -459,6 +459,11 @@ separately — that is where the gain is predicted to land.
   program for estimating soil hydraulic parameters with hierarchical
   pedotransfer functions. *Journal of Hydrology* 251:163–176.
   (Source of the ROSETTA class-mean parameters used in `verify_rosetta.py`.)
+- Vereecken, H., Van Looy, K., Weynants, M. and Javaux, M. (2017). Soil
+  retention and conductivity curve data base sDB, link to MATLAB files.
+  PANGAEA, doi:10.1594/PANGAEA.879233. Licensed **CC-BY-3.0**; redistributed
+  here as `data/sDB.zip` and the derived `data/sdb_reference.csv` under that
+  licence, with attribution to the authors.
 - Nemes, A., Schaap, M.G., Leij, F.J. and Wösten, J.H.M. (2001). Description of
   the unsaturated soil hydraulic database UNSODA version 2.0. *Journal of
   Hydrology* 251:151–162. Data: Ag Data Commons / figshare 24851832.
