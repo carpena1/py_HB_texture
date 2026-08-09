@@ -316,21 +316,29 @@ def main():
                          "for the soil's region -- it LOWERS accuracy by ~7 "
                          "points for European soils, which are sparsely "
                          "represented. See README.")
-    ap.add_argument("--reference", choices=["gshp", "merged"], default="gshp",
-                    help="reference database: gshp (default) or merged, "
-                         "which adds the 588 UNSODA 2.0 soils")
+    ap.add_argument("--reference", choices=["gshp", "merged", "kssl", "all"],
+                    default="gshp",
+                    help="reference database: gshp (default); merged adds the "
+                         "588 UNSODA 2.0 soils; kssl adds 2,508 NCSS/KSSL "
+                         "layers; all adds both. Neither merge reaches "
+                         "significance on its own (UNSODA +0.7 points "
+                         "p=0.052, KSSL +1.2 points p=0.090), and KSSL "
+                         "carries no Ksat. See README.")
     args = ap.parse_args()
 
     h, theta = _read_data(args.datafile)
 
     ref = None
-    if args.reference == "merged" or args.depth is not None:
+    if args.reference != "gshp" or args.depth is not None:
         import pandas as pd
+        here = os.path.dirname(os.path.abspath(__file__))
         df = pd.read_csv(REFERENCE_CSV)
-        if args.reference == "merged":
-            unsoda = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                  "data", "unsoda_reference.csv")
-            df = pd.concat([df, pd.read_csv(unsoda)], ignore_index=True)
+        extra = {"merged": ["unsoda_reference.csv"],
+                 "kssl": ["kssl_reference.csv"],
+                 "all": ["unsoda_reference.csv", "kssl_reference.csv"]}
+        for name in extra.get(args.reference, []):
+            df = pd.concat([df, pd.read_csv(os.path.join(here, "data", name))],
+                           ignore_index=True)
         ref = GshpReference(df=df, use_depth=args.depth is not None)
 
     res = estimate(h, theta, ref=ref, depth=args.depth)

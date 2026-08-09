@@ -485,8 +485,87 @@ To measure the benefit, add the table as a third variant in
 paired profile-level leave-one-out, ideally reporting European targets
 separately — that is where the gain is predicted to land.
 
+### Adding NCSS/KSSL (prepare_kssl.py, verify_kssl.py)
+
+The USDA-NRCS **NCSS Soil Characterization Database** (Kellogg Soil Survey
+Laboratory) is public domain and needs no registration. The full SQLite
+snapshot (1.95 GB zip → 5.4 GB database) is at
+[ncsslabdatamart.sc.egov.usda.gov](https://ncsslabdatamart.sc.egov.usda.gov/database_download.aspx);
+`prepare_kssl.py` rebuilds `data/kssl_reference.csv` from it.
+
+**It contains no Ksat.** `lab_analyte` declares "Saturated Conductivity,
+Replicate 0/1/2" and "Hydraulic Conductivity", but their `column_name` is empty
+and no table in the snapshot holds the values — the same "documented but not
+distributed" pattern as HYPRES. Every KSSL row therefore has `ksat_cmh` blank.
+Note also that `lab_rosetta_key` must **not** be used as reference van
+Genuchten parameters: those are PTF predictions derived *from* texture, so
+using them would make the reference circular.
+
+**Size.** Only ~4.3 k of 420 k physical-property layers carry ≥5 retention
+tensions plus particle-size analysis — most KSSL pedons store only the
+33/1500 kPa pair. After quality control, **2,508 layers** are usable. But the
+class mix is complementary to GSHP's: 1.8× the silty clay loam, ~1× the
+loam / silt loam / clay loam, and only 4 % as much sand — it fills the classes
+where GSHP is starved. (Silt stays starved: 32 + 4.)
+
+**The wet-end truncation artifact.** KSSL's wettest tension is 6 kPa, so
+nothing constrains saturation. Fitted as-is, alpha came out 5–16× lower than
+GSHP and 19.1 % of layers had θs > 0.75, which is not physical for a mineral
+soil. This is *not* a unit error: truncating GSHP's own measured curves at
+6 kPa and refitting reproduces the offset in the same direction and magnitude
+(clay 0.17×, clay loam 0.17×, silty clay loam 0.20×). The fix is one synthetic
+anchor at h = 0 with θ = porosity = 1 − BD_od/2.65, floored just above the
+wettest measurement (oven-dry porosity falls *below* it in shrink-swell clays).
+Validated on GSHP, where the full-curve answer is known: per-layer agreement
+with the true alpha improves from 20 % to 45 % within a factor of two, and
+median bias falls from +0.57 to +0.27 dex. After anchoring, θs > 0.75 drops to
+0.5 % and alpha aligns with GSHP (loam 0.194 vs 0.197, clay loam 0.120 vs
+0.098, silt loam 0.054 vs 0.081). It removes most of the systematic bias but
+not the per-layer scatter, so KSSL rows remain noisier than GSHP rows.
+
+**Unit consistency across datasets.** Because α = 1/h_b, the suction unit
+scales α directly, so every loader was audited — dimensionally *and*
+empirically. Refitting GSHP layers from their raw (h, θ) points reproduces the
+published α with a median factor of **1.00** (IQR ±0.02) in every class,
+confirming `lab_head_m` is metres and `prepare_gshp.py`'s ÷9.80665 is correct.
+KSSL's gravimetric→volumetric conversion was checked independently of α by
+comparing θ at 33 and 1500 kPa against GSHP per class (ratios 1.04–1.26, no
+BD-sized offset), and its PSDA-derived class matches KSSL's own `texture_lab`
+code for **99.6 %** of layers.
+
+| conversion | dataset |
+|---|---|
+| α[m⁻¹] ÷ 9.80665 | GSHP |
+| α[cm⁻¹] ÷ 0.0980665 | ROSETTA |
+| fit h in kPa after cm × 0.0980665 | UNSODA, sDB |
+| fit h in kPa natively (bar × 100) | KSSL |
+
+**Result** (paired profile-level leave-one-out, 1,663 stratified GSHP targets):
+
+| | GSHP | +KSSL | delta | p |
+|---|---|---|---|---|
+| exact class | 38.2 % | 39.4 % | +1.2 pp | 0.090 |
+| group | 61.5 % | 61.9 % | +0.4 pp | 0.626 |
+| Ksat within 2× | 43 % | 44 % | +1 pp | — |
+| Ksat RMSE (log10) | 0.90 | 0.89 | −0.01 | — |
+
+The gain is small and **not significant**, though the per-class pattern is
+mechanistically coherent — it lands in exactly the classes KSSL enriches
+(sandy clay loam +4.0, sandy loam +3.3, clay loam +2.7, silty clay loam +2.7).
+The feared Ksat dilution did **not** materialise: even though Ksat-bearing rows
+fall from 66 % to 53 % of the reference, ~22 of 30 neighbours still carry a
+measured Ksat and every Ksat metric is unchanged.
+
+Exposed as `--reference kssl` (and `all`, which adds UNSODA too). **Defaults
+are unchanged**, since neither merge reaches significance on its own.
+
 ## References
 
+- Soil Survey Staff, Natural Resources Conservation Service, United States
+  Department of Agriculture. *National Cooperative Soil Survey Soil
+  Characterization Database* (Kellogg Soil Survey Laboratory).
+  https://ncsslabdatamart.sc.egov.usda.gov/ (accessed 2026-08-09). Public
+  domain (US Government work).
 - Carsel, R.F. and Parrish, R.S. (1988). Developing joint probability
   distributions of soil water retention characteristics. *Water Resources
   Research* 24(5):755–769. doi:10.1029/WR024i005p00755.
