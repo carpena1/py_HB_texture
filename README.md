@@ -35,7 +35,8 @@ Or from Python: `swcc_texture.estimate(h, theta)`.
 
 Optional flags (see "Improving accuracy" below):
 
-    --depth 25                 sample mid-depth in cm; +3.5 pp exact-class accuracy
+    --depth 25                 sample mid-depth in cm; +3.5 pp on average, but
+                               HARMFUL for European soils (see below)
     --reference merged         add the 588 UNSODA 2.0 soils to the reference
 
 ## Files
@@ -260,8 +261,11 @@ Profile-level leave-one-out, n = 2,680 paired soils:
 
 Conclusions:
 
-- **Depth is worth using**: +3.5 pp exact-class accuracy, highly significant and
-  robust to profile-level leave-one-out. Pass it with `--depth <cm>`.
+- **Depth is worth using — but only where the reference is regionally dense.**
+  Globally it gives +3.5 pp exact-class accuracy, highly significant and robust
+  to profile-level leave-one-out. That global average, however, hides a
+  regional reversal; see "Depth has opposite signs in dense and sparse regions"
+  below before using `--depth`.
 - **Merging UNSODA gives little**: +0.7 pp, at the edge of significance
   (p = 0.052). It adds sample diversity at no cost, so it is available via
   `--reference merged`, but it is not the default and should not be expected to
@@ -273,6 +277,44 @@ Conclusions:
 - The 12-soil benchmark tables are too small to see these effects: there, depth
   appears to *hurt* (16/24 -> 15/24). A one-soil difference at n = 12 is noise;
   the n = 2,680 paired test is the one to trust.
+
+### Depth has opposite signs in dense and sparse regions
+
+The global +3.5 pp for `--depth` is an average that conceals a reversal. Tested
+on European targets against a **class-matched** non-European control of equal
+size (653 each, same reference, profile-level leave-one-out):
+
+| Targets | No depth | With depth | Effect |
+|---|---|---|---|
+| European | 34.8 % | 27.7 % | **-7.0 pp** (p < 0.001) |
+| Non-European (class-matched) | 35.8 % | 41.5 % | **+5.7 pp** (p = 0.003) |
+
+Same reference, same class mix, opposite sign. Matching the class distribution
+rules out texture composition as the explanation.
+
+The likely mechanism is sparsity. Depth adds a fifth dimension to the matching
+space, and Europe contributes only 778 of 9,996 layers. Where the reference is
+regionally dense, depth genuinely narrows the neighbourhood onto pedologically
+similar soils; where it is thin, the extra dimension pulls in soils that match
+on depth but come from an entirely different setting, displacing the few
+regionally appropriate neighbours. This is the curse of dimensionality biting
+exactly where coverage is weakest.
+
+Two consequences:
+
+- **Do not use `--depth` for European soils** — it costs about 7 points there.
+  Use it where the reference is dense for the region in question.
+- It sharpens the case for European reference data: the coverage gap does not
+  merely cost accuracy, it inverts the value of an otherwise useful covariate.
+  On top of `--depth`, adding sDB's European horizons recovers +1.7 pp
+  (p = 0.019), whereas without depth the same horizons do nothing (+0.3 pp,
+  p = 0.83).
+
+Caveat: "European" is a bounding box, so the effect is regional in the sense of
+being associated with that subset of the database; it may be partly confounded
+with the particular source datasets and measurement methods that dominate
+there. The sparsity explanation is a hypothesis consistent with the numbers,
+not something these runs prove directly.
 
 ### Would HYPRES help? Evidence from a regional hold-out (verify_region.py)
 

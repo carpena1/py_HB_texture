@@ -311,7 +311,11 @@ def main():
     ap.add_argument("--json", metavar="FILE", help="also write full results as JSON")
     ap.add_argument("--depth", type=float, metavar="CM",
                     help="sample mid-depth in cm; used as an extra matching "
-                         "feature (raises exact-class accuracy by ~3.5 points)")
+                         "feature. Raises exact-class accuracy by ~3.5 points "
+                         "on average, but only where the reference is dense "
+                         "for the soil's region -- it LOWERS accuracy by ~7 "
+                         "points for European soils, which are sparsely "
+                         "represented. See README.")
     ap.add_argument("--reference", choices=["gshp", "merged"], default="gshp",
                     help="reference database: gshp (default) or merged, "
                          "which adds the 588 UNSODA 2.0 soils")
