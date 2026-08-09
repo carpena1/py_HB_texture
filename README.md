@@ -47,6 +47,7 @@ Optional flags (see "Improving accuracy" below):
 - `verify_gshp.py` — leave-one-out verification vs source GSHP soils
 - `verify_groups.py` — accuracy at the 4 aggregated texture groups
 - `prepare_unsoda.py` — one-time: UNSODA 2.0 .mdb -> `data/unsoda_reference.csv`
+- `prepare_sdb.py` — one-time: sDB .mat -> `data/sdb_reference.csv` (CC-BY-3.0)
 - `verify_variants.py` — reference/covariate variants on the 4 benchmarks
 - `verify_variants_large.py` — same variants, large paired leave-one-out test
 - `verify_region.py` — how much region-matched reference data is worth
@@ -362,6 +363,7 @@ rare.
 | UNSODA 2.0 | 588 usable | **in use**, public (Ag Data Commons) |
 | HYPRES | 4,486 horizons | **unavailable** — raw data never released |
 | EU-HYDI | >18,000 samples, 29 institutions, 18 countries | **unavailable** — see below |
+| sDB (Vereecken et al. 2017) | 182 horizons, 165 usable | **open (CC-BY-3.0)**, included — but ~88 % already in GSHP, so no measurable gain |
 | SoilKsatDB | 13,258 Ksat + 11,584 texture | open (Zenodo) but **no retention curves**, so it cannot join a vG-matched reference; its Ksat also overlaps GSHP (same authors) |
 | HYDROS | 173 samples | too small to matter |
 | HYBRAS | 445 sites | Brazilian; already contributes 814 layers to GSHP |
@@ -385,8 +387,19 @@ route:
 > analysis and derived information can be published together with external
 > partners.
 
+One openly licensed European source *was* found and tested: **sDB** (Vereecken,
+Van Looy, Weynants & Javaux 2017, doi:10.1594/PANGAEA.879233, **CC-BY-3.0**) —
+38 Belgian profiles / 182 horizons, of which 165 yield usable van Genuchten
+fits (median 18 retention points per curve, median RMSE 0.014, 136 with Ksat).
+Being CC-BY it is redistributable, so `data/sdb_reference.csv` and
+`prepare_sdb.py` are included. Measured effect on the 778 European targets,
+paired and profile-level: **+0.3 pp class (p = 0.83), -0.4 pp group (p = 0.69)**
+— no benefit. The reason is straightforward: GSHP already ingests 145 layers
+referenced `Vereecken_et_al_2017`, so ~88 % of sDB is in the reference already.
+It is therefore not merged by default.
+
 **Conclusion.** There is no openly licensed, sample-level European retention
-database to merge, and the open sources that do exist (GSHP, UNSODA) are
+database that adds materially to what is already in use, and the open sources that do exist (GSHP, UNSODA) are
 already integrated — GSHP in particular already carries the European
 contributions of Nemes et al. 2001, Vereecken et al. 2017, Stolbovoy et al.
 2016, Richard & Lüscher and Schindler & Müller. Closing the European gap
