@@ -27,6 +27,10 @@ data/Spadbe*
 data/ESDAC*
 data/esdac*
 data/ESDB*
+data/soilDB*
+data/soildb*
+data/sgdbe*
+data/SGDBE*
 data/*licen[cs]e*
 data/unsoda_ht.csv
 data/unsoda_general.csv
