@@ -33,8 +33,14 @@ the reference, download it from Zenodo (record 6640246) into `data/` and run
 `mydata.csv`: two columns (comma or whitespace), h_kPa and theta.
 Or from Python: `swcc_texture.estimate(h, theta)`.
 
-Optional flags (see "Improving accuracy" below):
+Optional flags (see "Improving accuracy" and "Method levers" below):
 
+    --model hybrid             predict the class with a gradient-boosted
+                               classifier instead of neighbour voting:
+                               +3.2 pp (p=0.005), +5.4 pp against an unseen
+                               laboratory. RECOMMENDED. Needs scikit-learn.
+    --tau 0.75                 temper the class prior; better macro-F1 and
+                               far better precision for rare classes
     --depth 25                 sample mid-depth in cm; +3.5 pp on average, but
                                HARMFUL for European soils (see below)
     --reference merged         add the 588 UNSODA 2.0 soils to the reference
@@ -54,6 +60,17 @@ Optional flags (see "Improving accuracy" below):
 - `verify_region.py` — how much region-matched reference data is worth
 - `verify_hypres.py` — European benchmark from the HYPRES class PTFs
 - `prepare_hypres.py` — loader kept in case sample-level HYPRES is ever released
+- `ksat_metrics.py` — Ksat scoring shared by every verification script
+- `verify_by_class.py` — per-class/per-group accuracy, with and without depth
+- `verify_skill.py` — is each class acceptable in absolute terms?
+- `prepare_kssl.py` — one-time: NCSS/KSSL SQLite -> `data/kssl_reference.csv`
+- `verify_kssl.py` — does merging KSSL help?
+- `verify_source_blocked.py` — accuracy against an unseen laboratory
+- `verify_tau.py` — tuning the class-prior exponent
+- `verify_features.py` — vG parameters vs curve-space matching
+- `verify_gbm.py` — gradient boosting vs kNN on matched folds
+- `verify_ceiling.py` — model-free Cover & Hart bound on achievable accuracy
+- `verify_hybrid.py` — end-to-end check of the shipped hybrid model
 - `data/gshp_reference.csv` — the distributed reduced GSHP reference table
   (~10 k curated layers), derived from the raw GSHP file via `prepare_gshp.py`.
   The 80 MB raw file (`WRC_dataset_surya_et_al_2021_final.csv`, Zenodo 6640246)
@@ -709,6 +726,50 @@ Note the GBM's own mean top probability (46.5 %) must **not** be read as a
 ceiling: its calibration table shows systematic overconfidence (77.6 % mean
 confidence in the top bin against 65.9 % actual accuracy).
 
+### The hybrid model (`--model hybrid`, verify_hybrid.py)
+
+Gradient boosting predicts the class better, but a tree ensemble gives no
+prediction interval, no particle fractions and no list of similar real soils.
+The hybrid keeps both halves: **the GBM supplies the texture class, the kNN
+still supplies everything else.**
+
+Measured end to end through `estimate()`, profile-grouped 5-fold:
+
+| model | overall | macro-R | macro-P | macro-F1 | group |
+|---|---|---|---|---|---|
+| kNN | 36.7 % | 37.4 % | 36.0 % | 36.0 % | 60.3 % |
+| **hybrid** | **39.9 %** | **39.0 %** | **39.7 %** | **38.8 %** | 60.1 % |
+
+**+3.2 pp, McNemar p = 0.0047.** That is slightly better than the GBM scored in
+isolation (39.4 %), because the shipped hybrid averages `predict_proba` over
+the Monte Carlo draws of the fit covariance rather than predicting once from
+the point estimate — the same draws the kNN votes over, so fit uncertainty is
+still propagated, with a mild ensembling benefit on top.
+
+Per class it gains clay +16.0 pp, silt loam +10.7, silty clay loam +10.7,
+sandy clay loam +7.3, and loses silt −18.8, silty clay −9.2, loam −6.0. The
+silt loss is less bad than it looks: the kNN's high silt recall came with 19.5 %
+precision, and macro-precision rises 36.0 → 39.7 overall.
+
+The verification asserts that **Ksat and its interval are bit-identical**
+between the two models, so the GBM demonstrably touches only the class.
+
+**A free confidence signal.** Because the kNN still runs, its own answer is
+reported as a second opinion. They agree on 58.9 % of soils, and agreement is
+strongly informative:
+
+| | n | hybrid accuracy |
+|---|---|---|
+| kNN agrees with GBM | 979 | **47.8 %** |
+| kNN disagrees | 684 | **28.7 %** |
+
+A 19-point spread, free of charge. Treat a disagreement as a flag that the
+answer is unreliable.
+
+Training costs ~3 s on the 9,996-layer reference (early stopping settles near
+50 iterations), so the model is fitted on demand rather than shipped as a
+pickle, which would tie the repository to one scikit-learn version.
+
 ### Where this leaves things
 
 Seven interventions have now been tested on the same paired design. Six were
@@ -730,14 +791,19 @@ So the picture is no longer "everything is at the ceiling". It is:
 * **The honest headline figure is out-of-lab, not leave-one-out.** Quote
   ~23 % exact class and ~51 % group for a soil from a new source.
 
-Given a ~54 % hard ceiling, the highest-value remaining work is about
-*reporting* rather than point accuracy: the Ks p5–p95 interval is overconfident
-(covering 72–84 % of measurements against a nominal 90 %, and only 53 %
-source-blocked), and calibrated prediction *sets* would turn irreducible
-ambiguity into a defensible output. Adopting GBM wholesale would also cost the
-kNN's two useful by-products — the Ks prediction interval and the "here are
-similar real soils" explanation — so a hybrid (GBM for the class, kNN for
-intervals and Ksat) is the natural next build.
+The hybrid described above is the result: `--model hybrid` reaches 39.9 %
+in-distribution against a ~54 % hard ceiling, keeping every kNN by-product.
+
+Given that ceiling, the highest-value remaining work is about *reporting*
+rather than point accuracy: the Ks p5–p95 interval is overconfident (covering
+72–84 % of measurements against a nominal 90 %, and only 53 % source-blocked),
+and calibrated prediction *sets* would turn irreducible ambiguity into a
+defensible output — the kNN/GBM agreement flag is already a crude version of
+that, separating 47.8 % from 28.7 % accuracy.
+
+**The default is still `--model knn`**, only because `hybrid` requires
+scikit-learn, which the tool otherwise does not need. On accuracy grounds the
+hybrid should be the default.
 
 ## References
 

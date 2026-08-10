@@ -268,7 +268,69 @@ class GshpReference:
         return idx, w / w.sum()
 
 
-def estimate(h, theta, ref=None, n_mc=300, k=30, seed=0, depth=None):
+class TextureGBM:
+    """Gradient-boosted classifier for the texture class only.
+
+    Trained on the same four van Genuchten features the kNN uses. On matched
+    folds it beats neighbour voting by +2.6 points in-distribution
+    (p=0.019) and +5.4 points against an unseen laboratory (p=1.3e-07); see
+    verify_gbm.py. It does not replace the kNN, which still supplies particle
+    fractions, Ksat, the prediction intervals and the list of similar real
+    soils -- a tree ensemble gives none of those.
+
+    Training takes about 3 s on the 9,996-layer reference (early stopping
+    settles around 50 iterations), so the model is fitted on demand rather
+    than shipped as a pickle, which would tie the repository to one scikit-
+    learn version.
+    """
+
+    def __init__(self, path=REFERENCE_CSV, df=None, use_depth=False,
+                 random_state=0):
+        try:
+            from sklearn.ensemble import HistGradientBoostingClassifier
+        except ImportError:
+            raise SystemExit(
+                "the hybrid model needs scikit-learn: pip install scikit-learn")
+        import pandas as pd
+        if df is None:
+            df = pd.read_csv(path)
+        if use_depth:
+            df = df[df["depth_cm"].notna()]
+        df = df[df["texture_class"].notna()]
+        self.use_depth = use_depth
+        self.clf = HistGradientBoostingClassifier(
+            max_iter=400, learning_rate=0.06, max_leaf_nodes=31,
+            l2_regularization=1.0, early_stopping=True,
+            validation_fraction=0.15, random_state=random_state,
+            # matches the uniform prior the kNN imposes at tau = 1
+            class_weight="balanced")
+        self.clf.fit(self._features(
+            df["thetar"].to_numpy(), df["thetas"].to_numpy(),
+            df["alpha_kpa"].to_numpy(), df["n"].to_numpy(),
+            df["depth_cm"].to_numpy() if use_depth else None),
+            df["texture_class"].to_numpy())
+        self.classes_ = self.clf.classes_
+
+    def _features(self, thetar, thetas, alpha, n, depth=None):
+        cols = [np.log10(alpha), np.log10(np.asarray(n) - 1.0), thetar, thetas]
+        if self.use_depth:
+            cols.append(np.log10(1.0 + np.clip(np.asarray(depth, float), 0,
+                                               None)))
+        return np.column_stack(cols)
+
+    def probabilities(self, thetar, thetas, alpha, n, depth=None):
+        """Mean class probabilities over a set of Monte Carlo draws.
+
+        Averaging predict_proba across the draws propagates the vG fit
+        uncertainty exactly as the kNN's per-draw voting does.
+        """
+        d = (np.full(np.shape(thetar), depth if depth is not None else np.nan)
+             if self.use_depth else None)
+        p = self.clf.predict_proba(self._features(thetar, thetas, alpha, n, d))
+        return dict(zip(self.classes_, p.mean(axis=0)))
+
+
+def estimate(h, theta, ref=None, n_mc=300, k=30, seed=0, depth=None, clf=None):
     """Full pipeline: fit vG, then kNN inference with MC uncertainty.
 
     Returns a dict with fitted parameters, class probabilities, particle
@@ -308,8 +370,18 @@ def estimate(h, theta, ref=None, n_mc=300, k=30, seed=0, depth=None):
                 ks_vals.append(ref.ksat[i]); ks_w.append(wi)
 
     total = sum(votes.values())
-    probs = {c: v / total for c, v in sorted(votes.items(),
-             key=lambda kv: -kv[1]) if v > 0}
+    knn_probs = {c: v / total for c, v in sorted(votes.items(),
+                 key=lambda kv: -kv[1]) if v > 0}
+    if clf is None:
+        probs, source = knn_probs, "knn"
+    else:
+        # Hybrid: the class comes from the GBM, everything else below still
+        # comes from the kNN neighbourhood computed above.
+        p = clf.probabilities(draws[:, 0], draws[:, 1], 10.0 ** draws[:, 2],
+                              1.0 + 10.0 ** draws[:, 3], depth=depth)
+        probs = {c: v for c, v in sorted(p.items(), key=lambda kv: -kv[1])
+                 if v > 0}
+        source = "gbm"
 
     frac_vals = np.array(frac_vals); frac_w = np.array(frac_w)
     frac_mean = (frac_vals * frac_w[:, None]).sum(axis=0) / frac_w.sum()
@@ -340,6 +412,8 @@ def estimate(h, theta, ref=None, n_mc=300, k=30, seed=0, depth=None):
         },
         "texture_class": next(iter(probs)),
         "class_probabilities": probs,
+        "class_source": source,
+        "knn_class_probabilities": knn_probs,
         "fractions": {
             "sand": frac_mean[0], "silt": frac_mean[1], "clay": frac_mean[2],
             "p5": dict(zip(("sand", "silt", "clay"), frac_lo)),
@@ -386,6 +460,16 @@ def main():
                          "for the soil's region -- it LOWERS accuracy by ~7 "
                          "points for European soils, which are sparsely "
                          "represented. See README.")
+    ap.add_argument("--model", choices=["knn", "hybrid"], default="knn",
+                    help="knn (default) predicts the texture class by "
+                         "neighbour voting. hybrid predicts it with a "
+                         "gradient-boosted classifier, which is significantly "
+                         "more accurate (+2.6 points in-distribution "
+                         "p=0.019, +5.4 points against an unseen laboratory "
+                         "p=1.3e-07) and is the better choice for a soil from "
+                         "a new source. Fractions, Ksat, all intervals and "
+                         "the neighbour list still come from the kNN either "
+                         "way. Needs scikit-learn and ~3 s to train.")
     ap.add_argument("--tau", type=float, default=1.0, metavar="T",
                     help="class-prior exponent for neighbour votes, weight = "
                          "(1/class_count)^T. 1.0 (default) imposes a uniform "
@@ -407,8 +491,9 @@ def main():
 
     h, theta = _read_data(args.datafile)
 
-    ref = None
-    if args.reference != "gshp" or args.depth is not None or args.tau != 1.0:
+    ref, df = None, None
+    if (args.reference != "gshp" or args.depth is not None or args.tau != 1.0
+            or args.model == "hybrid"):
         import pandas as pd
         here = os.path.dirname(os.path.abspath(__file__))
         df = pd.read_csv(REFERENCE_CSV)
@@ -421,19 +506,35 @@ def main():
         ref = GshpReference(df=df, use_depth=args.depth is not None,
                             tau=args.tau)
 
-    res = estimate(h, theta, ref=ref, depth=args.depth)
+    clf = None
+    if args.model == "hybrid":
+        # Trained on the same table the kNN uses, so the two halves of the
+        # hybrid always see the same reference.
+        clf = TextureGBM(df=df, use_depth=args.depth is not None)
+
+    res = estimate(h, theta, ref=ref, depth=args.depth, clf=clf)
 
     vg = res["vg_fit"]
     print(f"van Genuchten fit (m = 1-1/n, alpha in kPa^-1):")
     print(f"  thetar = {vg['thetar']:.4f}  thetas = {vg['thetas']:.4f}  "
           f"alpha = {vg['alpha_kpa']:.4f}  n = {vg['n']:.3f}  m = {vg['m']:.3f}"
           f"  (RMSE {vg['rmse']:.4f})")
-    print(f"\nPredicted USDA texture class: {res['texture_class'].upper()}")
+    src = ("gradient-boosted classifier" if res["class_source"] == "gbm"
+           else "kNN neighbour vote")
+    print(f"\nPredicted USDA texture class: {res['texture_class'].upper()}"
+          f"   (from the {src})")
     for c, p in list(res["class_probabilities"].items())[:5]:
         print(f"  {c:<16s} {100 * p:5.1f} %")
+    if res["class_source"] == "gbm":
+        # The kNN's own answer is a free second opinion: agreement is a
+        # meaningful confidence signal, disagreement a warning.
+        knn_top = next(iter(res["knn_class_probabilities"]))
+        agree = "agrees" if knn_top == res["texture_class"] else "DISAGREES"
+        print(f"  kNN second opinion {agree}: {knn_top} "
+              f"({100 * res['knn_class_probabilities'][knn_top]:.1f} %)")
     fr = res["fractions"]
-    print(f"\nParticle fractions, mean [5-95 %]  "
-          f"(mean plots as: {fr['class_of_mean']}):")
+    print(f"\nParticle fractions, mean [5-95 %]  (from the kNN; "
+          f"mean plots as: {fr['class_of_mean']}):")
     for c in ("sand", "silt", "clay"):
         print(f"  {c:<5s} {fr[c]:5.1f} %  [{fr['p5'][c]:5.1f} - {fr['p95'][c]:5.1f}]")
     ks = res["ksat"]
