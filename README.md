@@ -653,21 +653,91 @@ amplifies the near-degenerate directions, which in a smooth curve are mostly
 fit noise. Both modes remain available for future experiments; the default is
 unchanged.
 
+### Gradient boosting and the accuracy ceiling (verify_gbm.py, verify_ceiling.py)
+
+**Gradient boosting is the one intervention that works.** Compared with kNN on
+identical folds and identical features:
+
+| split | model | overall | macro-F1 | group | vs kNN | p |
+|---|---|---|---|---|---|---|
+| profile-grouped 5-fold | kNN | 36.7 % | 36.0 % | 60.3 % | — | — |
+| | kNN + fit-quality wt | 36.7 % | 35.9 % | 60.4 % | +0.0 pp | 1.00 |
+| | **GBM** | **39.4 %** | **38.3 %** | 59.8 % | **+2.6 pp** | **0.019** |
+| source-blocked | kNN | 17.6 % | 17.0 % | 48.6 % | — | — |
+| | **GBM** | **23.0 %** | **19.7 %** | **51.1 %** | **+5.4 pp** | **1.3e-07** |
+
+The gain is largest and most significant exactly where it matters — against a
+laboratory the model has never seen, GBM is 31 % better in relative terms. Per
+class it wins on clay (+15.3 pp), silt loam (+11.3), silty clay loam (+8.0) and
+sandy clay loam (+7.3), and loses on silt (−18.8), silty clay (−12.2) and loam
+(−7.3). Its Ksat regressor is slightly better than the neighbour median
+(log10 RMSE 0.86 vs 0.91, Spearman 0.68 vs 0.66) but produces **no prediction
+interval**, which the kNN does.
+
+**Down-weighting by fit quality does nothing** (+0.0 pp, p=1.00). GSHP
+publishes the standard error of its own vG fit, but as a *relative* error the
+median is 0.11 and only 0.9 % of layers exceed 1.0 — the reference is mostly
+well constrained, so there is little to down-weight. (An earlier reading of the
+*absolute* se suggested ~10 % of the reference was unusable; that was wrong,
+because absolute se scales with alpha.) Available as `quality_weight=True`,
+not recommended.
+
+**The ceiling.** Cover & Hart (1967) bound the Bayes error by the
+1-nearest-neighbour error rate, giving a model-free limit for any classifier
+built on these four features:
+
+| split | 1NN accuracy | Bayes accuracy bracket | best model today |
+|---|---|---|---|
+| profile-grouped, exact class | 31.3 % | **[31.3 %, 54.2 %]** | GBM 39.4 % |
+| profile-grouped, group | 57.1 % | **[57.1 %, 74.0 %]** | kNN 60.3 % |
+| source-blocked, exact class | 19.6 % | **[19.6 %, 40.5 %]** | GBM 23.0 % |
+| source-blocked, group | 46.3 % | **[46.3 %, 65.0 %]** | GBM 51.1 % |
+
+Per-class 1NN separability (profile-grouped) ranks sand 83.3 %, clay 52.0 %,
+sandy loam 41.3 %, sandy clay loam 34.7 %, silt loam 28.7 %, loam 24.7 %,
+loamy sand 20.7 %, silty clay 19.1 %, silty clay loam 18.0 %, clay loam 14.0 %,
+sandy clay 11.3 %, silt 9.4 %.
+
+Three caveats. Only the **overall** bracket is rigorous — Cover & Hart bounds
+total error, so per-class brackets are heuristic and a few classes fall outside
+their own. The bounds are **asymptotic**, so `Bayes >= 1 - err_1NN` holds but
+the upper end is an estimate, and the true ceiling may sit a little above it.
+And Bayes error depends on the class prior, so both the natural (39 % sand) and
+balanced priors are reported.
+
+Note the GBM's own mean top probability (46.5 %) must **not** be read as a
+ceiling: its calibration table shows systematic overconfidence (77.6 % mean
+confidence in the top bin against 65.9 % actual accuracy).
+
 ### Where this leaves things
 
-Five interventions have now been tested on the same paired design — two data
-merges (UNSODA, KSSL) and three method changes (tau, curve, curve whitened).
-None produced a statistically significant accuracy gain. Together with the
-GSHP leave-one-out ceiling, that is converging evidence that ~38–40 % exact
-class under profile-level LOO — and ~22 % against an unseen laboratory — is a
-real limit for nearest-neighbour lookup on van Genuchten parameters, not a
-tuning problem.
+Seven interventions have now been tested on the same paired design. Six were
+flat — two data merges (UNSODA +0.7 pp p=0.052, KSSL +1.2 pp p=0.090), three
+metric changes (tau +0.7 pp p=0.33, curve −0.6 pp, curve whitened −1.3 pp) and
+fit-quality weighting (+0.0 pp p=1.00). One worked: **gradient boosting**,
++2.6 pp in-distribution (p=0.019) and +5.4 pp against an unseen laboratory
+(p=1.3e-07).
 
-The two clearest remaining opportunities are therefore about *reporting*
-rather than accuracy: the Ks p5–p95 interval is overconfident (it covers
-72–84 % of measurements against a nominal 90 %, and only 53 % source-blocked),
-and calibrated prediction *sets* would turn irreducible ambiguity into a
-defensible output.
+So the picture is no longer "everything is at the ceiling". It is:
+
+* **The lookup was leaving real accuracy on the table**, and a discriminative
+  model recovers a meaningful part of it, especially out-of-lab.
+* **But the ceiling is genuinely low.** No classifier on these four van
+  Genuchten features can exceed roughly **54 % exact class** in-distribution or
+  **40 %** against an unseen laboratory. Group-level ceilings are 74 % and
+  65 %. More reference data cannot move those numbers; only more informative
+  *inputs* can.
+* **The honest headline figure is out-of-lab, not leave-one-out.** Quote
+  ~23 % exact class and ~51 % group for a soil from a new source.
+
+Given a ~54 % hard ceiling, the highest-value remaining work is about
+*reporting* rather than point accuracy: the Ks p5–p95 interval is overconfident
+(covering 72–84 % of measurements against a nominal 90 %, and only 53 %
+source-blocked), and calibrated prediction *sets* would turn irreducible
+ambiguity into a defensible output. Adopting GBM wholesale would also cost the
+kNN's two useful by-products — the Ks prediction interval and the "here are
+similar real soils" explanation — so a hybrid (GBM for the class, kNN for
+intervals and Ksat) is the natural next build.
 
 ## References
 

@@ -75,6 +75,16 @@ def main():
     # how much that inflates the accuracy estimates.
     out["source_db"] = lay["source_db"]
 
+    # Standard errors of GSHP's own vG fit, as RELATIVE errors: alpha spans
+    # orders of magnitude, so absolute se scales with alpha and is not
+    # comparable across soils. Used to down-weight poorly identified reference
+    # layers (see verify_gbm.py). Median rse_alpha is 0.11 and only 0.9 % of
+    # layers exceed 1.0, so the reference is mostly well constrained.
+    out["rse_alpha"] = pd.to_numeric(lay["se_alpha"], errors="coerce") \
+        / lay["alpha"]
+    out["rse_n"] = pd.to_numeric(lay["se_n"], errors="coerce") \
+        / (lay["n"] - 1.0)
+
     out.to_csv("data/gshp_reference.csv", index=False)
     print(f"reference layers: {len(out)}")
     print(f"  with fractions:  {out['sand'].notna().sum()}")

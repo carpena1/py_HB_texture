@@ -150,7 +150,7 @@ def usda_centroids(step=0.25):
 
 class GshpReference:
     def __init__(self, path=REFERENCE_CSV, df=None, use_depth=False, tau=1.0,
-                 feature_mode="vg"):
+                 feature_mode="vg", quality_weight=False):
         """Build the reference from the CSV at `path`, or from a preloaded
         DataFrame `df` (used for leave-one-out verification, where the target
         soil is dropped before constructing the reference).
@@ -159,8 +159,8 @@ class GshpReference:
         weighted feature (log10(1+depth_cm), standardized); reference rows
         without a depth are dropped in that case.
         """
+        import pandas as pd
         if df is None:
-            import pandas as pd
             df = pd.read_csv(path)
         self.use_depth = use_depth
         if use_depth:
@@ -183,6 +183,21 @@ class GshpReference:
         counts = df["texture_class"].value_counts()
         self.class_weight = ((1.0 / counts) ** tau)[df["texture_class"]].to_numpy()
         self.feature_mode = feature_mode
+
+        # Optional per-row reliability weight. GSHP publishes the standard
+        # error of its own vG fit; rse_alpha/rse_n are those as relative
+        # errors. A layer whose alpha is barely identified should not vote as
+        # loudly as one measured over a full curve. Rows lacking the columns
+        # (other databases) or the values keep weight 1.
+        self.row_weight = np.ones(len(df))
+        if quality_weight:
+            ra = (pd.to_numeric(df["rse_alpha"], errors="coerce").to_numpy()
+                  if "rse_alpha" in df.columns else np.zeros(len(df)))
+            rn = (pd.to_numeric(df["rse_n"], errors="coerce").to_numpy()
+                  if "rse_n" in df.columns else np.zeros(len(df)))
+            ra = np.nan_to_num(ra, nan=0.0)
+            rn = np.nan_to_num(rn, nan=0.0)
+            self.row_weight = 1.0 / (1.0 + ra ** 2 + rn ** 2)
         self.fractions = df[["sand", "silt", "clay"]].to_numpy()
         self.ksat = df["ksat_cmh"].to_numpy()
         if feature_mode in ("curve", "curve_white"):
@@ -283,7 +298,7 @@ def estimate(h, theta, ref=None, n_mc=300, k=30, seed=0, depth=None):
     for tr, ts, la_i, ln1_i in draws:
         idx, w = ref.neighbors(tr, ts, 10.0 ** la_i, 1.0 + 10.0 ** ln1_i, k,
                                depth=depth)
-        w = w * ref.class_weight[idx]
+        w = w * ref.class_weight[idx] * ref.row_weight[idx]
         w = w / w.sum()
         ks_neighbor_counts.append(int(np.isfinite(ref.ksat[idx]).sum()))
         for i, wi in zip(idx, w):
