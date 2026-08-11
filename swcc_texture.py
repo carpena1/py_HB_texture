@@ -482,10 +482,10 @@ def main():
     ap.add_argument("--reference", choices=["gshp", "merged", "kssl", "all"],
                     default="gshp",
                     help="reference database: gshp (default); merged adds the "
-                         "588 UNSODA 2.0 soils; kssl adds 2,508 NCSS/KSSL "
+                         "588 UNSODA 2.0 soils; kssl adds 2,530 NCSS/KSSL "
                          "layers; all adds both. Neither merge reaches "
                          "significance on its own (UNSODA +0.7 points "
-                         "p=0.052, KSSL +1.2 points p=0.090), and KSSL "
+                         "p=0.052, KSSL +0.5 points p=0.523), and KSSL "
                          "carries no Ksat. See README.")
     args = ap.parse_args()
 

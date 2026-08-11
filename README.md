@@ -520,7 +520,7 @@ using them would make the reference circular.
 
 **Size.** Only ~4.3 k of 420 k physical-property layers carry ≥5 retention
 tensions plus particle-size analysis — most KSSL pedons store only the
-33/1500 kPa pair. After quality control, **2,508 layers** are usable. But the
+33/1500 kPa pair. After quality control, **2,530 layers** are usable. But the
 class mix is complementary to GSHP's: 1.8× the silty clay loam, ~1× the
 loam / silt loam / clay loam, and only 4 % as much sand — it fills the classes
 where GSHP is starved. (Silt stays starved: 32 + 4.)
@@ -531,14 +531,19 @@ GSHP and 19.1 % of layers had θs > 0.75, which is not physical for a mineral
 soil. This is *not* a unit error: truncating GSHP's own measured curves at
 6 kPa and refitting reproduces the offset in the same direction and magnitude
 (clay 0.17×, clay loam 0.17×, silty clay loam 0.20×). The fix is one synthetic
-anchor at h = 0 with θ = porosity = 1 − BD_od/2.65, floored just above the
-wettest measurement (oven-dry porosity falls *below* it in shrink-swell clays).
+anchor at h = 0 with θ = **0.95 × porosity**, porosity being 1 − BD_od/2.65,
+floored just above the wettest measurement (oven-dry porosity falls *below* it
+in shrink-swell clays). The 0.95 is not a tuning constant: θs is not porosity,
+because entrapped air keeps a saturated soil below its pore volume, and the
+measured θs/porosity ratio across 9,958 GSHP layers has median **0.946** (see
+"Soil-physics checks" below).
+
 Validated on GSHP, where the full-curve answer is known: per-layer agreement
-with the true alpha improves from 20 % to 45 % within a factor of two, and
-median bias falls from +0.57 to +0.27 dex. After anchoring, θs > 0.75 drops to
-0.5 % and alpha aligns with GSHP (loam 0.194 vs 0.197, clay loam 0.120 vs
-0.098, silt loam 0.054 vs 0.081). It removes most of the systematic bias but
-not the per-layer scatter, so KSSL rows remain noisier than GSHP rows.
+with the true alpha improves from 20 % to 48 % within a factor of two, and
+median bias falls from +0.57 to +0.20 dex. After anchoring, θs > 0.75 drops to
+0.3 % and alpha aligns closely with GSHP (sandy loam 0.175 vs 0.177, clay loam
+0.107 vs 0.098, silt loam 0.043 vs 0.081). It removes most of the systematic
+bias but not the per-layer scatter, so KSSL rows remain noisier than GSHP rows.
 
 **Unit consistency across datasets.** Because α = 1/h_b, the suction unit
 scales α directly, so every loader was audited — dimensionally *and*
@@ -561,14 +566,20 @@ code for **99.6 %** of layers.
 
 | | GSHP | +KSSL | delta | p |
 |---|---|---|---|---|
-| exact class | 38.2 % | 39.4 % | +1.2 pp | 0.090 |
-| group | 61.5 % | 61.9 % | +0.4 pp | 0.626 |
+| exact class | 38.2 % | 38.7 % | +0.5 pp | 0.523 |
+| group | 61.5 % | 61.8 % | +0.3 pp | 0.733 |
 | Ksat within 2× | 43 % | 44 % | +1 pp | — |
 | Ksat RMSE (log10) | 0.90 | 0.89 | −0.01 | — |
 
-The gain is small and **not significant**, though the per-class pattern is
-mechanistically coherent — it lands in exactly the classes KSSL enriches
-(sandy clay loam +4.0, sandy loam +3.3, clay loam +2.7, silty clay loam +2.7).
+**Not significant, and not coherent either.** The gains are scattered (sandy
+clay +3.3, clay loam +2.7, sandy loam / sandy clay loam / clay +2.0) but loam
+*loses* 6.0 pp and the Silty group loses 3.9 pp (p=0.035, which does not
+survive Bonferroni over the four group tests). An earlier build of the KSSL
+table, anchored at θ = porosity rather than 0.95 × porosity, gave +1.2 pp
+(p=0.090); correcting the anchor moved it to +0.5 pp. Both are within noise of
+zero, and the anchor was corrected on independent physical and validation
+grounds, *not* chosen to improve this number — the reverse, in fact.
+
 The feared Ksat dilution did **not** materialise: even though Ksat-bearing rows
 fall from 66 % to 53 % of the reference, ~22 of 30 neighbours still carry a
 measured Ksat and every Ksat metric is unchanged.
@@ -576,10 +587,83 @@ measured Ksat and every Ksat metric is unchanged.
 Exposed as `--reference kssl` (and `all`, which adds UNSODA too). **Defaults
 are unchanged**, since neither merge reaches significance on its own.
 
+### Soil-physics checks on the reference data
+
+Two identities were checked against GSHP, because both are used to build the
+KSSL saturation anchor.
+
+**1. θs equals porosity, and porosity gives a free SWCC point at h = 0.**
+True in principle, ~5 % off in practice. Across 9,958 GSHP layers with bulk
+density:
+
+| quantity | value |
+|---|---|
+| θs − porosity (1 − BD/2.65) | median **−0.024** (IQR −0.049 … +0.001) |
+| θs / porosity | median **0.946** |
+| θs *exceeds* porosity | **25.9 %** of layers |
+| exceeds by > 0.05 | 4.3 % |
+
+θs sits systematically below porosity — entrapped air keeps a saturated soil
+short of its pore volume — which is why the anchor uses 0.95 × porosity. The
+25.9 % that exceed porosity are impossible at ρ_p = 2.65, which leads to the
+second check.
+
+**2. BD = (1 − porosity) · ρ_p, with ρ_p ≈ 2.65 for mineral soil.** Where GSHP
+reports porosity *and* bulk density directly (634 layers), inverting gives
+ρ_p = BD/(1 − porosity):
+
+| percentile | 5 | 25 | 50 | 75 | 95 |
+|---|---|---|---|---|---|
+| implied ρ_p | 2.39 | 2.50 | **2.59** | 2.68 | 2.93 |
+
+Median **2.589**, below the silica value, and 24.3 % fall under 2.5.
+Correlation with organic carbon is **−0.46**, in the expected direction:
+
+| organic carbon | n | median ρ_p |
+|---|---|---|
+| 0–0.5 % | 46 | 2.514 |
+| 0.5–2 % | 237 | 2.512 |
+| 2–5 % | 37 | 2.688 |
+| **> 5 %** | 10 | **1.977** |
+
+The trend is *not* monotonic through the mineral range (the 2–5 % bin runs
+higher than the 0–0.5 % bin), so the correlation is carried mainly by the
+genuinely organic tail, where the effect is large. Organic layers are excluded
+from the KSSL build by the θ ceiling rather than by modelling ρ_p, so
+`PARTICLE_DENSITY` stays at the mineral value.
+
+**How many curves are actually missing the wet end?** Fewer than the raw count
+suggests:
+
+| wettest measured h | layers | share | with bulk density |
+|---|---|---|---|
+| exact h = 0 present | 1,181 | 11.8 % | — |
+| h_min > 1 kPa | 1,895 | 19.0 % | 1,894 |
+| h_min > 6 kPa | 1,195 | 12.0 % | 1,195 |
+| h_min > 33 kPa | 417 | 4.2 % | 417 |
+
+Only 11.8 % of GSHP curves carry a true saturation point, but 81 % start at
+≤ 1 kPa (≈ 10 cm head), already near saturation. The genuinely exposed set is
+the 12 % starting above 6 kPa — and every one of those has bulk density, so an
+anchor is available for all of them.
+
+**But anchoring GSHP would probably not help.** Contrary to expectation, GSHP's
+published θs is no more inflated for wet-end-lacking curves than for the rest:
+
+| subset | n | θs − porosity | exceeds porosity |
+|---|---|---|---|
+| no wet end (h_min > 6 kPa) | 1,195 | −0.029 | 24.6 % |
+| has wet end (h_min ≤ 1 kPa) | 8,064 | −0.024 | 23.1 % |
+
+Gupta et al. evidently constrained θs better than the `fit_vg` here does —
+under the same truncation, refitting locally pushed θs up by +0.57 for sand.
+The anchor therefore pays off for tables fitted in this repository (KSSL), not
+for GSHP's own published parameters.
+
 ## Method levers (not more data)
 
 Adding databases gave diminishing returns (UNSODA +0.7 pp p=0.052, KSSL
-+1.2 pp p=0.090), so three changes to the *method* were tested instead.
++0.5 pp p=0.523), so three changes to the *method* were tested instead.
 
 ### How optimistic are our numbers? (verify_source_blocked.py)
 
@@ -773,7 +857,7 @@ pickle, which would tie the repository to one scikit-learn version.
 ### Where this leaves things
 
 Seven interventions have now been tested on the same paired design. Six were
-flat — two data merges (UNSODA +0.7 pp p=0.052, KSSL +1.2 pp p=0.090), three
+flat — two data merges (UNSODA +0.7 pp p=0.052, KSSL +0.5 pp p=0.523), three
 metric changes (tau +0.7 pp p=0.33, curve −0.6 pp, curve whitened −1.3 pp) and
 fit-quality weighting (+0.0 pp p=1.00). One worked: **gradient boosting**,
 +2.6 pp in-distribution (p=0.019) and +5.4 pp against an unseen laboratory

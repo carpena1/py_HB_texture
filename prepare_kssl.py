@@ -49,12 +49,26 @@ soil difference. Confirmed by truncating GSHP's own measured curves at 6 kPa
 and refitting: alpha falls by the same factor and in the same direction
 (clay 0.17x, clay loam 0.17x, silty clay loam 0.20x).
 
-The fix is one synthetic point at h = 0 with theta = total porosity
-(1 - bulk_density_oven_dry / 2.65). Validated on GSHP, where the full-curve
-answer is known: with the anchor, per-layer agreement with the true alpha
-improves from 20 % to 45 % within a factor of two and the median bias falls
-from +0.57 to +0.27 dex. It removes most of the systematic bias but NOT the
-per-layer scatter, so KSSL rows remain noisier than GSHP rows.
+The fix is one synthetic point at h = 0 with theta = 0.95 * total porosity,
+porosity being 1 - bulk_density_oven_dry / PARTICLE_DENSITY. Validated on
+GSHP, where the full-curve answer is known: with the anchor, per-layer
+agreement with the true alpha improves from 20 % to 48 % within a factor of
+two and the median bias falls from +0.57 to +0.20 dex. It removes most of the
+systematic bias but NOT the per-layer scatter, so KSSL rows remain noisier
+than GSHP rows.
+
+Two soil-physics caveats behind those constants, both measured on GSHP:
+
+  * theta_s is not porosity. Entrapped air keeps a saturated soil below its
+    pore volume; the measured median ratio is 0.946, hence
+    SATURATION_FRACTION. (Even so, theta_s exceeds 1 - BD/2.65 in 26 % of
+    GSHP layers, which is impossible at that particle density -- see below.)
+  * 2.65 g/cm3 is the density of silica and an upper bound for real soil.
+    Where GSHP reports porosity and bulk density directly, the implied
+    particle density BD/(1-porosity) has median 2.589, and it falls with
+    organic matter (corr with organic carbon -0.46; median 1.98 above 5 % OC).
+    Organic layers are excluded here by MAX_THETA rather than by modelling
+    their particle density, so PARTICLE_DENSITY is kept at the mineral value.
 """
 
 import os
@@ -83,6 +97,16 @@ MAX_RMSE = 0.03
 MAX_THETA = 0.95        # drops organic layers, whose gravimetric water is huge
 PARTICLE_DENSITY = 2.65
 POROSITY_RANGE = (0.15, 0.90)
+
+# theta_s is NOT equal to total porosity: entrapped air keeps a saturated soil
+# below its pore volume. Measured on GSHP (9,958 layers with bulk density),
+# theta_s / porosity has median 0.946, so the saturation anchor is placed at
+# 0.95 * porosity rather than at porosity itself. Validated by removing the
+# wet end from GSHP's own curves and refitting: the median bias in log10 alpha
+# falls from +0.278 (anchor = porosity) to +0.204, and agreement within a
+# factor of two rises from 45 % to 48 %. Lower fractions reduce the bias
+# further (0.90 -> +0.137) but have no physical justification, so 0.95 is used.
+SATURATION_FRACTION = 0.95
 
 # KSSL texture_lab codes -> USDA class. Sand-grade qualifiers (very fine,
 # fine, medium, coarse, very coarse) do not change the USDA class, so they are
@@ -186,7 +210,7 @@ def main():
         # where the dried clod has already shrunk. Saturation cannot be below
         # a measured value, so floor the anchor just above it rather than
         # discarding the layer (dropping these cost most of the clay).
-        anchor = max(por, theta.max() * 1.05)
+        anchor = max(por * SATURATION_FRACTION, theta.max() * 1.05)
         if anchor > MAX_THETA:
             skip["porosity"] += 1
             continue
