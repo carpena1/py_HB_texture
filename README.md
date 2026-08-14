@@ -48,6 +48,61 @@ the multi-GB NCSS/KSSL Lab Data Mart snapshot from USDA-NRCS.
 `mydata.csv`: two columns (comma or whitespace), h_kPa and theta.
 Or from Python: `swcc_texture.estimate(h, theta)`.
 
+### Worked example
+
+`Testing/6_SiL_CnP.csv` is a silt loam retention curve generated from the
+Carsel & Parrish (1988) typical parameters — a soil the reference table has
+never seen, so this is a fair demonstration rather than a lookup:
+
+    h_kPa,theta
+    0,0.45
+    5,0.38008714
+    10,0.329688092
+    ...            (32 rows)
+
+Running it with all defaults:
+
+    $ .venv/bin/python swcc_texture.py Testing/6_SiL_CnP.csv
+
+    van Genuchten fit (m = 1-1/n, alpha in kPa^-1):
+      thetar = 0.0670  thetas = 0.4500  alpha = 0.2000  n = 1.410  m = 0.291  (RMSE 0.0000)
+
+    Predicted USDA texture class: SILT LOAM   (from the gradient-boosted classifier)
+      silt loam         34.1 %
+      loam              15.6 %
+      sandy loam        13.2 %
+      sandy clay loam    7.6 %
+      sand               6.3 %
+      kNN second opinion agrees: silt loam (42.4 %)
+
+    Particle fractions, mean [5-95 %]  (from the kNN; mean plots as: loam):
+      sand   39.1 %  [  4.7 -  86.8]
+      silt   45.8 %  [  5.8 -  80.6]
+      clay   15.0 %  [  4.8 -  22.8]
+
+    Ks = 0.128 cm/h  [5-95 %: 0.0292 - 2.34]  (from ~11 of 30 neighbors with measured Ksat)
+
+How to read it:
+
+- **The class is right** (true class is silt loam), but at 34.1 % probability.
+  That is normal and not a defect: a retention curve simply does not pin
+  texture down further, and the ceiling for any model on these four parameters
+  is around 54 % (see "The accuracy ceiling" below). Treat the ranked list as
+  the answer, not the top line alone.
+- **The kNN agreeing with the classifier is a confidence signal.** When the two
+  agree the prediction is right 47.8 % of the time; when they disagree, 28.7 %.
+  A disagreement is a warning to look at the ranked list and the intervals.
+- **The fraction intervals are wide, and the mean plots as loam** — a different
+  class from the predicted one. The mean of a set of neighbour fractions need
+  not lie in the modal class, so the two lines can disagree. The intervals are
+  the honest output here.
+- **Ks is the weakest number.** The true value is 0.45 cm/h, the estimate 0.128,
+  and the 5-95 % band contains the truth but spans two orders of magnitude.
+  Only ~11 of the 30 neighbours carried a measured Ksat, and that support count
+  is printed precisely so you can discount the estimate when it is low.
+
+`--model knn` reproduces everything except the class prediction bit-for-bit.
+
 Optional flags (see "Improving accuracy" and "Method levers" below):
 
     --model knn                predict the class by neighbour voting instead
