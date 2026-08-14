@@ -146,10 +146,12 @@ def load():
            p.sand_total, p.silt_total, p.clay_total, p.texture_lab,
            p.bulk_density_third_bar, p.bulk_density_oven_dry,
            l.pedon_key, l.hzn_top, l.hzn_bot, l.hzn_desgn,
+           c.organic_carbon_walkley_black, c.estimated_organic_carbon,
            s.latitude_std_decimal_degrees  AS lat,
            s.longitude_std_decimal_degrees AS lon
     FROM lab_physical_properties_vw p
     JOIN lab_layer l ON l.layer_key = p.layer_key
+    LEFT JOIN lab_chemical_properties_vw c ON c.layer_key = p.layer_key
     LEFT JOIN lab_pedon d ON d.pedon_key = l.pedon_key
     LEFT JOIN lab_site  s ON s.site_key  = d.site_key
     """
@@ -241,6 +243,14 @@ def main():
 
         depth = (np.nan if row.hzn_top is None or row.hzn_bot is None
                  else (float(row.hzn_top) + float(row.hzn_bot)) / 2.0)
+        # Organic carbon (%). Prefer the Walkley-Black measurement, fall back
+        # to KSSL's estimate. total_carbon_ncs is NOT used: it includes
+        # carbonate carbon, which would overstate OC in calcareous soils.
+        oc = row.organic_carbon_walkley_black
+        if oc is None or not np.isfinite(oc):
+            oc = row.estimated_organic_carbon
+        oc = (float(oc) if oc is not None and np.isfinite(oc)
+              and 0 <= oc < 60 else np.nan)
         rows.append(dict(
             layer_id=f"KSSL_{row.layer_key}",
             profile_id=f"KSSL_{row.pedon_key}",
@@ -250,7 +260,7 @@ def main():
             ksat_cmh=np.nan,          # KSSL distributes none -- see docstring
             depth_cm=depth, lat=row.lat, lon=row.lon,
             rmse=rmse, n_points=n_measured, porosity=por,
-            texture_lab=row.texture_lab))
+            oc=oc, texture_lab=row.texture_lab))
 
     out = pd.DataFrame(rows)
     out.to_csv(OUT, index=False)

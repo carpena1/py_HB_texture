@@ -85,6 +85,12 @@ def main():
     out["rse_n"] = pd.to_numeric(lay["se_n"], errors="coerce") \
         / (lay["n"] - 1.0)
 
+    # Organic carbon (%), an optional covariate. Coverage is only ~15 % in
+    # GSHP, against ~85 % in KSSL -- see verify_om.py for whether it earns the
+    # reference rows it costs.
+    oc = pd.to_numeric(lay["oc"], errors="coerce")
+    out["oc"] = oc.where((oc >= 0) & (oc < 60))
+
     out.to_csv("data/gshp_reference.csv", index=False)
     print(f"reference layers: {len(out)}")
     print(f"  with fractions:  {out['sand'].notna().sum()}")

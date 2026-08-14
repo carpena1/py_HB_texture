@@ -180,7 +180,7 @@ def usda_centroids(step=0.25):
 
 class GshpReference:
     def __init__(self, path=None, df=None, reference=DEFAULT_REFERENCE,
-                 use_depth=False, tau=1.0, feature_mode="vg",
+                 use_depth=False, use_om=False, tau=1.0, feature_mode="vg",
                  quality_weight=False):
         """Build the reference from the CSV at `path`, or from a preloaded
         DataFrame `df` (used for leave-one-out verification, where the target
@@ -195,8 +195,14 @@ class GshpReference:
             df = (pd.read_csv(path) if path is not None
                   else load_reference_df(reference))
         self.use_depth = use_depth
+        self.use_om = use_om
         if use_depth:
             df = df[df["depth_cm"].notna()].reset_index(drop=True)
+        if use_om:
+            # Organic carbon is present for only ~32 % of the merged
+            # reference, so switching it on discards most of the rows. Whether
+            # the covariate repays that is measured in verify_om.py.
+            df = df[df["oc"].notna()].reset_index(drop=True)
         self.layer_id = df["layer_id"].to_numpy()
         self.profile_id = (df["profile_id"].to_numpy()
                            if "profile_id" in df.columns else None)
@@ -243,6 +249,8 @@ class GshpReference:
             raise ValueError(f"unknown feature_mode {feature_mode!r}")
         if use_depth:
             cols.append(np.log10(1.0 + df["depth_cm"].clip(lower=0)))
+        if use_om:
+            cols.append(np.log10(1.0 + df["oc"].clip(lower=0)))
         feats = np.column_stack(cols)
         self.mean = feats.mean(axis=0)
         self.std = feats.std(axis=0)
@@ -279,7 +287,7 @@ class GshpReference:
             raise ValueError("reference has no profile_id column")
         self._excluded = (self.profile_id == profile_id)
 
-    def neighbors(self, thetar, thetas, alpha, n, k, depth=None):
+    def neighbors(self, thetar, thetas, alpha, n, k, depth=None, om=None):
         if self.feature_mode in ("curve", "curve_white"):
             f = list(_curve_features(thetar, thetas, alpha, n).ravel())
         else:
@@ -288,6 +296,10 @@ class GshpReference:
             if depth is None:
                 raise ValueError("this reference uses depth; pass depth=...")
             f.append(np.log10(1.0 + max(depth, 0.0)))
+        if self.use_om:
+            if om is None:
+                raise ValueError("this reference uses organic carbon; pass om=")
+            f.append(np.log10(1.0 + max(om, 0.0)))
         f = (np.array(f) - self.mean) / self.std
         if self._W is not None:
             f = f @ self._W
@@ -363,7 +375,8 @@ class TextureGBM:
         return dict(zip(self.classes_, p.mean(axis=0)))
 
 
-def estimate(h, theta, ref=None, n_mc=300, k=30, seed=0, depth=None, clf=None):
+def estimate(h, theta, ref=None, n_mc=300, k=30, seed=0, depth=None,
+             om=None, clf=None):
     """Full pipeline: fit vG, then kNN inference with MC uncertainty.
 
     Returns a dict with fitted parameters, class probabilities, particle
@@ -392,7 +405,7 @@ def estimate(h, theta, ref=None, n_mc=300, k=30, seed=0, depth=None, clf=None):
     ks_neighbor_counts = []
     for tr, ts, la_i, ln1_i in draws:
         idx, w = ref.neighbors(tr, ts, 10.0 ** la_i, 1.0 + 10.0 ** ln1_i, k,
-                               depth=depth)
+                               depth=depth, om=om)
         w = w * ref.class_weight[idx] * ref.row_weight[idx]
         w = w / w.sum()
         ks_neighbor_counts.append(int(np.isfinite(ref.ksat[idx]).sum()))
