@@ -333,7 +333,7 @@ class TextureGBM:
         try:
             from sklearn.ensemble import HistGradientBoostingClassifier
         except ImportError:
-            raise SystemExit(
+            raise ImportError(
                 "the hybrid model needs scikit-learn: pip install scikit-learn")
         import pandas as pd
         if df is None:
@@ -506,16 +506,19 @@ def main():
                          "for the soil's region -- it LOWERS accuracy by ~7 "
                          "points for European soils, which are sparsely "
                          "represented. See README.")
-    ap.add_argument("--model", choices=["knn", "hybrid"], default="knn",
-                    help="knn (default) predicts the texture class by "
-                         "neighbour voting. hybrid predicts it with a "
+    ap.add_argument("--model", choices=["knn", "hybrid"], default=None,
+                    help="hybrid (default) predicts the texture class with a "
                          "gradient-boosted classifier, which is significantly "
-                         "more accurate (+2.6 points in-distribution "
-                         "p=0.019, +5.4 points against an unseen laboratory "
-                         "p=1.3e-07) and is the better choice for a soil from "
-                         "a new source. Fractions, Ksat, all intervals and "
-                         "the neighbour list still come from the kNN either "
-                         "way. Needs scikit-learn and ~3 s to train.")
+                         "more accurate than neighbour voting (+2.6 points "
+                         "in-distribution p=0.019, +5.4 points against an "
+                         "unseen laboratory p=1.3e-07). knn predicts it by "
+                         "neighbour voting instead, which needs no "
+                         "scikit-learn, runs in ~0.6 s rather than ~3 s, and "
+                         "is bit-reproducible across environments. Fractions, "
+                         "Ksat, all intervals and the neighbour list come from "
+                         "the kNN either way; the hybrid also prints the kNN's "
+                         "class as a second opinion. If scikit-learn is "
+                         "missing the default falls back to knn.")
     ap.add_argument("--tau", type=float, default=1.0, metavar="T",
                     help="class-prior exponent for neighbour votes, weight = "
                          "(1/class_count)^T. 1.0 (default) imposes a uniform "
@@ -546,10 +549,18 @@ def main():
               f"Ksat, so no Ks estimate can be made.", file=sys.stderr)
 
     clf = None
-    if args.model == "hybrid":
-        # Trained on the same table the kNN uses, so the two halves of the
-        # hybrid always see the same reference.
-        clf = TextureGBM(df=df, use_depth=args.depth is not None)
+    model = args.model or "hybrid"
+    if model == "hybrid":
+        try:
+            # Trained on the same table the kNN uses, so the two halves of the
+            # hybrid always see the same reference.
+            clf = TextureGBM(df=df, use_depth=args.depth is not None)
+        except ImportError as exc:
+            if args.model is not None:
+                raise SystemExit(str(exc))
+            # The hybrid is only the default, not a request: degrade to the
+            # kNN rather than refusing to run.
+            print(f"note: {exc}; falling back to --model knn.", file=sys.stderr)
 
     res = estimate(h, theta, ref=ref, depth=args.depth, clf=clf)
 

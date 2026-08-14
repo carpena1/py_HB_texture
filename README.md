@@ -36,10 +36,11 @@ Or from Python: `swcc_texture.estimate(h, theta)`.
 
 Optional flags (see "Improving accuracy" and "Method levers" below):
 
-    --model hybrid             predict the class with a gradient-boosted
-                               classifier instead of neighbour voting:
-                               +3.2 pp (p=0.005), +5.4 pp against an unseen
-                               laboratory. RECOMMENDED. Needs scikit-learn.
+    --model knn                predict the class by neighbour voting instead
+                               of the default gradient-boosted classifier:
+                               -3.2 pp (p=0.005), -5.4 pp against an unseen
+                               laboratory, but needs no scikit-learn, runs in
+                               ~0.6 s rather than ~5 s, and is bit-reproducible
     --tau 0.75                 temper the class prior; better macro-F1 and
                                far better precision for rare classes
     --depth 25                 sample mid-depth in cm; +3.5 pp on average, but
@@ -938,9 +939,23 @@ and calibrated prediction *sets* would turn irreducible ambiguity into a
 defensible output — the kNN/GBM agreement flag is already a crude version of
 that, separating 47.8 % from 28.7 % accuracy.
 
-**The default is still `--model knn`**, only because `hybrid` requires
-scikit-learn, which the tool otherwise does not need. On accuracy grounds the
-hybrid should be the default.
+**The hybrid is the default as of 2026-08-14.** It was held back only because
+it requires scikit-learn, which the tool otherwise does not need; accuracy won
+that argument. If scikit-learn is not installed the tool prints a note and
+falls back to `--model knn` rather than refusing to run, so the dependency is
+effectively optional. Passing `--model hybrid` explicitly still errors when
+scikit-learn is missing, since that is a request rather than a default.
+
+Two costs come with it. A run takes about 5 s instead of 0.6 s, because the
+GBM is trained on demand rather than shipped as a pickle that would pin the
+repository to one scikit-learn version. And the class prediction is no longer
+bit-reproducible across scikit-learn versions — the histogram binning and
+early-stopping split can shift marginal cases, though the four vG features and
+`random_state=0` keep it close. Everything except the class — fractions, Ksat,
+every interval, the neighbour list — comes from the kNN and is unaffected;
+`verify_hybrid.py` asserts that those outputs are bit-identical between the two
+models. Use `--model knn` where exact reproducibility matters more than the
+3 points.
 
 ## References
 
