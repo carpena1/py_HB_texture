@@ -867,6 +867,46 @@ Training costs ~3 s on the 9,996-layer reference (early stopping settles near
 50 iterations), so the model is fitted on demand rather than shipped as a
 pickle, which would tie the repository to one scikit-learn version.
 
+### Organic matter, reopened and rejected again (verify_om.py)
+
+Organic carbon was dropped early on for coverage (15 % in GSHP). KSSL carries
+it for 98.8 %, so the merged reference is 32.1 % covered (4,023 of 12,526) and
+the question was worth reopening.
+
+Using it as a feature forces every reference row without it to be discarded, so
+three arms are needed to separate the covariate from the shrinkage:
+
+| variant | reference rows | overall | macro-F1 | group |
+|---|---|---|---|---|
+| A OM-only reference, 4 features | 4,023 | 37.0 % | 35.0 % | 60.6 % |
+| B OM-only reference, **+OM** | 4,023 | 38.3 % | 36.6 % | 61.9 % |
+| C full reference (today's default) | 12,526 | 35.4 % | 33.4 % | 60.4 % |
+
+| comparison | delta | p |
+|---|---|---|
+| B vs A — does the covariate carry information? | +1.3 pp | 0.331 |
+| B vs C — is the whole package better than today? | +2.9 pp | **0.042** |
+| A vs C — cost of shrinking the reference | +1.7 pp | 0.180 |
+
+**B vs C looks significant and is not trustworthy.** Targets must carry organic
+carbon to be usable, and OC coverage is 98.8 % in KSSL against 15.2 % in GSHP,
+so the targets are 60.1 % KSSL — while the OM-only reference is 62.1 % KSSL and
+the full reference only 20.2 %. Arms A and B are compositionally matched to
+their own targets; arm C is not. That is the same source-leakage effect
+verify_source_blocked.py measures at −11.4 pp, reappearing as an apparent gain.
+The giveaway is A vs C: shrinking the reference *without* using the covariate
+already gains 1.7 pp, which discarding two thirds of the data cannot otherwise
+do.
+
+**The controlled comparison is B vs A, where both arms share one reference:
++1.3 pp, p = 0.331. Organic carbon does not significantly improve
+classification.** It is implemented (`GshpReference(use_om=True)`) but not
+exposed on the CLI and not recommended.
+
+(The Ksat rows in that run sit on an unusual 196-soil subset — GSHP layers
+having both organic carbon and a measured Ksat — and should not be read as a
+general Ksat result.)
+
 ### Where this leaves things
 
 Seven interventions have now been tested on the same paired design. Six were
