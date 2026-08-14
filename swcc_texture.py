@@ -27,10 +27,40 @@ import sys
 import numpy as np
 from scipy.optimize import curve_fit
 
-# Resolve the reference table relative to this script, so the tool works
-# from any working directory.
-REFERENCE_CSV = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                             "data", "gshp_reference.csv")
+# Resolve reference tables relative to this script, so the tool works from any
+# working directory.
+DATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
+
+# GSHP alone. Kept as a module constant because the historical verification
+# scripts (Carsel & Parrish, ROSETTA, region, variants) were all scored against
+# GSHP and their published tables must stay reproducible.
+REFERENCE_CSV = os.path.join(DATA_DIR, "gshp_reference.csv")
+
+# Named reference sets. "merged" is the default: GSHP plus the NCSS/KSSL
+# layers, whose class mix complements GSHP's (1.8x the silty clay loam, only
+# 4 % as much sand). The merge is not a significant accuracy win on its own
+# (+0.7 pp, p=0.35) but it is not harmful either, it lifts the Loamy group
+# past the 50 % bar under Bonferroni (p=0.019 -> 0.004), and it improves Ksat
+# within a factor of two from 44 % to 47 % by changing which GSHP neighbours
+# are selected -- despite KSSL carrying no Ksat of its own.
+REFERENCE_SETS = {
+    "merged": ["gshp_reference.csv", "kssl_reference.csv"],
+    "gshp": ["gshp_reference.csv"],
+    "kssl": ["kssl_reference.csv"],
+    "all": ["gshp_reference.csv", "unsoda_reference.csv",
+            "kssl_reference.csv"],
+}
+DEFAULT_REFERENCE = "merged"
+
+
+def load_reference_df(name=DEFAULT_REFERENCE):
+    """Concatenate the CSVs making up a named reference set."""
+    import pandas as pd
+    if name not in REFERENCE_SETS:
+        raise ValueError(f"unknown reference set {name!r}; "
+                         f"choose from {sorted(REFERENCE_SETS)}")
+    return pd.concat([pd.read_csv(os.path.join(DATA_DIR, f))
+                      for f in REFERENCE_SETS[name]], ignore_index=True)
 
 USDA_CLASSES = [
     "sand", "loamy sand", "sandy loam", "loam", "silt", "silt loam",
@@ -149,8 +179,9 @@ def usda_centroids(step=0.25):
 # ---------------------------------------------------------------------------
 
 class GshpReference:
-    def __init__(self, path=REFERENCE_CSV, df=None, use_depth=False, tau=1.0,
-                 feature_mode="vg", quality_weight=False):
+    def __init__(self, path=None, df=None, reference=DEFAULT_REFERENCE,
+                 use_depth=False, tau=1.0, feature_mode="vg",
+                 quality_weight=False):
         """Build the reference from the CSV at `path`, or from a preloaded
         DataFrame `df` (used for leave-one-out verification, where the target
         soil is dropped before constructing the reference).
@@ -161,7 +192,8 @@ class GshpReference:
         """
         import pandas as pd
         if df is None:
-            df = pd.read_csv(path)
+            df = (pd.read_csv(path) if path is not None
+                  else load_reference_df(reference))
         self.use_depth = use_depth
         if use_depth:
             df = df[df["depth_cm"].notna()].reset_index(drop=True)
@@ -284,8 +316,8 @@ class TextureGBM:
     learn version.
     """
 
-    def __init__(self, path=REFERENCE_CSV, df=None, use_depth=False,
-                 random_state=0):
+    def __init__(self, path=None, df=None, reference=DEFAULT_REFERENCE,
+                 use_depth=False, random_state=0):
         try:
             from sklearn.ensemble import HistGradientBoostingClassifier
         except ImportError:
@@ -293,7 +325,8 @@ class TextureGBM:
                 "the hybrid model needs scikit-learn: pip install scikit-learn")
         import pandas as pd
         if df is None:
-            df = pd.read_csv(path)
+            df = (pd.read_csv(path) if path is not None
+                  else load_reference_df(reference))
         if use_depth:
             df = df[df["depth_cm"].notna()]
         df = df[df["texture_class"].notna()]
@@ -479,32 +512,25 @@ def main():
                          "(precision 20%%). 0.75 gives the best macro-F1 and "
                          "0.5 roughly calibrates silt, at almost no cost in "
                          "recall. 0 disables the correction. See README.")
-    ap.add_argument("--reference", choices=["gshp", "merged", "kssl", "all"],
-                    default="gshp",
-                    help="reference database: gshp (default); merged adds the "
-                         "588 UNSODA 2.0 soils; kssl adds 2,530 NCSS/KSSL "
-                         "layers; all adds both. Neither merge reaches "
-                         "significance on its own (UNSODA +0.7 points "
-                         "p=0.052, KSSL +0.5 points p=0.523), and KSSL "
-                         "carries no Ksat. See README.")
+    ap.add_argument("--reference", choices=sorted(REFERENCE_SETS),
+                    default=DEFAULT_REFERENCE,
+                    help="reference table. merged (default) = GSHP 9,996 "
+                         "layers + NCSS/KSSL 2,530; gshp = GSHP only; "
+                         "kssl = KSSL only (2,530 layers, and NO measured "
+                         "Ksat at all, so Ks cannot be estimated); all adds "
+                         "the 588 UNSODA 2.0 soils on top of merged. NOTE: "
+                         "before 2026-08 the default was gshp and 'merged' "
+                         "meant GSHP+UNSODA -- scripted callers should pass "
+                         "--reference explicitly.")
     args = ap.parse_args()
 
     h, theta = _read_data(args.datafile)
 
-    ref, df = None, None
-    if (args.reference != "gshp" or args.depth is not None or args.tau != 1.0
-            or args.model == "hybrid"):
-        import pandas as pd
-        here = os.path.dirname(os.path.abspath(__file__))
-        df = pd.read_csv(REFERENCE_CSV)
-        extra = {"merged": ["unsoda_reference.csv"],
-                 "kssl": ["kssl_reference.csv"],
-                 "all": ["unsoda_reference.csv", "kssl_reference.csv"]}
-        for name in extra.get(args.reference, []):
-            df = pd.concat([df, pd.read_csv(os.path.join(here, "data", name))],
-                           ignore_index=True)
-        ref = GshpReference(df=df, use_depth=args.depth is not None,
-                            tau=args.tau)
+    df = load_reference_df(args.reference)
+    ref = GshpReference(df=df, use_depth=args.depth is not None, tau=args.tau)
+    if df["ksat_cmh"].notna().sum() == 0:
+        print(f"note: the '{args.reference}' reference carries no measured "
+              f"Ksat, so no Ks estimate can be made.", file=sys.stderr)
 
     clf = None
     if args.model == "hybrid":

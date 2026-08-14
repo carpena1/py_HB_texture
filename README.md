@@ -5,9 +5,10 @@ saturated hydraulic conductivity Ks (cm/h), with uncertainty ranges, from
 measured SWCC data (h in kPa, theta as fraction or % — auto-detected).
 
 Method (see Problem_description.docx): fit van Genuchten parameters
-(Mualem m = 1-1/n), then distance-weighted k-nearest-neighbor inference in
-the GSHP database (Gupta et al. 2022, doi:10.5281/zenodo.6640246;
-9,996 quality-filtered layers). Votes use inverse class-frequency weighting
+(Mualem m = 1-1/n), then distance-weighted k-nearest-neighbor inference in a
+reference table of measured soils. **The default reference is `merged`:** the
+GSHP database (Gupta et al. 2022, doi:10.5281/zenodo.6640246; 9,996
+quality-filtered layers) plus 2,530 NCSS/KSSL layers, 12,526 in total. Votes use inverse class-frequency weighting
 (uniform prior over the 12 USDA classes). Fit uncertainty is propagated by
 Monte Carlo sampling of the fit covariance.
 
@@ -43,7 +44,9 @@ Optional flags (see "Improving accuracy" and "Method levers" below):
                                far better precision for rare classes
     --depth 25                 sample mid-depth in cm; +3.5 pp on average, but
                                HARMFUL for European soils (see below)
-    --reference merged         add the 588 UNSODA 2.0 soils to the reference
+    --reference gshp           GSHP only (default is now merged = GSHP+KSSL)
+    --reference kssl           KSSL only — no Ksat at all in that table
+    --reference all            merged plus the 588 UNSODA 2.0 soils
 
 ## Files
 
@@ -584,8 +587,18 @@ The feared Ksat dilution did **not** materialise: even though Ksat-bearing rows
 fall from 66 % to 53 % of the reference, ~22 of 30 neighbours still carry a
 measured Ksat and every Ksat metric is unchanged.
 
-Exposed as `--reference kssl` (and `all`, which adds UNSODA too). **Defaults
-are unchanged**, since neither merge reaches significance on its own.
+**KSSL is now part of the default reference** (`--reference merged`). The
+accuracy gain is not significant on its own, but the merge is not harmful, it
+lifts the Loamy group past the 50 % bar under Bonferroni (p=0.019 -> 0.004),
+and it improves Ksat within a factor of two from 44 % to 47 % — by changing
+which GSHP neighbours are selected, since KSSL contributes no Ksat itself.
+
+**Breaking change (2026-08):** the default was `gshp`, and `merged` used to
+mean GSHP+UNSODA. It now means GSHP+KSSL, `gshp` selects GSHP alone and `kssl`
+selects KSSL alone. Scripted callers should pass `--reference` explicitly. The
+historical benchmark scripts (Carsel & Parrish, ROSETTA, groups, HYPRES) are
+pinned to `reference="gshp"` so their published tables above stay
+reproducible.
 
 ### Soil-physics checks on the reference data
 

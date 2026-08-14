@@ -33,13 +33,13 @@ H = np.arange(0.0, 150.0 + 0.1, 5.0)
 
 def preds_carsel():
     names, curves, _ = vcp.load_benchmark()
-    ref = st.GshpReference()
+    ref = st.GshpReference(reference="gshp")
     return [(n, st.estimate(curves[n]["h"], curves[n]["theta"],
                             ref=ref)["texture_class"]) for n in names]
 
 
 def preds_rosetta():
-    ref = st.GshpReference()
+    ref = st.GshpReference(reference="gshp")
     out = []
     for n in vr.ORDER:
         tr, ts, a, nn, _ = vr.rosetta_params(n)

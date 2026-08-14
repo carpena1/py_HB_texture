@@ -70,7 +70,7 @@ def fao_class(sand, silt, clay):
 
 def main():
     h = np.arange(0.0, 150.0 + 0.1, 5.0)
-    ref_plain = st.GshpReference()
+    ref_plain = st.GshpReference(reference="gshp")
 
     import pandas as pd
     ref_depth = st.GshpReference(df=pd.read_csv(st.REFERENCE_CSV),

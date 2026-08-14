@@ -46,7 +46,7 @@ def rosetta_params(cls):
 
 def main():
     centroids = st.usda_centroids()
-    ref = st.GshpReference()
+    ref = st.GshpReference(reference="gshp")
     h = np.arange(0.0, 150.0 + 0.1, 5.0)
 
     n_top1 = n_top2 = n_ks_in = n_frac_in = 0

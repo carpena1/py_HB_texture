@@ -68,7 +68,7 @@ def reference_counts():
 def main():
     names, curves, ks_true = load_benchmark()
     centroids = st.usda_centroids()
-    ref = st.GshpReference()
+    ref = st.GshpReference(reference="gshp")
     n_ref, n_ks = reference_counts()
 
     n_top1 = n_top2 = n_ks_in = n_frac_in = 0
