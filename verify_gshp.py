@@ -40,7 +40,14 @@ def representative_layer(df, cls):
 
 
 def main():
-    df = pd.read_csv(st.REFERENCE_CSV)
+    # The 12 target soils are chosen from GSHP alone, not from the merged
+    # reference. That is forced rather than conservative: a target must carry a
+    # measured Ksat to be scored against one, and KSSL has none at all. Keeping
+    # the selection pool fixed also keeps these soils identical to the shipped
+    # Testing/<i>_<code>_GHSP.csv files.
+    pool = pd.read_csv(st.REFERENCE_CSV)
+    # Predictions are made against the shipping default reference (merged).
+    df = st.load_reference_df()
     h = np.arange(0.0, 150.0 + 0.1, 5.0)
 
     n_top1 = n_top2 = n_ks_in = n_frac_in = 0
@@ -51,14 +58,16 @@ def main():
           f"{'s/si/cl pred':<14s} {'s/si/cl true':<14s} "
           f"{'Ks pred':>8s} {'Ks true':>8s} {'nb':>4s} {'Ks in5-95%':>10s}")
     for name in ORDER:
-        j = representative_layer(df, name)
-        row = df.loc[j]
+        j = representative_layer(pool, name)
+        row = pool.loc[j]
         theta = st.vg_theta(h, row.thetar, row.thetas, row.alpha_kpa, row.n)
 
         # leave-one-out: drop this exact layer from the reference
-        loo = df.drop(index=j).reset_index(drop=True)
+        loo = df[df.layer_id != row.layer_id].reset_index(drop=True)
         ref = st.GshpReference(df=loo)
-        res = st.estimate(h, theta, ref=ref)
+        # The classifier must also be blind to the target layer.
+        clf = st.TextureGBM(df=loo)
+        res = st.estimate(h, theta, ref=ref, clf=clf)
 
         probs = res["class_probabilities"]
         pred = res["texture_class"]

@@ -46,7 +46,8 @@ def rosetta_params(cls):
 
 def main():
     centroids = st.usda_centroids()
-    ref = st.GshpReference(reference="gshp")
+    ref = st.GshpReference()
+    clf = st.TextureGBM(df=st.load_reference_df())
     h = np.arange(0.0, 150.0 + 0.1, 5.0)
 
     n_top1 = n_top2 = n_ks_in = n_frac_in = 0
@@ -58,7 +59,7 @@ def main():
     for name in ORDER:
         tr, ts, alpha, n, ks_true = rosetta_params(name)
         theta = st.vg_theta(h, tr, ts, alpha, n)
-        res = st.estimate(h, theta, ref=ref)
+        res = st.estimate(h, theta, ref=ref, clf=clf)
 
         probs = res["class_probabilities"]
         pred = res["texture_class"]

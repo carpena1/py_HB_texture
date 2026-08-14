@@ -33,30 +33,38 @@ H = np.arange(0.0, 150.0 + 0.1, 5.0)
 
 def preds_carsel():
     names, curves, _ = vcp.load_benchmark()
-    ref = st.GshpReference(reference="gshp")
+    ref = st.GshpReference()
+    clf = st.TextureGBM(df=st.load_reference_df())
     return [(n, st.estimate(curves[n]["h"], curves[n]["theta"],
-                            ref=ref)["texture_class"]) for n in names]
+                            ref=ref, clf=clf)["texture_class"])
+            for n in names]
 
 
 def preds_rosetta():
-    ref = st.GshpReference(reference="gshp")
+    ref = st.GshpReference()
+    clf = st.TextureGBM(df=st.load_reference_df())
     out = []
     for n in vr.ORDER:
         tr, ts, a, nn, _ = vr.rosetta_params(n)
         theta = st.vg_theta(H, tr, ts, a, nn)
-        out.append((n, st.estimate(H, theta, ref=ref)["texture_class"]))
+        out.append((n, st.estimate(H, theta, ref=ref,
+                                   clf=clf)["texture_class"]))
     return out
 
 
 def preds_gshp():
-    df = pd.read_csv(st.REFERENCE_CSV)
+    # Targets from GSHP (only it carries measured Ksat); reference = default.
+    pool = pd.read_csv(st.REFERENCE_CSV)
+    df = st.load_reference_df()
     out = []
     for n in vg.ORDER:
-        j = vg.representative_layer(df, n)
-        row = df.loc[j]
+        j = vg.representative_layer(pool, n)
+        row = pool.loc[j]
         theta = st.vg_theta(H, row.thetar, row.thetas, row.alpha_kpa, row.n)
-        loo = st.GshpReference(df=df.drop(index=j).reset_index(drop=True))
-        out.append((n, st.estimate(H, theta, ref=loo)["texture_class"]))
+        keep = df[df.layer_id != row.layer_id].reset_index(drop=True)
+        loo = st.GshpReference(df=keep)
+        out.append((n, st.estimate(H, theta, ref=loo,
+                                   clf=st.TextureGBM(df=keep))["texture_class"]))
     return out
 
 

@@ -59,7 +59,7 @@ def reference_counts():
     """Per-class curated GSHP counts: n_ref (texture/fraction layers) and
     n_ks (subset with a measured Ksat)."""
     import pandas as pd
-    df = pd.read_csv("data/gshp_reference.csv")
+    df = st.load_reference_df()
     n_ref = df["texture_class"].value_counts()
     n_ks = df[df["ksat_cmh"].notna()]["texture_class"].value_counts()
     return n_ref, n_ks
@@ -68,7 +68,8 @@ def reference_counts():
 def main():
     names, curves, ks_true = load_benchmark()
     centroids = st.usda_centroids()
-    ref = st.GshpReference(reference="gshp")
+    ref = st.GshpReference()
+    clf = st.TextureGBM(df=st.load_reference_df())
     n_ref, n_ks = reference_counts()
 
     n_top1 = n_top2 = n_ks_in = n_frac_in = 0
@@ -80,7 +81,7 @@ def main():
           f"{'Ks pred':>8s} {'Ks true':>8s} {'nb':>4s} {'in5-95%':>7s}")
     for name in names:
         cur = curves[name]
-        res = st.estimate(cur["h"], cur["theta"], ref=ref)
+        res = st.estimate(cur["h"], cur["theta"], ref=ref, clf=clf)
         probs = res["class_probabilities"]
         pred = res["texture_class"]
         p_true = probs.get(name, 0.0)

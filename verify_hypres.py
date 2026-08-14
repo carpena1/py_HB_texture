@@ -70,11 +70,11 @@ def fao_class(sand, silt, clay):
 
 def main():
     h = np.arange(0.0, 150.0 + 0.1, 5.0)
-    ref_plain = st.GshpReference(reference="gshp")
-
-    import pandas as pd
-    ref_depth = st.GshpReference(df=pd.read_csv(st.REFERENCE_CSV),
-                                 use_depth=True)
+    ref_plain = st.GshpReference()
+    clf = st.TextureGBM(df=st.load_reference_df())
+    ref_depth = st.GshpReference(use_depth=True)
+    clf_depth = st.TextureGBM(df=st.load_reference_df(),
+                              use_depth=True)
 
     n_ok = n_ok_d = 0
     ks_log, ks_in = [], 0
@@ -88,13 +88,14 @@ def main():
         ks_true = ks_day / 24.0
         theta = st.vg_theta(h, tr, ts, alpha, n)
 
-        res = st.estimate(h, theta, ref=ref_plain)
+        res = st.estimate(h, theta, ref=ref_plain, clf=clf)
         fr = res["fractions"]
         pred_fao = fao_class(fr["sand"], fr["silt"], fr["clay"])
         ok = pred_fao == cls
         n_ok += ok
 
-        rd = st.estimate(h, theta, ref=ref_depth, depth=DEPTH_CM[pos])
+        rd = st.estimate(h, theta, ref=ref_depth, depth=DEPTH_CM[pos],
+                         clf=clf_depth)
         fd = rd["fractions"]
         ok_d = fao_class(fd["sand"], fd["silt"], fd["clay"]) == cls
         n_ok_d += ok_d
