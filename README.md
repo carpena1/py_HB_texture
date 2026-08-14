@@ -5,12 +5,23 @@ saturated hydraulic conductivity Ks (cm/h), with uncertainty ranges, from
 measured SWCC data (h in kPa, theta as fraction or % — auto-detected).
 
 Method (see Problem_description.docx): fit van Genuchten parameters
-(Mualem m = 1-1/n), then distance-weighted k-nearest-neighbor inference in a
-reference table of measured soils. **The default reference is `merged`:** the
-GSHP database (Gupta et al. 2022, doi:10.5281/zenodo.6640246; 9,996
-quality-filtered layers) plus 2,530 NCSS/KSSL layers, 12,526 in total. Votes use inverse class-frequency weighting
-(uniform prior over the 12 USDA classes). Fit uncertainty is propagated by
-Monte Carlo sampling of the fit covariance.
+(Mualem m = 1-1/n), then infer texture and Ks from a reference table of
+measured soils.
+
+**The default reference is `merged`:** the GSHP database (Gupta et al. 2022,
+doi:10.5281/zenodo.6640246; 9,996 quality-filtered layers) plus 2,530
+NCSS/KSSL layers, 12,526 in total.
+
+**The default model is `hybrid`:** a gradient-boosted classifier predicts the
+texture class, and distance-weighted k-nearest-neighbor inference supplies
+everything else — particle fractions, Ks, every uncertainty range, and the
+list of similar real soils. The kNN's own class vote is printed alongside as a
+second opinion, and the two agreeing is a useful confidence signal (47.8 %
+accurate when they agree, 28.7 % when they do not). kNN votes use inverse
+class-frequency weighting (uniform prior over the 12 USDA classes). Fit
+uncertainty is propagated by Monte Carlo sampling of the fit covariance
+through both halves. Use `--model knn` for a pure-kNN run with no
+scikit-learn dependency.
 
 ## Setup
 
@@ -22,10 +33,13 @@ virtual environment without activating it, so no extra step is needed. If you
 prefer to type `python` instead of the full path, activate the environment
 first with `source .venv/bin/activate` (`deactivate` to exit).
 
-The derived reference table `data/gshp_reference.csv` is included, so the tool
-runs out of the box. The 80 MB raw GSHP file is not committed; to regenerate
-the reference, download it from Zenodo (record 6640246) into `data/` and run
-`prepare_gshp.py`.
+The derived reference tables (`data/gshp_reference.csv`,
+`data/kssl_reference.csv`, and the optional `data/unsoda_reference.csv` and
+`data/sdb_reference.csv`) are all committed, so **the tool runs out of the box
+with no downloads.** The bulky raw sources are not committed; each
+`prepare_*.py` script documents where to obtain its input if you want to
+rebuild a table from scratch — the 80 MB GSHP file from Zenodo record 6640246,
+the multi-GB NCSS/KSSL Lab Data Mart snapshot from USDA-NRCS.
 
 ## Usage
 

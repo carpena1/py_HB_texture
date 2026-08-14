@@ -2,3 +2,7 @@ numpy
 scipy
 pandas
 openpyxl
+# Required by the default --model hybrid (gradient-boosted class prediction).
+# The tool degrades to --model knn with a note if it is absent, so it is
+# optional in the strict sense, at a cost of about 3 points of accuracy.
+scikit-learn

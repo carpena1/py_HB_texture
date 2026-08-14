@@ -513,7 +513,7 @@ def main():
                          "in-distribution p=0.019, +5.4 points against an "
                          "unseen laboratory p=1.3e-07). knn predicts it by "
                          "neighbour voting instead, which needs no "
-                         "scikit-learn, runs in ~0.6 s rather than ~3 s, and "
+                         "scikit-learn, runs in ~0.6 s rather than ~5 s, and "
                          "is bit-reproducible across environments. Fractions, "
                          "Ksat, all intervals and the neighbour list come from "
                          "the kNN either way; the hybrid also prints the kNN's "
