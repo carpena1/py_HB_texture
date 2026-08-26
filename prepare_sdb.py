@@ -23,6 +23,7 @@ import numpy as np
 import pandas as pd
 import scipy.io as sio
 
+import free_m
 import swcc_texture as st
 
 MAT = "data/sdb_raw/sDB.mat"
@@ -68,6 +69,9 @@ def main():
                 n_skip += 1
                 continue
 
+            fm = free_m.fit_free_m(h_kpa, theta,
+                                   fallback=free_m.mualem_fallback(tr, ts, alpha, n))
+
             sand, silt, clay = sla[:3]
             tot = sand + silt + clay
             if not (95 <= tot <= 105):
@@ -95,7 +99,7 @@ def main():
                 alpha_kpa=alpha, n=n, thetar=tr, thetas=ts,
                 sand=sand, silt=silt, clay=clay, ksat_cmh=ksat_cmh,
                 depth_cm=TOPSOIL_DEPTH_CM if topsoil else SUBSOIL_DEPTH_CM,
-                rmse=rmse, n_points=int(good.sum())))
+                rmse=rmse, n_points=int(good.sum()), **fm))
 
     out = pd.DataFrame(rows)
     out.to_csv(OUT, index=False)

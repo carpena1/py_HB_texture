@@ -23,6 +23,7 @@ import subprocess
 import numpy as np
 import pandas as pd
 
+import free_m
 import swcc_texture as st
 
 MDB = "data/unsoda_raw/unsoda.mdb"
@@ -95,6 +96,9 @@ def main():
             n_fit_fail += 1
             continue
 
+        fm = free_m.fit_free_m(h, theta, fallback=free_m.mualem_fallback(
+            thetar, thetas, alpha, n))
+
         sand, silt, clay = fracs[code]
         # Use the class implied by the measured fractions, so the label is
         # consistent with the USDA definition used everywhere else.
@@ -115,7 +119,8 @@ def main():
                             texture_class=cls,
                             alpha_kpa=alpha, n=n, thetar=thetar, thetas=thetas,
                             sand=sand, silt=silt, clay=clay,
-                            ksat_cmh=ksat_cmh, depth_cm=depth, rmse=rmse))
+                            ksat_cmh=ksat_cmh, depth_cm=depth, rmse=rmse,
+                            **fm))
 
     out = pd.DataFrame(records)
     out.to_csv("data/unsoda_reference.csv", index=False)

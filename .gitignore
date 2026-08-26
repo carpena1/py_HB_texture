@@ -39,3 +39,6 @@ data/unsoda_ht.csv
 data/unsoda_general.csv
 data/unsoda_props.csv
 data/unsoda_psd.csv
+# Hohenbrink et al. (2023) raw distribution (23 MB) — rebuild
+# data/hohenbrink_reference.csv with prepare_hohenbrink.py.
+data/Hohenbrink_raw/

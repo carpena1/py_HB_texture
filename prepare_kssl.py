@@ -77,6 +77,7 @@ import sqlite3
 import numpy as np
 import pandas as pd
 
+import free_m
 import swcc_texture as st
 
 DB = "data/kssl_raw/NCSSLabDataMartSQLite.sqlite3"
@@ -251,6 +252,10 @@ def main():
             oc = row.estimated_organic_carbon
         oc = (float(oc) if oc is not None and np.isfinite(oc)
               and 0 <= oc < 60 else np.nan)
+        # Unconstrained-m companion fit on the same points (see free_m.py).
+        fm = free_m.fit_free_m(h, theta,
+                               fallback=free_m.mualem_fallback(tr, ts, alpha, n))
+
         rows.append(dict(
             layer_id=f"KSSL_{row.layer_key}",
             profile_id=f"KSSL_{row.pedon_key}",
@@ -259,7 +264,7 @@ def main():
             sand=sand, silt=silt, clay=clay,
             ksat_cmh=np.nan,          # KSSL distributes none -- see docstring
             depth_cm=depth, lat=row.lat, lon=row.lon,
-            rmse=rmse, n_points=n_measured, porosity=por,
+            rmse=rmse, n_points=n_measured, porosity=por, **fm,
             oc=oc, texture_lab=row.texture_lab))
 
     out = pd.DataFrame(rows)

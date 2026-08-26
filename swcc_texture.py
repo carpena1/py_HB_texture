@@ -44,11 +44,14 @@ REFERENCE_CSV = os.path.join(DATA_DIR, "gshp_reference.csv")
 # within a factor of two from 44 % to 47 % by changing which GSHP neighbours
 # are selected -- despite KSSL carrying no Ksat of its own.
 REFERENCE_SETS = {
-    "merged": ["gshp_reference.csv", "kssl_reference.csv"],
+    "merged": ["gshp_reference.csv", "kssl_reference.csv",
+               "hohenbrink_reference.csv"],
     "gshp": ["gshp_reference.csv"],
     "kssl": ["kssl_reference.csv"],
-    "all": ["gshp_reference.csv", "unsoda_reference.csv",
-            "kssl_reference.csv"],
+    "hohenbrink": ["hohenbrink_reference.csv"],
+    "all": ["gshp_reference.csv", "kssl_reference.csv",
+            "hohenbrink_reference.csv", "unsoda_reference.csv",
+            "sdb_reference.csv"],
 }
 DEFAULT_REFERENCE = "merged"
 
@@ -72,9 +75,16 @@ USDA_CLASSES = [
 # van Genuchten model and fitting
 # ---------------------------------------------------------------------------
 
-def vg_theta(h, thetar, thetas, alpha, n):
-    """van Genuchten retention, m = 1 - 1/n, h in kPa >= 0."""
-    m = 1.0 - 1.0 / n
+def vg_theta(h, thetar, thetas, alpha, n, m=None):
+    """van Genuchten retention, h in kPa >= 0.
+
+    m defaults to the Mualem constraint 1 - 1/n. Passing m explicitly gives
+    the unconstrained (five-parameter) form, in which n and m independently
+    control the two inflection regions of the curve -- the dry end, where
+    texture information lives, is governed mostly by m.
+    """
+    if m is None:
+        m = 1.0 - 1.0 / n
     return thetar + (thetas - thetar) * (1.0 + (alpha * np.asarray(h)) ** n) ** (-m)
 
 
@@ -104,26 +114,48 @@ def _vg_transformed(h, thetar, thetas, la, ln1):
     return vg_theta(h, thetar, thetas, 10.0 ** la, 1.0 + 10.0 ** ln1)
 
 
-def fit_vg(h, theta):
+def _vg_transformed_m(h, thetar, thetas, la, ln1, m):
+    return vg_theta(h, thetar, thetas, 10.0 ** la, 1.0 + 10.0 ** ln1, m)
+
+
+# Bounds on the free m. Away from 0 and 1 because both ends are degenerate:
+# m -> 0 flattens the curve entirely, m -> 1 with large n makes the dry limb
+# vertical, and curve_fit wanders into both if allowed.
+M_BOUNDS = (0.02, 0.98)
+
+
+def fit_vg(h, theta, free_m=False):
     """Fit vG parameters to (h [kPa], theta [m3/m3]) data.
 
     Fits in transformed space p = [thetar, thetas, log10(alpha), log10(n-1)]
-    for stability. Returns (popt, pcov) in that transformed space.
+    for stability, with m tied to n by the Mualem constraint. With
+    free_m=True a fifth parameter m is fitted independently and appended to
+    p, which needs at least 6 points. Returns (popt, pcov) in that space.
     """
     h = np.asarray(h, dtype=float)
     theta = np.asarray(theta, dtype=float)
-    if len(h) < 5:
-        raise ValueError("need at least 5 (h, theta) points to fit 4 parameters")
+    npar = 5 if free_m else 4
+    if len(h) < npar + 1:
+        raise ValueError(f"need at least {npar + 1} (h, theta) points to fit "
+                         f"{npar} parameters")
 
     tmin, tmax = theta.min(), theta.max()
     hpos = h[h > 0]
     p0 = [max(0.5 * tmin, 1e-3), tmax, np.log10(1.0 / np.median(hpos)), np.log10(0.5)]
     lb = [0.0, 0.5 * tmax, -4.0, np.log10(0.01)]
     ub = [tmin + 1e-9, 1.0, 1.5, np.log10(10.0)]
+    f = _vg_transformed
+    if free_m:
+        # Start from the Mualem value implied by p0's n, so the free fit
+        # begins at the constrained solution and only departs if the data
+        # ask it to.
+        p0 = p0 + [1.0 - 1.0 / (1.0 + 10.0 ** p0[3])]
+        lb = lb + [M_BOUNDS[0]]
+        ub = ub + [M_BOUNDS[1]]
+        f = _vg_transformed_m
     p0 = np.clip(p0, lb, ub)
 
-    popt, pcov = curve_fit(_vg_transformed, h, theta, p0=p0,
-                           bounds=(lb, ub), maxfev=20000)
+    popt, pcov = curve_fit(f, h, theta, p0=p0, bounds=(lb, ub), maxfev=20000)
     return popt, pcov
 
 
@@ -180,7 +212,8 @@ def usda_centroids(step=0.25):
 
 class GshpReference:
     def __init__(self, path=None, df=None, reference=DEFAULT_REFERENCE,
-                 use_depth=False, use_om=False, tau=1.0, feature_mode="vg",
+                 use_depth=False, use_om=False, use_m=False, tau=1.0,
+                 feature_mode="vg",
                  quality_weight=False):
         """Build the reference from the CSV at `path`, or from a preloaded
         DataFrame `df` (used for leave-one-out verification, where the target
@@ -196,6 +229,10 @@ class GshpReference:
                   else load_reference_df(reference))
         self.use_depth = use_depth
         self.use_om = use_om
+        # use_m switches to the unconstrained five-parameter vG coordinates
+        # (see free_m.py): freeing m from n gives the dry limb -- where
+        # texture information sits -- its own axis.
+        self.use_m = use_m
         if use_depth:
             df = df[df["depth_cm"].notna()].reset_index(drop=True)
         if use_om:
@@ -243,8 +280,12 @@ class GshpReference:
                 df["thetar"].to_numpy(), df["thetas"].to_numpy(),
                 df["alpha_kpa"].to_numpy(), df["n"].to_numpy()).T)
         elif feature_mode == "vg":
-            cols = [np.log10(df["alpha_kpa"]), np.log10(df["n"] - 1.0),
-                    df["thetar"], df["thetas"]]
+            if use_m:
+                cols = [np.log10(df["alpha_kpa_m"]), np.log10(df["n_m"] - 1.0),
+                        df["thetar_m"], df["thetas_m"], df["m"]]
+            else:
+                cols = [np.log10(df["alpha_kpa"]), np.log10(df["n"] - 1.0),
+                        df["thetar"], df["thetas"]]
         else:
             raise ValueError(f"unknown feature_mode {feature_mode!r}")
         if use_depth:
@@ -287,9 +328,14 @@ class GshpReference:
             raise ValueError("reference has no profile_id column")
         self._excluded = (self.profile_id == profile_id)
 
-    def neighbors(self, thetar, thetas, alpha, n, k, depth=None, om=None):
+    def neighbors(self, thetar, thetas, alpha, n, k, depth=None, om=None,
+                  m=None):
         if self.feature_mode in ("curve", "curve_white"):
             f = list(_curve_features(thetar, thetas, alpha, n).ravel())
+        elif self.use_m:
+            if m is None:
+                raise ValueError("this reference uses free m; pass m=...")
+            f = [np.log10(alpha), np.log10(n - 1.0), thetar, thetas, m]
         else:
             f = [np.log10(alpha), np.log10(n - 1.0), thetar, thetas]
         if self.use_depth:
@@ -329,7 +375,7 @@ class TextureGBM:
     """
 
     def __init__(self, path=None, df=None, reference=DEFAULT_REFERENCE,
-                 use_depth=False, random_state=0):
+                 use_depth=False, use_m=False, random_state=0):
         try:
             from sklearn.ensemble import HistGradientBoostingClassifier
         except ImportError:
@@ -343,27 +389,32 @@ class TextureGBM:
             df = df[df["depth_cm"].notna()]
         df = df[df["texture_class"].notna()]
         self.use_depth = use_depth
+        self.use_m = use_m
         self.clf = HistGradientBoostingClassifier(
             max_iter=400, learning_rate=0.06, max_leaf_nodes=31,
             l2_regularization=1.0, early_stopping=True,
             validation_fraction=0.15, random_state=random_state,
             # matches the uniform prior the kNN imposes at tau = 1
             class_weight="balanced")
+        cols = ("thetar_m", "thetas_m", "alpha_kpa_m", "n_m") if use_m \
+            else ("thetar", "thetas", "alpha_kpa", "n")
         self.clf.fit(self._features(
-            df["thetar"].to_numpy(), df["thetas"].to_numpy(),
-            df["alpha_kpa"].to_numpy(), df["n"].to_numpy(),
-            df["depth_cm"].to_numpy() if use_depth else None),
+            *(df[c].to_numpy() for c in cols),
+            df["depth_cm"].to_numpy() if use_depth else None,
+            df["m"].to_numpy() if use_m else None),
             df["texture_class"].to_numpy())
         self.classes_ = self.clf.classes_
 
-    def _features(self, thetar, thetas, alpha, n, depth=None):
+    def _features(self, thetar, thetas, alpha, n, depth=None, m=None):
         cols = [np.log10(alpha), np.log10(np.asarray(n) - 1.0), thetar, thetas]
         if self.use_depth:
             cols.append(np.log10(1.0 + np.clip(np.asarray(depth, float), 0,
                                                None)))
+        if self.use_m:
+            cols.append(np.asarray(m, dtype=float))
         return np.column_stack(cols)
 
-    def probabilities(self, thetar, thetas, alpha, n, depth=None):
+    def probabilities(self, thetar, thetas, alpha, n, depth=None, m=None):
         """Mean class probabilities over a set of Monte Carlo draws.
 
         Averaging predict_proba across the draws propagates the vG fit
@@ -371,7 +422,8 @@ class TextureGBM:
         """
         d = (np.full(np.shape(thetar), depth if depth is not None else np.nan)
              if self.use_depth else None)
-        p = self.clf.predict_proba(self._features(thetar, thetas, alpha, n, d))
+        p = self.clf.predict_proba(
+            self._features(thetar, thetas, alpha, n, d, m))
         return dict(zip(self.classes_, p.mean(axis=0)))
 
 
@@ -389,23 +441,33 @@ def estimate(h, theta, ref=None, n_mc=300, k=30, seed=0, depth=None,
     if ref is None:
         ref = GshpReference()
 
-    popt, pcov = fit_vg(h, theta)
-    thetar, thetas, la, ln1 = popt
+    # The reference decides the coordinate system: a use_m reference is
+    # indexed on the unconstrained five-parameter fit, so the target has to
+    # be fitted the same way.
+    free_m = bool(getattr(ref, "use_m", False))
+    popt, pcov = fit_vg(h, theta, free_m=free_m)
+    thetar, thetas, la, ln1 = popt[:4]
     alpha, n = 10.0 ** la, 1.0 + 10.0 ** ln1
+    m_fit = popt[4] if free_m else 1.0 - 1.0 / n
     perr = np.sqrt(np.diag(pcov))
 
     rng = np.random.default_rng(seed)
     draws = rng.multivariate_normal(popt, pcov, size=n_mc)
-    draws = np.clip(draws, [0.0, 0.05, -4.0, np.log10(0.01)],
-                    [0.5, 1.0, 1.5, np.log10(10.0)])
+    lo = [0.0, 0.05, -4.0, np.log10(0.01)]
+    hi = [0.5, 1.0, 1.5, np.log10(10.0)]
+    if free_m:
+        lo, hi = lo + [M_BOUNDS[0]], hi + [M_BOUNDS[1]]
+    draws = np.clip(draws, lo, hi)
 
     votes = {c: 0.0 for c in USDA_CLASSES}
     frac_vals, frac_w = [], []
     ks_vals, ks_w = [], []
     ks_neighbor_counts = []
-    for tr, ts, la_i, ln1_i in draws:
+    for row in draws:
+        tr, ts, la_i, ln1_i = row[:4]
         idx, w = ref.neighbors(tr, ts, 10.0 ** la_i, 1.0 + 10.0 ** ln1_i, k,
-                               depth=depth, om=om)
+                               depth=depth, om=om,
+                               m=row[4] if free_m else None)
         w = w * ref.class_weight[idx] * ref.row_weight[idx]
         w = w / w.sum()
         ks_neighbor_counts.append(int(np.isfinite(ref.ksat[idx]).sum()))
@@ -424,7 +486,8 @@ def estimate(h, theta, ref=None, n_mc=300, k=30, seed=0, depth=None,
         # Hybrid: the class comes from the GBM, everything else below still
         # comes from the kNN neighbourhood computed above.
         p = clf.probabilities(draws[:, 0], draws[:, 1], 10.0 ** draws[:, 2],
-                              1.0 + 10.0 ** draws[:, 3], depth=depth)
+                              1.0 + 10.0 ** draws[:, 3], depth=depth,
+                              m=draws[:, 4] if free_m else None)
         probs = {c: v for c, v in sorted(p.items(), key=lambda kv: -kv[1])
                  if v > 0}
         source = "gbm"
@@ -450,11 +513,13 @@ def estimate(h, theta, ref=None, n_mc=300, k=30, seed=0, depth=None,
     return {
         "vg_fit": {
             "thetar": thetar, "thetas": thetas,
-            "alpha_kpa": alpha, "n": n, "m": 1.0 - 1.0 / n,
+            "alpha_kpa": alpha, "n": n, "m": m_fit,
+            "m_is_free": free_m,
             "se_thetar": perr[0], "se_thetas": perr[1],
             "se_log10_alpha": perr[2], "se_log10_n_minus_1": perr[3],
             "rmse": float(np.sqrt(np.mean(
-                (vg_theta(h, thetar, thetas, alpha, n) - theta) ** 2))),
+                (vg_theta(h, thetar, thetas, alpha, n,
+                          m_fit if free_m else None) - theta) ** 2))),
         },
         "texture_class": next(iter(probs)),
         "class_probabilities": probs,
@@ -531,12 +596,13 @@ def main():
     ap.add_argument("--reference", choices=sorted(REFERENCE_SETS),
                     default=DEFAULT_REFERENCE,
                     help="reference table. merged (default) = GSHP 9,996 "
-                         "layers + NCSS/KSSL 2,530; gshp = GSHP only; "
-                         "kssl = KSSL only (2,530 layers, and NO measured "
-                         "Ksat at all, so Ks cannot be estimated); all adds "
-                         "the 588 UNSODA 2.0 soils on top of merged. NOTE: "
-                         "before 2026-08 the default was gshp and 'merged' "
-                         "meant GSHP+UNSODA -- scripted callers should pass "
+                         "layers + NCSS/KSSL 2,530 + Hohenbrink 560, 13,086 "
+                         "in total; gshp, kssl and hohenbrink select one "
+                         "source only (kssl has NO measured Ksat at all, so "
+                         "Ks cannot be estimated from it); all adds UNSODA "
+                         "2.0 and sDB on top of merged. NOTE: before 2026-08 "
+                         "the default was gshp and 'merged' meant "
+                         "GSHP+UNSODA -- scripted callers should pass "
                          "--reference explicitly.")
     args = ap.parse_args()
 

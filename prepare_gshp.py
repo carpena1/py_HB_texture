@@ -14,7 +14,11 @@ Units in the output table:
 
 import pandas as pd
 
+import free_m
+
 M_HEAD_TO_KPA = 9.80665
+# lab_head_m carries a 2.48e29 sentinel for missing values.
+MAX_HEAD_M = 1e5
 
 USDA_CLASSES = [
     "sand", "loamy sand", "sandy loam", "loam", "silt", "silt loam",
@@ -90,6 +94,32 @@ def main():
     # reference rows it costs.
     oc = pd.to_numeric(lay["oc"], errors="coerce")
     out["oc"] = oc.where((oc >= 0) & (oc < 60))
+
+    # Unconstrained-m parameters. GSHP publishes only the Mualem-constrained
+    # fit, but it also ships the measured (h, theta) points those were fitted
+    # to, so m can be freed by refitting. Layers with too few points keep the
+    # published parameters with m = 1 - 1/n (see free_m.py).
+    pts = df[["layer_id", "lab_head_m", "lab_wrc"]].copy()
+    for c in ("lab_head_m", "lab_wrc"):
+        pts[c] = pd.to_numeric(pts[c], errors="coerce")
+    pts = pts[(pts.lab_head_m >= 0) & (pts.lab_head_m < MAX_HEAD_M)
+              & (pts.lab_wrc > 0) & (pts.lab_wrc <= 1)]
+    by_layer = {k: v for k, v in pts.groupby("layer_id")}
+
+    rows, n_free = [], 0
+    for r in out.itertuples():
+        fb = free_m.mualem_fallback(r.thetar, r.thetas, r.alpha_kpa, r.n)
+        g = by_layer.get(r.layer_id)
+        res = fb
+        if g is not None:
+            res = free_m.fit_free_m(g.lab_head_m.to_numpy() * M_HEAD_TO_KPA,
+                                    g.lab_wrc.to_numpy(), fallback=fb)
+        n_free += res is not fb
+        rows.append(res)
+    for c in free_m.FREE_COLS:
+        out[c] = [x[c] for x in rows]
+    print(f"  free-m refit:   {n_free} of {len(out)} layers "
+          f"({n_free / len(out) * 100:.1f} %); rest keep m = 1 - 1/n")
 
     out.to_csv("data/gshp_reference.csv", index=False)
     print(f"reference layers: {len(out)}")

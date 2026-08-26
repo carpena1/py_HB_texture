@@ -9,8 +9,11 @@ Method (see Problem_description.docx): fit van Genuchten parameters
 measured soils.
 
 **The default reference is `merged`:** the GSHP database (Gupta et al. 2022,
-doi:10.5281/zenodo.6640246; 9,996 quality-filtered layers) plus 2,530
-NCSS/KSSL layers, 12,526 in total.
+doi:10.5281/zenodo.6640246; 9,996 quality-filtered layers), 2,530 NCSS/KSSL
+layers and 560 from Hohenbrink et al. (2023), 13,086 in total. The Hohenbrink
+curves are HYPROP evaporation plus WP4 dewpoint, so they run from effectively
+saturation (pF -0.03) past pF 5 -- the wet end the other tables barely
+sample.
 
 **The default model is `hybrid`:** a gradient-boosted classifier predicts the
 texture class, and distance-weighted k-nearest-neighbor inference supplies
@@ -68,23 +71,23 @@ Running it with all defaults:
       thetar = 0.0670  thetas = 0.4500  alpha = 0.2000  n = 1.410  m = 0.291  (RMSE 0.0000)
 
     Predicted USDA texture class: SILT LOAM   (from the gradient-boosted classifier)
-      silt loam         34.1 %
-      loam              15.6 %
-      sandy loam        13.2 %
-      sandy clay loam    7.6 %
-      sand               6.3 %
-      kNN second opinion agrees: silt loam (42.4 %)
+      silt loam         22.7 %
+      sandy loam        14.2 %
+      loam              13.7 %
+      loamy sand         9.7 %
+      sand               9.3 %
+      kNN second opinion agrees: silt loam (40.5 %)
 
     Particle fractions, mean [5-95 %]  (from the kNN; mean plots as: loam):
-      sand   39.1 %  [  4.7 -  86.8]
-      silt   45.8 %  [  5.8 -  80.6]
+      sand   40.0 %  [  4.7 -  86.8]
+      silt   45.0 %  [  5.8 -  80.6]
       clay   15.0 %  [  4.8 -  22.8]
 
     Ks = 0.128 cm/h  [5-95 %: 0.0292 - 2.34]  (from ~11 of 30 neighbors with measured Ksat)
 
 How to read it:
 
-- **The class is right** (true class is silt loam), but at 34.1 % probability.
+- **The class is right** (true class is silt loam), but at 22.7 % probability.
   That is normal and not a defect: a retention curve simply does not pin
   texture down further, and the ceiling for any model on these four parameters
   is around 54 % (see "The accuracy ceiling" below). Treat the ranked list as
@@ -134,6 +137,10 @@ Optional flags (see "Improving accuracy" and "Method levers" below):
 - `verify_hypres.py` — European benchmark from the HYPRES class PTFs
 - `prepare_hypres.py` — loader kept in case sample-level HYPRES is ever released
 - `ksat_metrics.py` — Ksat scoring shared by every verification script
+- `free_m.py` — unconstrained-m vG fitting shared by the prepare_*.py scripts
+- `prepare_hohenbrink.py` — one-time: Hohenbrink et al. (2023) -> `data/hohenbrink_reference.csv`
+- `verify_free_m.py` — does freeing m from n help? (no; see below)
+- `verify_hohenbrink.py` — what the European dataset adds, EU vs non-EU
 - `verify_by_class.py` — per-class/per-group accuracy, with and without depth
 - `verify_skill.py` — is each class acceptable in absolute terms?
 - `prepare_kssl.py` — one-time: NCSS/KSSL SQLite -> `data/kssl_reference.csv`
@@ -156,8 +163,8 @@ Optional flags (see "Improving accuracy" and "Method levers" below):
 
 ## Benchmark verifications
 
-The four benchmark tables below were re-run on 2026-08-14 against the **shipped
-defaults** — the merged GSHP+KSSL reference and the hybrid model. They
+The four benchmark tables below were re-run on 2026-08-26 against the **shipped
+defaults** — the merged GSHP+KSSL+Hohenbrink reference and the hybrid model. They
 previously described a GSHP-only reference with pure kNN, which is no longer
 what the tool does.
 
@@ -183,30 +190,30 @@ merged-reference layers backing texture/fractions for that class;
 
 | True class | n_ref | n_ks | Predicted | P(true) | Rank | Ks pred | Ks true | nb | Ks in 5-95% |
 |---|---|---|---|---|---|---|---|---|---|
-| sand (S) | 3965 | 3735 | **sand (S)** | 0.95 | 1 | 4.67 | 29.7 | 25 | no |
-| loamy sand (LS) | 952 | 581 | sand (S) | 0.15 | 2 | 3.23 | 14.6 | 24 | no |
-| sandy loam (SL) | 2000 | 785 | sand (S) | 0.26 | 3 | 1.7 | 4.42 | 24 | yes |
-| loam (L) | 1053 | 103 | loamy sand (LS) | 0.07 | 3 | 0.329 | 1.04 | 22 | yes |
-| silt (Si) | 36 | 10 | silt loam (SiL) | 0.06 | 6 | 0.0529 | 0.25 | 13 | yes |
-| silt loam (SiL) | 1118 | 191 | **silt loam (SiL)** | 0.34 | 1 | 0.128 | 0.45 | 11 | yes |
-| sandy clay loam (SCL) | 1046 | 660 | **sandy clay loam (SCL)** | 0.34 | 1 | 0.196 | 1.31 | 15 | yes |
-| clay loam (CL) | 502 | 60 | loam (L) | 0.07 | 6 | 0.0738 | 0.26 | 14 | yes |
-| silty clay loam (SiCL) | 578 | 49 | clay loam (CL) | 0.18 | 2 | 0.178 | 0.07 | 8 | yes |
-| sandy clay (SC) | 172 | 108 | loam (L) | 0.04 | 6 | 0.0229 | 0.12 | 22 | yes |
-| silty clay (SiC) | 250 | 39 | clay loam (CL) | 0.11 | 4 | 0.0308 | 0.02 | 15 | yes |
-| clay (C) | 854 | 323 | clay loam (CL) | 0.02 | 8 | 0.0308 | 0.2 | 12 | yes |
-| **Total** | **12526** | **6644** | | | | | | | |
+| sand (S) | 4010 | 3757 | **sand (S)** | 0.95 | 1 | 4.67 | 29.7 | 25 | no |
+| loamy sand (LS) | 976 | 597 | sand (S) | 0.11 | 2 | 3.23 | 14.6 | 24 | no |
+| sandy loam (SL) | 2136 | 897 | sand (S) | 0.17 | 3 | 1.7 | 4.42 | 24 | yes |
+| loam (L) | 1093 | 134 | loamy sand (LS) | 0.07 | 4 | 0.329 | 1.04 | 22 | yes |
+| silt (Si) | 47 | 21 | silt loam (SiL) | 0.07 | 7 | 0.0496 | 0.25 | 12 | yes |
+| silt loam (SiL) | 1254 | 278 | **silt loam (SiL)** | 0.23 | 1 | 0.128 | 0.45 | 11 | yes |
+| sandy clay loam (SCL) | 1085 | 684 | sandy loam (SL) | 0.27 | 2 | 0.196 | 1.31 | 14 | yes |
+| clay loam (CL) | 528 | 79 | loam (L) | 0.06 | 6 | 0.0738 | 0.26 | 14 | yes |
+| silty clay loam (SiCL) | 641 | 92 | clay loam (CL) | 0.12 | 3 | 0.178 | 0.07 | 8 | yes |
+| sandy clay (SC) | 172 | 108 | sandy clay loam (SCL) | 0.05 | 6 | 0.0229 | 0.12 | 22 | yes |
+| silty clay (SiC) | 264 | 51 | sandy clay loam (SCL) | 0.10 | 4 | 0.0308 | 0.02 | 15 | yes |
+| clay (C) | 880 | 348 | clay loam (CL) | 0.03 | 8 | 0.0308 | 0.2 | 12 | yes |
+| **Total** | **13086** | **7046** | | | | | | | |
 
 - vG fit stage: exact recovery of all 12 generating parameter sets.
-- Texture class: 3/12 exact, 5/12 top-2. Development-set leave-one-out
+- Texture class: 2/12 exact, 4/12 top-2. Development-set leave-one-out
   ceiling is ~41 % macro recall even using true vG parameters — the
   vG -> texture mapping is inherently ambiguous.
-- Fractions: mean |error| vs USDA class centroid 14.4 %.
+- Fractions: mean |error| vs USDA class centroid 14.5 %.
 - Ks: benchmark value inside the 5-95 % range for 10/12 classes;
   typical factor ~3.9. GSHP lab sands are much slower than the idealized
   Carsel & Parrish sand (4.6 vs 29.7 cm/h).
-- Curated reference: 12,526 layers back the texture/fraction inference; only
-  6,644 carry a measured Ksat, so Ks rests on a smaller, sand-skewed subset
+- Curated reference: 13,086 layers back the texture/fraction inference; only
+  7,046 carry a measured Ksat, so Ks rests on a smaller, sand-skewed subset
   (per class: loam 103, clay loam 60, silty clay loam 49 with Ksat). The
   verification table reports per-class n_ref/n_ks and 'nb', the mean number of
   the 30 nearest neighbors that had a measured Ksat behind each Ks estimate;
@@ -227,23 +234,23 @@ Carsel); `nb` is the mean number of the 30 neighbors with a measured Ksat.
 
 | True class | Predicted | P(true) | Rank | Ks pred | Ks true | nb | Ks in 5-95% |
 |---|---|---|---|---|---|---|---|
-| sand (S) | **sand (S)** | 0.90 | 1 | 1.86 | 26.8 | 30 | no |
-| loamy sand (LS) | **loamy sand (LS)** | 0.47 | 1 | 0.483 | 4.38 | 23 | no |
-| sandy loam (SL) | loamy sand (LS) | 0.23 | 2 | 0.189 | 1.6 | 18 | no |
-| loam (L) | sandy loam (SL) | 0.09 | 4 | 1.73 | 0.502 | 16 | yes |
-| silt (Si) | silt loam (SiL) | 0.23 | 2 | 0.411 | 1.82 | 2 | no |
-| silt loam (SiL) | **silt loam (SiL)** | 0.54 | 1 | 0.0358 | 0.76 | 1 | no |
-| sandy clay loam (SCL) | sandy loam (SL) | 0.12 | 3 | 0.0738 | 0.549 | 16 | yes |
-| clay loam (CL) | loam (L) | 0.05 | 6 | 1.47 | 0.341 | 8 | yes |
-| silty clay loam (SiCL) | clay loam (CL) | 0.12 | 4 | 2.42 | 0.463 | 1 | no |
-| sandy clay (SC) | sandy clay loam (SCL) | 0.03 | 7 | 2.09 | 0.473 | 18 | yes |
-| silty clay (SiC) | silt loam (SiL) | 0.06 | 6 | 0.0421 | 0.401 | 8 | yes |
-| clay (C) | clay loam (CL) | 0.03 | 7 | 0.0421 | 0.615 | 6 | no |
+| sand (S) | **sand (S)** | 0.92 | 1 | 1.86 | 26.8 | 30 | no |
+| loamy sand (LS) | **loamy sand (LS)** | 0.45 | 1 | 0.483 | 4.38 | 23 | no |
+| sandy loam (SL) | loamy sand (LS) | 0.27 | 2 | 0.246 | 1.6 | 18 | yes |
+| loam (L) | sandy loam (SL) | 0.10 | 3 | 1.73 | 0.502 | 16 | yes |
+| silt (Si) | silt loam (SiL) | 0.01 | 11 | 0.411 | 1.82 | 2 | no |
+| silt loam (SiL) | **silt loam (SiL)** | 0.66 | 1 | 0.0358 | 0.76 | 1 | no |
+| sandy clay loam (SCL) | sandy loam (SL) | 0.10 | 4 | 0.0785 | 0.549 | 18 | yes |
+| clay loam (CL) | silt loam (SiL) | 0.05 | 8 | 1.47 | 0.341 | 8 | yes |
+| silty clay loam (SiCL) | silty clay (SiC) | 0.12 | 4 | 2.42 | 0.463 | 1 | no |
+| sandy clay (SC) | sandy clay loam (SCL) | 0.04 | 5 | 2.09 | 0.473 | 18 | yes |
+| silty clay (SiC) | silty clay loam (SiCL) | 0.02 | 9 | 0.0421 | 0.401 | 8 | yes |
+| clay (C) | clay loam (CL) | 0.05 | 7 | 0.0421 | 0.615 | 6 | no |
 
 - vG fit stage: exact recovery of all 12 ROSETTA parameter sets (RMSE 0).
-- Texture class: 3/12 exact, 5/12 top-2.
+- Texture class: 3/12 exact, 4/12 top-2.
 - Fractions: mean |error| vs centroid 12.5 % (centroid in 5-95 % range 7/12).
-- Ks: true value in 5-95 % range 5/12; typical factor ~7.6.
+- Ks: true value in 5-95 % range 6/12; typical factor ~7.4.
 - This now scores level with the Carsel benchmark on exact class, but the
   underlying difficulty is unchanged and instructive:
   the three databases disagree on where each class sits in vG space. Class-mean
@@ -270,27 +277,27 @@ and Ks — not class centroids.
 
 | True class | Predicted | P(true) | Rank | s/si/cl pred | s/si/cl true | Ks pred | Ks true | nb | Ks in 5-95% |
 |---|---|---|---|---|---|---|---|---|---|
-| sand (S) | **sand (S)** | 0.90 | 1 | 94/4/2 | 96/3/1 | 0.848 | 0.694 | 30 | yes |
-| loamy sand (LS) | **loamy sand (LS)** | 0.46 | 1 | 84/7/9 | 86/7/7 | 0.26 | 0.246 | 21 | yes |
-| sandy loam (SL) | loamy sand (LS) | 0.33 | 2 | 82/11/7 | 61/31/8 | 0.0986 | 0.0583 | 18 | yes |
-| loam (L) | sandy loam (SL) | 0.16 | 2 | 51/30/18 | 50/33/17 | 0.161 | 0.0475 | 16 | yes |
-| silt (Si) | **silt (Si)** | 0.88 | 1 | 4/86/10 | 6/84/10 | 0.0614 | 0.367 | 20 | yes |
-| silt loam (SiL) | clay loam (CL) | 0.18 | 2 | 24/56/20 | 26/64/10 | 0.0358 | 2.25 | 2 | no |
-| sandy clay loam (SCL) | sandy loam (SL) | 0.41 | 2 | 68/13/20 | 71/6/23 | 0.0378 | 0.0392 | 27 | yes |
-| clay loam (CL) | silty clay loam (SiCL) | 0.15 | 3 | 13/49/38 | 23/44/33 | 7.84 | 70.5 | 3 | no |
-| silty clay loam (SiCL) | **silty clay loam (SiCL)** | 0.45 | 1 | 22/51/27 | 7/54/39 | 3.79 | 4.54 | 1 | no |
-| sandy clay (SC) | loam (L) | 0.14 | 3 | 57/19/24 | 59/4/36 | 0.0317 | 0.0362 | 15 | yes |
-| silty clay (SiC) | silty clay loam (SiCL) | 0.05 | 5 | 26/41/33 | 11/46/43 | 0.0954 | 1.11 | 1 | no |
-| clay (C) | **clay (C)** | 0.43 | 1 | 31/22/47 | 45/9/46 | 4.17 | 0.425 | 10 | no |
+| sand (S) | **sand (S)** | 0.95 | 1 | 94/4/2 | 96/3/1 | 0.848 | 0.694 | 30 | yes |
+| loamy sand (LS) | **loamy sand (LS)** | 0.47 | 1 | 84/7/9 | 86/7/7 | 0.26 | 0.246 | 21 | yes |
+| sandy loam (SL) | loamy sand (LS) | 0.24 | 2 | 82/10/7 | 61/31/8 | 0.0986 | 0.0583 | 18 | yes |
+| loam (L) | sandy loam (SL) | 0.20 | 2 | 52/30/18 | 50/33/17 | 0.161 | 0.0475 | 16 | yes |
+| silt (Si) | **silt (Si)** | 0.76 | 1 | 5/85/10 | 6/84/10 | 0.0614 | 0.367 | 22 | yes |
+| silt loam (SiL) | clay loam (CL) | 0.20 | 2 | 26/53/21 | 26/64/10 | 0.0358 | 2.25 | 2 | no |
+| sandy clay loam (SCL) | **sandy clay loam (SCL)** | 0.40 | 1 | 68/13/20 | 71/6/23 | 0.0378 | 0.0392 | 27 | yes |
+| clay loam (CL) | silty clay loam (SiCL) | 0.19 | 2 | 13/49/38 | 23/44/33 | 7.84 | 70.5 | 3 | no |
+| silty clay loam (SiCL) | **silty clay loam (SiCL)** | 0.30 | 1 | 22/51/27 | 7/54/39 | 3.79 | 4.54 | 1 | no |
+| sandy clay (SC) | loam (L) | 0.13 | 3 | 57/19/24 | 59/4/36 | 0.0317 | 0.0362 | 15 | yes |
+| silty clay (SiC) | clay loam (CL) | 0.07 | 6 | 26/41/33 | 11/46/43 | 0.0954 | 1.11 | 1 | no |
+| clay (C) | **clay (C)** | 0.38 | 1 | 31/22/47 | 45/9/46 | 4.17 | 0.425 | 10 | no |
 
-- Texture class: **5/12 exact, 9/12 top-2**.
+- Texture class: **6/12 exact, 10/12 top-2**.
 - Fractions: mean |error| vs the soils' **measured** fractions **6.4 %**;
   measured value inside the 5-95 % range for 10/12 soils.
 - Ks: measured value inside the 5-95 % range for 7/12; typical factor ~3.6.
 
 This is the fair "does it work on real soils it wasn't allowed to memorize"
-test, and it is the strongest of the three (5/12 vs 3/12 Carsel and ROSETTA,
-and 9/12 within the top two) precisely because the inputs come from the same
+test, and it is the strongest of the three (6/12 vs 2/12 Carsel and 3/12
+ROSETTA, and 10/12 within the top two) precisely because the inputs come from the same
 population as the reference.
 
 The 12 target soils are selected from GSHP alone even though the reference is
@@ -314,9 +321,9 @@ unchanged; only the evaluation is coarsened.
 
 | Benchmark | Class-level (exact) | Group-level |
 |---|---|---|
-| Carsel & Parrish (1988) | 3/12 | 6/12 (50 %) |
-| ROSETTA class means | 3/12 | 7/12 (58 %) |
-| GSHP leave-one-out | 5/12 | 7/12 (58 %) |
+| Carsel & Parrish (1988) | 2/12 | 6/12 (50 %) |
+| ROSETTA class means | 3/12 | 6/12 (50 %) |
+| GSHP leave-one-out | 6/12 | 7/12 (58 %) |
 
 Grouping helps least where it might be expected to help most: the **Clayey**
 group is the persistent failure across all three benchmarks — real/typical clays
@@ -493,11 +500,11 @@ sand/silt/clay is scored against the FAO class envelope (coarse: clay < 18 and
 sand > 65; medium; medium fine: clay < 35 and sand < 15; fine: 35 <= clay < 60;
 very fine: clay >= 60).
 
-- FAO texture class correct: **5/10**, and **6/10** when `--depth` is supplied
-  (topsoil 15 cm, subsoil 60 cm) — independent corroboration that the depth
-  covariate helps.
+- FAO texture class correct: **5/10**, and **5/10** when `--depth` is supplied
+  (topsoil 15 cm, subsoil 60 cm). On the GSHP-only reference `--depth` gained
+  one class here; on the merged reference it no longer does.
 - Ks: HYPRES value inside the 5-95 % range for 9/10 classes, but the median is
-  off by a typical factor of 7 — worse than on the other benchmarks.
+  off by a typical factor of 10 — worse than on the other benchmarks.
 - The failures are concentrated at the fine end: the "very fine" class
   (clay >= 60 %) is never recovered, with the tool predicting 44-49 % clay. This
   is the same fine-texture weakness the Carsel, ROSETTA and group-level results
@@ -1046,6 +1053,103 @@ every interval, the neighbour list — comes from the kNN and is unaffected;
 `verify_hybrid.py` asserts that those outputs are bit-identical between the two
 models. Use `--model knn` where exact reproducibility matters more than the
 3 points.
+
+### Freeing m from n — tested and rejected (verify_free_m.py, `use_m=`)
+
+The Mualem constraint m = 1 - 1/n makes two of the four coordinates redundant
+by construction: corr(log10(n-1), 1-1/n) = 0.993. Since m governs the dry limb
+of the retention curve, which is the part most closely tied to texture, freeing
+it ought to help. Every reference table therefore now carries both parameter
+sets — `thetar, thetas, alpha_kpa, n` (Mualem) and `thetar_m, thetas_m,
+alpha_kpa_m, n_m, m` (unconstrained, refitted from the measured points where a
+database ships them; see `free_m.py` and `M_BOUNDS`).
+
+Freeing m does produce a genuinely new axis: on the rebuilt GSHP table the
+correlation between shape parameters falls from 0.993 to -0.38, the median m
+drops from 0.448 to 0.186, and 74 % of layers move by more than 0.05.
+
+It does not help. Profile-grouped 5-fold over 1,697 targets, curves generated
+from each row's *unconstrained* parameters (generating from the Mualem ones
+would hand the five-feature arm a curve that is Mualem-shaped by construction)
+and evaluated on a 0.1–1500 kPa grid, because a grid stopping at 150 kPa cannot
+see the dry limb at all:
+
+| features | model | exact | macro-F1 | group | vs 4-feature |
+|---|---|---|---|---|---|
+| 4 (Mualem) | kNN | 38.0 % | 37.5 % | 59.3 % | — |
+| 5 (+m) | kNN | 35.0 % | 34.2 % | 59.0 % | **-3.0 pp, p=0.007** |
+| 4 (Mualem) | hybrid | 37.9 % | 36.6 % | 59.5 % | — |
+| 5 (+m) | hybrid | 37.2 % | 34.8 % | 59.1 % | -0.6 pp, p=0.58 |
+
+Ksat is unmoved as well (median |log10 error| 0.422 → 0.413 dex, Wilcoxon
+p=0.16). The kNN is hurt significantly, which is the same curse-of-
+dimensionality effect `--depth` shows in Europe: a fifth axis thins an already
+sparse neighbourhood. The unconstrained fit is also less identifiable — n and
+m trade off, and 7.5 % of GSHP layers land on the m bounds.
+
+**The default stays four Mualem-constrained features.** `GshpReference(use_m=True)`
+and `TextureGBM(use_m=True)` remain available, and the columns ship, so the
+experiment can be repeated on a future reference.
+
+### Adding Hohenbrink et al. (2023) (prepare_hohenbrink.py, verify_hohenbrink.py)
+
+560 German layers, measured HYPROP + WP4 + KSAT, now part of the default
+reference. 402 carry a measured Ksat and 479 organic carbon. The class derived
+from the published fractions matches the published USDA class for 99.3 % of
+samples, which validates the pF and unit handling.
+
+One processing choice matters: HYPROP returns ~199 points between pF -0.03 and
+2.6 while the dry limb carries only ~3 WP4 points, so a plain least-squares fit
+weights the wet-to-mid range about 98:2 against the dry end. Points are
+therefore binned in pF and one median point kept per bin.
+
+Against European targets drawn from GSHP+KSSL only (so the gain cannot come
+from Hohenbrink predicting itself), profile-grouped folds, n=592:
+
+| | exact | macro-R | group | Ks bias | Ks coverage |
+|---|---|---|---|---|---|
+| kNN, base | 28.9 % | 23.5 % | 50.8 % | -0.89 | 53 % |
+| kNN, +Hohenbrink | 29.4 % | 26.9 % | 52.4 % | -0.68 | **65 %** |
+| hybrid, base | 33.8 % | 27.5 % | 56.6 % | -0.89 | 53 % |
+| hybrid, +Hohenbrink | 34.6 % | 28.0 % | 57.1 % | -0.68 | **65 %** |
+
+The texture gains are small and not significant (+0.5 pp kNN p=0.61, +0.8 pp
+hybrid p=0.64; group +1.5 pp p=0.078). Macro-recall moves more than exact
+accuracy, i.e. it helps the rarer European classes. Non-European targets
+(n=913) are unaffected: +0.3 pp kNN (p=0.65), -1.5 pp hybrid (p=0.17).
+
+**The clearest gain is in the Ks intervals**, whose European coverage rises
+from 53 % to 65 % against a nominal 90 %, with the systematic
+under-prediction easing from -0.89 to -0.68 dex.
+
+### Ks for structured soils is badly biased (the finding that matters most)
+
+Predicting the Hohenbrink soils from GSHP+KSSL alone — laboratories that never
+measured them — gives a fair source-blocked read, and texture holds up better
+than expected: 33.0 % exact / 57.1 % group (kNN), 33.4 % / 58.6 % (hybrid),
+against the ~23 % / ~51 % quoted elsewhere for an unseen laboratory.
+
+Ks does not:
+
+| | n | bias | RMSE | <2x | coverage | rho |
+|---|---|---|---|---|---|---|
+| kNN | 401 | **-1.43** | 1.85 | 5 % | 24 % | 0.22 |
+| hybrid | 401 | -1.43 | 1.85 | 5 % | 24 % | 0.22 |
+
+A systematic under-prediction of 1.43 dex is a factor of about 27, with only
+5 % of soils within a factor of two and interval coverage of 24 % against a
+nominal 90 %. Hohenbrink measures undisturbed cores with a KSAT device, where
+conductivity near saturation is governed by macropores and aggregation —
+structure, not texture. A texture-matched lookup cannot reproduce it, and the
+reference tables are dominated by laboratory measurements on soils whose
+structure was disturbed or never present.
+
+This is the strongest evidence in the project for the premise that the
+retention curve carries structure near saturation and texture at the dry end:
+the texture half of the inference survives an unseen laboratory, and the
+conductivity half collapses on structured samples. **Ks estimates should not be
+trusted for undisturbed, structured field soils** — which, for in-situ sensor
+data, is the normal case.
 
 ## References
 
