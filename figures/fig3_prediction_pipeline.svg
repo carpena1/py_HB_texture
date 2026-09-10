@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- py_HB_texture. Land outline: Natural Earth 110 m, public domain. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="1040" height="486" viewBox="0 0 1040 486" role="img" aria-label="A measured curve is fitted to four van Genuchten parameters, sampled 300 times from the fit covariance, then passed to both a gradient-boosted classifier which returns the texture class and a k-nearest-neighbour search which returns particle fractions, conductivity and all uncertainty ranges.">
+      <defs>
+        <marker id="ar2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M 0 1 L 9 5 L 0 9 z" fill="#141A1D"/>
+        </marker>
+        <marker id="ar2a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M 0 1 L 9 5 L 0 9 z" fill="#0E6E73"/>
+        </marker>
+      </defs>
+
+      <g font-family="IBM Plex Sans, sans-serif">
+        <!-- input -->
+        <rect x="16" y="186" width="152" height="104" rx="3" fill="none" stroke="#141A1D"/>
+        <text x="28" y="210" font-size="13" font-weight="600" fill="#141A1D">Measured SWCC</text>
+        <text x="28" y="232" font-size="11" fill="#5C6A70">h [kPa], &#952; [&#8211;]</text>
+        <text x="28" y="250" font-size="11" fill="#5C6A70">&#8805; 5 points</text>
+        <text x="28" y="272" font-size="11" fill="#5C6A70">lab core or sensor</text>
+
+        <!-- fit -->
+        <rect x="216" y="186" width="176" height="104" rx="3" fill="#EAEEEC" stroke="#141A1D"/>
+        <text x="228" y="208" font-size="11.5" font-family="IBM Plex Mono, monospace" fill="#0E6E73">fit_vg()</text>
+        <text x="228" y="230" font-size="11" fill="#141A1D">least squares in</text>
+        <text x="228" y="245" font-size="11" fill="#141A1D">[&#952;r, &#952;s, log&#8321;&#8320;&#945;, log&#8321;&#8320;(n&#8722;1)]</text>
+        <text x="228" y="268" font-size="11" fill="#5C6A70">m tied to n</text>
+        <text x="228" y="283" font-size="11" fill="#5C6A70">(Mualem)</text>
+
+        <!-- MC -->
+        <rect x="440" y="186" width="152" height="104" rx="3" fill="#EAEEEC" stroke="#141A1D"/>
+        <text x="452" y="208" font-size="13" font-weight="600" fill="#141A1D">Monte Carlo</text>
+        <text x="452" y="230" font-size="11" fill="#141A1D">300 draws from</text>
+        <text x="452" y="245" font-size="11" fill="#141A1D">the fit covariance</text>
+        <text x="452" y="268" font-size="11" fill="#5C6A70">each draw is a</text>
+        <text x="452" y="283" font-size="11" fill="#5C6A70">plausible soil</text>
+
+        <!-- GBM -->
+        <rect x="644" y="60" width="196" height="118" rx="3" fill="none" stroke="#0E6E73"/>
+        <text x="656" y="84" font-size="13" font-weight="600" fill="#0E6E73">Gradient boosting</text>
+        <text x="656" y="106" font-size="11" fill="#141A1D">trained on the same</text>
+        <text x="656" y="121" font-size="11" fill="#141A1D">reference, class-balanced</text>
+        <text x="656" y="144" font-size="11" fill="#5C6A70">predict_proba averaged</text>
+        <text x="656" y="159" font-size="11" fill="#5C6A70">over the 300 draws</text>
+
+        <!-- kNN -->
+        <rect x="644" y="298" width="196" height="130" rx="3" fill="none" stroke="#0E6E73"/>
+        <text x="656" y="322" font-size="13" font-weight="600" fill="#0E6E73">k-nearest neighbours</text>
+        <text x="656" y="344" font-size="11" fill="#141A1D">k = 30 in standardised</text>
+        <text x="656" y="359" font-size="11" fill="#141A1D">4-parameter space</text>
+        <text x="656" y="382" font-size="11" fill="#5C6A70">weight 1/d&#178;, times</text>
+        <text x="656" y="397" font-size="11" fill="#5C6A70">inverse class frequency</text>
+        <text x="656" y="415" font-size="11" fill="#5C6A70">(&#964; = 1, uniform prior)</text>
+
+        <!-- outputs -->
+        <rect x="888" y="60" width="136" height="118" rx="3" fill="#D5E7E7" stroke="#0E6E73"/>
+        <text x="900" y="84" font-size="12.5" font-weight="600" fill="#141A1D">Texture class</text>
+        <text x="900" y="106" font-size="11" fill="#5C6A70">ranked over all 12,</text>
+        <text x="900" y="121" font-size="11" fill="#5C6A70">with probabilities</text>
+        <text x="900" y="146" font-size="11" fill="#5C6A70">top class is rarely</text>
+        <text x="900" y="161" font-size="11" fill="#5C6A70">above 40 %</text>
+
+        <rect x="888" y="298" width="136" height="130" rx="3" fill="#D5E7E7" stroke="#0E6E73"/>
+        <text x="900" y="322" font-size="12.5" font-weight="600" fill="#141A1D">Fractions, K<tspan baseline-shift="sub" font-size="9">s</tspan></text>
+        <text x="900" y="344" font-size="11" fill="#5C6A70">sand / silt / clay %</text>
+        <text x="900" y="359" font-size="11" fill="#5C6A70">with 5&#8211;95 % range</text>
+        <text x="900" y="382" font-size="11" fill="#5C6A70">K<tspan baseline-shift="sub" font-size="8">s</tspan> median + range,</text>
+        <text x="900" y="397" font-size="11" fill="#5C6A70">from neighbours that</text>
+        <text x="900" y="412" font-size="11" fill="#5C6A70">carry a measurement</text>
+      </g>
+
+      <g stroke="#141A1D" fill="none">
+        <line x1="168" y1="238" x2="212" y2="238" marker-end="url(#ar2)"/>
+        <line x1="392" y1="238" x2="436" y2="238" marker-end="url(#ar2)"/>
+      </g>
+      <g stroke="#0E6E73" fill="none">
+        <path d="M 592 220 L 618 220 L 618 119 L 640 119" marker-end="url(#ar2a)"/>
+        <path d="M 592 256 L 618 256 L 618 363 L 640 363" marker-end="url(#ar2a)"/>
+        <line x1="840" y1="119" x2="884" y2="119" marker-end="url(#ar2a)"/>
+        <line x1="840" y1="363" x2="884" y2="363" marker-end="url(#ar2a)"/>
+      </g>
+
+      <!-- second opinion -->
+      <path d="M 742 298 L 742 240 L 806 240 L 806 182" stroke="#141A1D" fill="none" stroke-dasharray="4 3" opacity=".7" marker-end="url(#ar2)"/>
+      <text x="752" y="234" font-size="11" font-family="IBM Plex Sans, sans-serif" fill="#141A1D" opacity=".8">second opinion</text>
+
+      <rect x="16" y="382" width="592" height="88" rx="3" fill="none" stroke="#141A1D" opacity=".35" stroke-dasharray="3 3"/>
+      <text x="30" y="404" font-size="12" font-weight="600" font-family="IBM Plex Sans, sans-serif" fill="#141A1D">The split is deliberate</text>
+      <text x="30" y="426" font-size="11" font-family="IBM Plex Sans, sans-serif" fill="#5C6A70">The classifier is more accurate on the class but returns nothing else — no fractions, no K<tspan baseline-shift="sub" font-size="8">s</tspan>, no intervals,</text>
+      <text x="30" y="442" font-size="11" font-family="IBM Plex Sans, sans-serif" fill="#5C6A70">no list of comparable real soils. The neighbourhood supplies all of those, and its own class vote is kept as</text>
+      <text x="30" y="458" font-size="11" font-family="IBM Plex Sans, sans-serif" fill="#5C6A70">a confidence flag: when the two agree the answer is right 48 % of the time, when they disagree, 29 %.</text>
+    </svg>

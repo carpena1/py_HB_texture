@@ -44,16 +44,32 @@ REFERENCE_CSV = os.path.join(DATA_DIR, "gshp_reference.csv")
 # within a factor of two from 44 % to 47 % by changing which GSHP neighbours
 # are selected -- despite KSSL carrying no Ksat of its own.
 REFERENCE_SETS = {
+    # EU-HYDI joined the default in 2026-09. It is restricted, so where its
+    # table has not been built the default quietly becomes "public" -- see
+    # RESTRICTED_TABLES.
     "merged": ["gshp_reference.csv", "kssl_reference.csv",
+               "hohenbrink_reference.csv", "euhydi_reference.csv"],
+    # The distributed tables: what a fresh clone has, and what every table in
+    # the README was computed on.
+    "public": ["gshp_reference.csv", "kssl_reference.csv",
                "hohenbrink_reference.csv"],
     "gshp": ["gshp_reference.csv"],
     "kssl": ["kssl_reference.csv"],
     "hohenbrink": ["hohenbrink_reference.csv"],
+    "euhydi": ["euhydi_reference.csv"],
     "all": ["gshp_reference.csv", "kssl_reference.csv",
-            "hohenbrink_reference.csv", "unsoda_reference.csv",
-            "sdb_reference.csv"],
+            "hohenbrink_reference.csv", "euhydi_reference.csv",
+            "unsoda_reference.csv", "sdb_reference.csv"],
 }
 DEFAULT_REFERENCE = "merged"
+
+
+# Tables built locally from restricted data and never distributed. A named set
+# that includes one still loads without it -- from its other tables, with a
+# note on stderr -- so a fresh clone of the public repository runs. A set made
+# only of restricted tables cannot load at all.
+RESTRICTED_TABLES = {"euhydi_reference.csv"}
+_noted_missing = set()
 
 
 def load_reference_df(name=DEFAULT_REFERENCE):
@@ -62,8 +78,22 @@ def load_reference_df(name=DEFAULT_REFERENCE):
     if name not in REFERENCE_SETS:
         raise ValueError(f"unknown reference set {name!r}; "
                          f"choose from {sorted(REFERENCE_SETS)}")
-    return pd.concat([pd.read_csv(os.path.join(DATA_DIR, f))
-                      for f in REFERENCE_SETS[name]], ignore_index=True)
+    files = REFERENCE_SETS[name]
+    have = [f for f in files if os.path.exists(os.path.join(DATA_DIR, f))]
+    missing = [f for f in files if f not in have]
+    if not have or any(f not in RESTRICTED_TABLES for f in missing):
+        raise FileNotFoundError(
+            f"reference set {name!r} needs {', '.join(missing)}, which is not "
+            f"in this checkout. Build it with the matching prepare_*.py; "
+            f"restricted tables are not distributed.")
+    for f in missing:
+        if f not in _noted_missing:
+            _noted_missing.add(f)
+            print(f"note: {f} is built locally from restricted data and is "
+                  f"not in this checkout, so the {name!r} reference uses the "
+                  f"public tables only.", file=sys.stderr)
+    return pd.concat([pd.read_csv(os.path.join(DATA_DIR, f)) for f in have],
+                     ignore_index=True)
 
 USDA_CLASSES = [
     "sand", "loamy sand", "sandy loam", "loam", "silt", "silt loam",
@@ -596,14 +626,17 @@ def main():
     ap.add_argument("--reference", choices=sorted(REFERENCE_SETS),
                     default=DEFAULT_REFERENCE,
                     help="reference table. merged (default) = GSHP 9,996 "
-                         "layers + NCSS/KSSL 2,530 + Hohenbrink 560, 13,086 "
-                         "in total; gshp, kssl and hohenbrink select one "
-                         "source only (kssl has NO measured Ksat at all, so "
-                         "Ks cannot be estimated from it); all adds UNSODA "
-                         "2.0 and sDB on top of merged. NOTE: before 2026-08 "
-                         "the default was gshp and 'merged' meant "
-                         "GSHP+UNSODA -- scripted callers should pass "
-                         "--reference explicitly.")
+                         "layers + NCSS/KSSL 2,530 + Hohenbrink 560 + EU-HYDI "
+                         "6,797, 19,883 in total. EU-HYDI is consortium-"
+                         "restricted: its table is built locally with "
+                         "prepare_euhydi.py and never distributed, so where it "
+                         "is absent merged uses the other three (13,086) and "
+                         "says so. public = those three distributed tables; "
+                         "gshp, kssl, hohenbrink and euhydi select one source "
+                         "(kssl has NO measured Ksat, so Ks cannot be "
+                         "estimated from it); all adds UNSODA 2.0 and sDB. "
+                         "NOTE: what merged contains has changed over time -- "
+                         "scripted callers should pass --reference explicitly.")
     args = ap.parse_args()
 
     h, theta = _read_data(args.datafile)

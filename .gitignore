@@ -42,3 +42,14 @@ data/unsoda_psd.csv
 # Hohenbrink et al. (2023) raw distribution (23 MB) — rebuild
 # data/hohenbrink_reference.csv with prepare_hohenbrink.py.
 data/Hohenbrink_raw/
+# ---------------------------------------------------------------------------
+# EU-HYDI (European Hydropedological Data Inventory) is consortium-restricted:
+# per EUR 26053 EN the intellectual property stays with the individual data
+# providers. Neither the raw database nor anything derived from it may be
+# committed to this public repository until redistribution terms are agreed.
+# ---------------------------------------------------------------------------
+data/euhydi_raw/
+data/euhydi_reference.csv
+data/euhydi*
+data/EUHYDI*
+data/HYDI*

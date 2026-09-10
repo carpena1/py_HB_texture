@@ -152,13 +152,22 @@ def main():
                  "hybrid +Hohenbrink"]
         block(label, truth, obs, {k: res[k] for k in order})
 
-    # --- Hohenbrink itself, predicted by laboratories that never saw it ----
+    # --- Hohenbrink itself, with and without its own source in the reference
+    # The paired arms answer a question the source-blocked figure alone
+    # cannot: is the Ksat bias a property of these soils, or simply of a
+    # reference whose Ksat population sits 1.5 orders of magnitude lower?
     tg = hb
     truth = tg.texture_class.to_numpy()
     obs = tg.ksat_cmh.to_numpy(float)
-    block("HOHENBRINK soils from GSHP+KSSL only (source-blocked)", truth, obs,
-          {"kNN": predict(base, tg, n_mc, False),
-           "hybrid": predict(base, tg, n_mc, True)})
+    hprofs = np.array(sorted(tg.profile_id.unique()))
+    np.random.default_rng(1).shuffle(hprofs)
+    hfolds = [set(x) for x in np.array_split(hprofs, N_FOLDS)]
+    block("HOHENBRINK soils: reference without vs with their own source",
+          truth, obs,
+          {"kNN, source-blocked": predict(base, tg, n_mc, False),
+           "kNN, +own source": predict(both, tg, n_mc, False, hfolds),
+           "hybrid, source-blocked": predict(base, tg, n_mc, True),
+           "hybrid, +own source": predict(both, tg, n_mc, True, hfolds)})
 
 
 if __name__ == "__main__":
