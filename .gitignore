@@ -49,10 +49,9 @@ data/willard_raw/
 data/willard_reference.csv
 
 # Canary Islands volcanic ("sorriba") soils: Armas-Espinel et al. (2003) paper
-# and the source dissertation (copyright). Not distributed; the derived tables
-# stay local until their distribution is decided.
+# and the source dissertation (copyright), and the points digitised from it.
+# The derived data/armas_reference.csv is distributed.
 data/armas_raw/
-data/armas_reference.csv
 data/armas_points.csv
 
 # Smithsonian Global Volcanism Program volcano lists (downloaded reference
@@ -85,11 +84,10 @@ data/local_reference.csv
 # Per-sample validation predictions (include EU-HYDI samples); aggregate figures only are committed.
 figures/cache/
 
-# Babaeian's Arizona soils (the data owner's spreadsheet and fit plots); under
-# test, not distributed until that is decided.
+# Babaeian's Arizona soils (the data owner's spreadsheet and fit plots); the
+# derived data/babaeian_az_reference.csv is distributed.
 data/babaeian_AZ_raw/
-data/babaeian_az_reference.csv
-# Per-soil reports for external test sets not (yet) distributed.
+# Per-soil reports for external test sets.
 figures/external/babaeian_az/
 figures/external/willard/
 

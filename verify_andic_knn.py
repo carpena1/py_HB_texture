@@ -141,10 +141,12 @@ def main():
     ctrl = pd.concat([g.sample(min(len(g), n_per_class), random_state=SEED)
                       for _, g in rest.groupby("texture_class")])
     tg = pd.concat([ref_df[volc], ctrl]).reset_index(drop=True)
-    try:
-        extra = st.load_reference_df("armas").reset_index(drop=True)
-    except FileNotFoundError:
-        extra = None
+    extra = None                 # Canary as a new source, when not in the reference
+    if not ref_df.source_db.eq("Armas_Canarias").any():
+        try:
+            extra = st.load_reference_df("armas").reset_index(drop=True)
+        except FileNotFoundError:
+            pass
     print(f"reference {len(ref_df)}; andic soils in it {int(a_ref.sum())}; "
           f"targets {volc.sum()} volcanic + {len(ctrl)} controls"
           + (f" + {len(extra)} Canary" if extra is not None else ""))

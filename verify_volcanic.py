@@ -102,12 +102,13 @@ def main():
     ctrl = pd.concat([g.sample(min(len(g), n_per_class), random_state=SEED)
                       for _, g in rest.groupby("texture_class")])
     tg = pd.concat([ref[volc], ctrl]).reset_index(drop=True)
-    extra = None
-    try:
-        a = codes(st.load_reference_df("armas"))
-        extra = a[a.volcanic.notna()].reset_index(drop=True)
-    except FileNotFoundError:
-        pass
+    extra = None                 # Canary as a new source, when not in the reference
+    if not ref.source_db.eq("Armas_Canarias").any():
+        try:
+            a = codes(st.load_reference_df("armas"))
+            extra = a[a.volcanic.notna()].reset_index(drop=True)
+        except FileNotFoundError:
+            pass
     print(f"reference {len(ref)} layers; volcanic flags: "
           f"{ref.volcanic.value_counts().to_dict()}; andic: {ref.andic.value_counts().to_dict()}")
     print(f"targets: {volc.sum()} volcanic (known/probable) from "

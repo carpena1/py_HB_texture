@@ -44,16 +44,19 @@ REFERENCE_CSV = os.path.join(DATA_DIR, "gshp_reference.csv")
 # within a factor of two from 44 % to 47 % by changing which GSHP neighbours
 # are selected -- despite KSSL carrying no Ksat of its own.
 REFERENCE_SETS = {
-    # EU-HYDI and Laikipia joined the default in 2026-09. Both are
-    # restricted, so where their tables have not been built the default
-    # quietly becomes "public" -- see RESTRICTED_TABLES.
+    # Laikipia, Arizona and the Canary Islands joined the default in 2026-09,
+    # after EU-HYDI. EU-HYDI and Laikipia are restricted, so where their
+    # tables have not been built the default quietly becomes "public" -- see
+    # RESTRICTED_TABLES.
     "merged": ["gshp_reference.csv", "kssl_reference.csv",
                "hohenbrink_reference.csv", "babaeian_zanjanrood_reference.csv",
                "euhydi_reference.csv", "willard_reference.csv",
+               "babaeian_az_reference.csv", "armas_reference.csv",
                "local_reference.csv"],
     # The distributed tables: what a fresh clone has.
     "public": ["gshp_reference.csv", "kssl_reference.csv",
-               "hohenbrink_reference.csv", "babaeian_zanjanrood_reference.csv"],
+               "hohenbrink_reference.csv", "babaeian_zanjanrood_reference.csv",
+               "babaeian_az_reference.csv", "armas_reference.csv"],
     "gshp": ["gshp_reference.csv"],
     "kssl": ["kssl_reference.csv"],
     "hohenbrink": ["hohenbrink_reference.csv"],
@@ -64,15 +67,16 @@ REFERENCE_SETS = {
     # Zanjanrood, Iran (Babaeian et al. 2015; prepare_babaeian_zanjanrood.py);
     # in the default since 2026-09 after verify_external.py.
     "babaeian_zanjanrood": ["babaeian_zanjanrood_reference.csv"],
-    # Arizona, USA (Babaeian, unpublished; prepare_babaeian_az.py), under test
-    # with verify_external.py.
+    # Arizona, USA (Babaeian, unpublished; prepare_babaeian_az.py); in the
+    # default since 2026-09 after verify_external.py.
     "babaeian_az": ["babaeian_az_reference.csv"],
-    # Canary Islands andic soils (Armas Espinel 2013; prepare_armas.py), under
-    # test with verify_external.py.
+    # Canary Islands andic soils (Armas Espinel 2013; prepare_armas.py); in
+    # the default since 2026-09 after verify_external.py and verify_andic.py.
     "armas": ["armas_reference.csv"],
     "all": ["gshp_reference.csv", "kssl_reference.csv",
             "hohenbrink_reference.csv", "babaeian_zanjanrood_reference.csv",
             "euhydi_reference.csv", "willard_reference.csv",
+            "babaeian_az_reference.csv", "armas_reference.csv",
             "unsoda_reference.csv", "sdb_reference.csv",
             "local_reference.csv"],
 }
@@ -98,9 +102,9 @@ VOLCANIC_TABLES = ("volcanic_flags.csv", "volcanic_flags_restricted.csv")
 # it as a feature (reference: yes/likely 1, no 0, unknown missing), and the
 # neighbour search adds ANDIC_LAMBDA standard units of distance between soils
 # that differ in it (reference unknown counts as not andic) -- for the class
-# vote and the fractions only. Ks neighbours ignore it: the only andic soils
-# with a measured Ks come from one source. See verify_volcanic.py and
-# verify_andic_knn.py.
+# vote and the fractions only. Ks neighbours ignore it: when tested, the only
+# andic soils with a measured Ks came from one source (the Canary Islands
+# have since added a second). See verify_volcanic.py and verify_andic_knn.py.
 ANDIC_CODE = {"yes": 1.0, "likely": 1.0, "no": 0.0}
 ANDIC_LAMBDA = 1.0
 
@@ -517,7 +521,7 @@ class TextureGBM:
         self.use_sample_type = use_sample_type
         # Optional user covariates, a subset of COVARIATES, appended as extra
         # features. Reference rows lacking one keep it as NaN. Depth and bulk
-        # density together add ~4 points when the user's own data source is
+        # density together add ~3 points when the user's own data source is
         # in the reference and change little (-1 to +2.5 points, depending on
         # the targets) for a source it has never seen; see
         # verify_covariates.py.
@@ -625,7 +629,7 @@ def estimate(h, theta, ref=None, n_mc=300, k=30, seed=0, depth=None,
     # An undisturbed sample takes Ks only from undisturbed neighbours: near
     # saturation an intact core keeps its macropores and a repacked one does
     # not. Disturbed samples use every soil, because the reference holds
-    # almost no disturbed layers with a measured Ks (45 of 9,919). Matching
+    # almost no disturbed layers with a measured Ks (45 of 10,002). Matching
     # the class and fractions on type as well was tested and cost accuracy
     # against an unseen laboratory, so only Ks is restricted.
     ks_type = ("undisturbed" if sample_type == "undisturbed"
@@ -749,7 +753,7 @@ def main():
     ap.add_argument("--json", metavar="FILE", help="also write full results as JSON")
     ap.add_argument("--depth", type=float, metavar="CM",
                     help="sample mid-depth in cm. Together with "
-                         "--bulk-density it adds ~4 points of exact class "
+                         "--bulk-density it adds ~3 points of exact class "
                          "when your own verified data are in the reference "
                          "(add_local_data.py); for a data source the "
                          "reference has never seen the effect is small and "
@@ -800,13 +804,15 @@ def main():
                     help="reference table. merged (default) = GSHP 9,996 "
                          "layers + NCSS/KSSL 2,530 + Hohenbrink 560 + "
                          "Zanjanrood (Babaeian) 169 + EU-HYDI 6,797 + "
-                         "Laikipia 86, 20,138 in total. EU-HYDI (consortium-"
-                         "restricted) and Laikipia (unpublished) are built "
-                         "locally with prepare_euhydi.py and prepare_willard.py "
-                         "and never distributed, so where they are absent "
-                         "merged uses the other four (13,255) and says so. public = those four distributed tables; "
-                         "gshp, kssl, hohenbrink, babaeian_zanjanrood and "
-                         "euhydi select "
+                         "Laikipia 86 + Arizona 21 + Canary Islands 66, 20,225 "
+                         "in total. EU-HYDI (consortium-restricted) and Laikipia "
+                         "(unpublished) are built locally with "
+                         "prepare_euhydi.py and prepare_willard.py and never "
+                         "distributed, so where they are absent merged uses "
+                         "the other six (13,342) and says so. public = those "
+                         "six distributed tables; gshp, kssl, "
+                         "hohenbrink, babaeian_zanjanrood, euhydi, willard, "
+                         "babaeian_az and armas select "
                          "one source "
                          "(kssl has NO measured Ksat, so Ks cannot be "
                          "estimated from it); all adds UNSODA 2.0 and sDB. "
@@ -820,8 +826,8 @@ def main():
                          "survive; disturbed is for repacked or sieved "
                          "samples; unknown gives no type. The classifier is "
                          "told the type, and an undisturbed sample takes Ks "
-                         "only from undisturbed reference soils (9,853 of the "
-                         "9,919 with a measured Ks). The reference has almost "
+                         "only from undisturbed reference soils (9,936 of the "
+                         "10,002 with a measured Ks). The reference has almost "
                          "no disturbed Ks, so disturbed and unknown samples "
                          "take Ks from all soils. See README.")
     args = ap.parse_args()

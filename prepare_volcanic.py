@@ -5,8 +5,7 @@ they exist:
 
   data/volcanic_flags.csv             layers of the distributed tables
   data/volcanic_flags_restricted.csv  layers of restricted or unpublished
-                                      tables (EU-HYDI, Laikipia, Canary,
-                                      Arizona); git-ignored
+                                      tables (EU-HYDI, Laikipia); git-ignored
 
 Two attributes, kept apart because they differ: the Laikipia soils sit on
 Mount Kenya's volcanics but show no andic properties.
@@ -92,7 +91,7 @@ ROMANO_CAMPANIA = [(40.94, 14.37, 10), (40.93, 14.20, 10), (40.98, 14.26, 10),
 ROMANO_ALENTO = [(40.38, 15.18, 25)]
 KAMCHATKA = dict(lat=(50.8, 60.5), lon=(155.5, 163.5))
 PUBLIC_SOURCES = {"gshp", "kssl", "hohenbrink", "babaeian_zanjanrood",
-                  "unsoda", "sdb"}
+                  "unsoda", "sdb", "armas", "babaeian_az"}
 
 
 def layers():

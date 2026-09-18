@@ -196,6 +196,8 @@ def main():
         <text x="664" y="72">W. Russia {int(src.get("Russia_EGRPR", 0)):,}</text>
         <line x1="576" y1="298" x2="600" y2="322" stroke="currentColor" opacity=".55"/>
         <text x="604" y="326">Sub-Saharan Africa {int(src.get("AfSPDB", 0)):,}</text>
+        <line x1="469" y1="189" x2="446" y2="206" stroke="currentColor" opacity=".55"/>
+        <text x="442" y="210" text-anchor="end">Canary Islands {int(src.get("Armas_Canarias", 0)):,}</text>
         <line x1="279" y1="149" x2="238" y2="120" stroke="currentColor" opacity=".55"/>
         <text x="234" y="116" text-anchor="end">KSSL, across the US {int(src.get("KSSL", 0)):,}</text>'''
 
@@ -244,7 +246,7 @@ def main():
       <g font-family="IBM Plex Sans, sans-serif" font-size="11.5">
         <path d="{path(ex, ey, close=True)}" fill="none" stroke="currentColor" stroke-width="1.1" stroke-dasharray="4 3" opacity=".75"/>
         <text x="{ex.min():.0f}" y="{ey.min() - 9:.0f}" fill="currentColor" font-weight="600">{eu_label}</text>
-        <text x="{ex.min():.0f}" y="{ey.max() + 16:.0f}" fill="var(--muted)">{eu_sub}</text>
+        <text x="{ex.max():.0f}" y="{ey.max() + 16:.0f}" text-anchor="end" fill="var(--muted)">{eu_sub}</text>
       </g>
       <g font-family="IBM Plex Sans, sans-serif" font-size="11" fill="currentColor">{callouts}
       </g>

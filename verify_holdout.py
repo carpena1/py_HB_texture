@@ -11,7 +11,10 @@ the neighbour reference and the classifier's training data:
            site from a source the reference has never seen
 
 The tool itself is the shipped default (hybrid, each target's own sample type).
-Targets are the same 1,711 layers as verify_hybrid.py (150 per class).
+Targets are the same 1,711 layers as verify_hybrid.py (150 per class). Each
+design is also run as the command line does with --depth and --bulk-density
+(classifier trained with both, bulk density in the neighbour search), on the
+targets that carry both, and compared with the curve alone on those targets.
 
 Usage:  python verify_holdout.py [n_per_class] [n_mc]
 """
@@ -33,6 +36,8 @@ def run(train, tg, sel, out, n_mc):
     train = train.reset_index(drop=True)
     ref = st.GshpReference(df=train)
     clf = st.TextureGBM(df=train)
+    ref_bd = st.GshpReference(df=train, use_bd=True)
+    clf_cov = st.TextureGBM(df=train, covariates=["depth_cm", "bd"])
     for j in sel:
         r = tg.iloc[j]
         theta = st.vg_theta(H, r.thetar, r.thetas, r.alpha_kpa, r.n)
@@ -42,6 +47,13 @@ def run(train, tg, sel, out, n_mc):
         out["knn"][j] = next(iter(res["knn_class_probabilities"]))
         k = res["ksat"]
         out["ks"][j] = (k["median_cmh"], k["p5_cmh"], k["p95_cmh"])
+        if np.isfinite(r.depth_cm) and np.isfinite(r.bd):
+            res = st.estimate(H, theta, ref=ref_bd, n_mc=n_mc, clf=clf_cov,
+                              sample_type=r.sample_type, depth=r.depth_cm,
+                              bulk_density=r.bd)
+            out["cls_cov"][j] = res["texture_class"]
+            k = res["ksat"]
+            out["ks_cov"][j] = (k["median_cmh"], k["p5_cmh"], k["p95_cmh"])
 
 
 def main():
@@ -71,7 +83,8 @@ def main():
     for name, folds in designs.items():
         n = len(tg)
         out = {"cls": np.empty(n, object), "knn": np.empty(n, object),
-               "ks": np.full((n, 3), np.nan)}
+               "ks": np.full((n, 3), np.nan), "cls_cov": np.empty(n, object),
+               "ks_cov": np.full((n, 3), np.nan)}
         for col, held in folds:
             sel = np.where(tg[col].isin(held).to_numpy())[0]
             if len(sel):
@@ -79,19 +92,39 @@ def main():
         res[name] = out
         print(f"  {name} done", flush=True)
 
-    grp = lambda p: np.array([GROUP[x] == GROUP[t] for x, t in zip(p, truth)])
-    print(f"\n{'held out':<9s} {'exact':>6s} {'group':>6s} {'kNN':>6s} "
-          f"{'Ks n':>5s} {'med|err|':>8s} {'<2x':>4s} {'<10x':>5s} {'cover':>5s} {'rho':>5s}")
-    for name, o in res.items():
-        med, lo, hi = o["ks"].T
-        ok = np.isfinite(obs) & np.isfinite(med) & (obs > 0) & (med > 0)
+    grp = lambda p, m=slice(None): np.array(
+        [GROUP[x] == GROUP[t] for x, t in zip(p, truth[m])])
+
+    def ks_line(ks, m):
+        med, lo, hi = ks.T
+        ok = m & np.isfinite(obs) & np.isfinite(med) & (obs > 0) & (med > 0)
         e = np.abs(np.log10(med[ok]) - np.log10(obs[ok]))
         cov = np.mean((obs[ok] >= lo[ok]) & (obs[ok] <= hi[ok]))
         rho = spearmanr(obs[ok], med[ok]).statistic
+        return (f"{ok.sum():5d} {np.median(e):8.2f} {np.mean(e <= np.log10(2))*100:3.0f}% "
+                f"{np.mean(e <= 1)*100:4.0f}% {cov*100:4.0f}% {rho:5.2f}")
+
+    print(f"\n{'held out':<9s} {'exact':>6s} {'group':>6s} {'kNN':>6s} "
+          f"{'Ks n':>5s} {'med|err|':>8s} {'<2x':>4s} {'<10x':>5s} {'cover':>5s} {'rho':>5s}")
+    every = np.ones(len(tg), bool)
+    for name, o in res.items():
         print(f"{name:<9s} {(o['cls'] == truth).mean()*100:5.1f}% "
               f"{grp(o['cls']).mean()*100:5.1f}% {(o['knn'] == truth).mean()*100:5.1f}% "
-              f"{ok.sum():5d} {np.median(e):8.2f} {np.mean(e <= np.log10(2))*100:3.0f}% "
-              f"{np.mean(e <= 1)*100:4.0f}% {cov*100:4.0f}% {rho:5.2f}")
+              + ks_line(o["ks"], every))
+
+    has = np.array([c is not None for c in res["layer"]["cls_cov"]])
+    print(f"\nwith --depth and --bulk-density, on the {has.sum()} targets carrying both "
+          f"(curve alone on the same targets above each):")
+    for name, o in res.items():
+        for label, c, ks in (("curve", o["cls"], o["ks"]),
+                             ("+ d & BD", o["cls_cov"], o["ks_cov"])):
+            print(f"{name + ' ' + label:<18s} {(c[has] == truth[has]).mean()*100:5.1f}% "
+                  f"{grp(c[has], has).mean()*100:5.1f}%        " + ks_line(ks, has))
+        a, b = o["cls"][has] == truth[has], o["cls_cov"][has] == truth[has]
+        ga, gb = grp(o["cls"][has], has), grp(o["cls_cov"][has], has)
+        print(f"  {name}: + depth & BD {(b.mean() - a.mean())*100:+.1f} pp exact "
+              f"p={mcnemar(a, b):.4f}, group {(gb.mean() - ga.mean())*100:+.1f} pp "
+              f"p={mcnemar(ga, gb):.4f}")
     for a, b in (("layer", "profile"), ("profile", "source")):
         ca, cb = res[a]["cls"] == truth, res[b]["cls"] == truth
         print(f"  {b} vs {a}: {(cb.mean() - ca.mean())*100:+.1f} pp exact, "

@@ -33,10 +33,13 @@ GROUPED = ["sand", "loamy sand",
            "silt", "silt loam", "silty clay loam",
            "sandy clay", "silty clay", "clay"]
 
-# verify_holdout.py, 1,711 targets, shipped tool without depth or bulk density.
-HOLDOUT = [("Soil alone\n(the standard)", 39.5, 62.8),
-           ("Whole profile", 40.4, 62.7),
-           ("Whole data source", 29.7, 56.6)]
+# verify_holdout.py: the 1,711 targets with the curve alone, and the tool as
+# run with --depth and --bulk-density on the HOLDOUT_N targets that carry both
+# (name, exact, group, exact with both, group with both).
+HOLDOUT_N = 1659
+HOLDOUT = [("Soil alone\n(the standard)", 41.2, 64.8, 45.0, 66.7),
+           ("Whole profile", 39.7, 63.8, 41.4, 65.0),
+           ("Whole data source", 30.5, 58.3, 31.9, 57.9)]
 
 
 def style():
@@ -286,27 +289,32 @@ def fig_ks_cdf(d):
 
 
 def fig_holdout():
-    """Accuracy at each hold-out level (what is hidden with the test soil)."""
-    fig, ax = plt.subplots(figsize=(7.6, 3.7))
-    fig.subplots_adjust(top=0.74, bottom=0.2, left=0.22, right=0.95)
-    ys = np.arange(len(HOLDOUT))[::-1] * 1.0
-    h = 0.3
-    for y, (name, ex, gr) in zip(ys, HOLDOUT):
-        for v, c, dy in ((ex, S1, h / 2 + 0.02), (gr, S2, -h / 2 - 0.02)):
-            ax.barh(y + dy, v, height=h, color=c, zorder=2)
-            ax.text(v + 1, y + dy, f"{v:.1f} %", va="center", fontsize=9, color=INK)
-    ax.set_yticks(ys, [n for n, _, _ in HOLDOUT], fontsize=9.5)
+    """Accuracy at each hold-out level (what is hidden with the test soil),
+    with the curve alone and with depth and bulk density supplied."""
+    fig, ax = plt.subplots(figsize=(7.6, 4.6))
+    fig.subplots_adjust(top=0.78, bottom=0.2, left=0.22, right=0.95)
+    ys = np.arange(len(HOLDOUT))[::-1] * 1.25
+    h = 0.24
+    bars = ((S1, 1.0), (S1, 0.45), (S2, 1.0), (S2, 0.45))
+    for y, (name, *vals) in zip(ys, HOLDOUT):
+        for i, (v, (c, a)) in enumerate(zip((vals[0], vals[2], vals[1], vals[3]), bars)):
+            dy = (1.5 - i) * (h + 0.02)
+            ax.barh(y + dy, v, height=h, color=c, alpha=a, zorder=2)
+            ax.text(v + 1, y + dy, f"{v:.1f} %", va="center", fontsize=8.5, color=INK)
+    ax.set_yticks(ys, [n for n, *_ in HOLDOUT], fontsize=9.5)
     ax.set_xlim(0, 100)
     ax.xaxis.set_major_formatter(lambda v, _: f"{v:.0f} %")
     hgrid(ax, [0, 25, 50, 75, 100])
     ax.spines["left"].set_visible(False)
-    hd = [Rectangle((0, 0), 1, 1, color=c) for c in (S1, S2)]
-    ax.legend(hd, ["exact class (chance 8 %)", "texture group (chance 25 %)"],
-              loc="upper center", bbox_to_anchor=(0.4, -0.12), ncol=2, fontsize=9)
+    hd = [Rectangle((0, 0), 1, 1, color=c, alpha=a) for c, a in bars]
+    ax.legend(hd, ["exact class, curve alone", "exact class, + depth & bulk density",
+                   "texture group, curve alone", "texture group, + depth & bulk density"],
+              loc="upper center", bbox_to_anchor=(0.4, -0.1), ncol=2, fontsize=8.5)
     title(fig, "What is hidden along with the test soil",
-          "Same 1,711 soils, retention curve only. Hiding the soil's other "
-          "horizons barely matters;\nhiding its whole data source costs "
-          "about 10 points.")
+          f"Same {HOLDOUT_N:,} soils (those with depth and bulk density). Chance is 8 % "
+          "exact, 25 % group.\nHiding the soil's whole data source costs about 9 points. "
+          "Depth and bulk density add 4 points\nfor a new depth at a known site, "
+          "under 2 (not significant) beyond it.")
     save(fig, "v6_holdout_levels")
 
 

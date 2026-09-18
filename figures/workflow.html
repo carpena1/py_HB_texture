@@ -200,7 +200,7 @@
   </div>
 
   <figure>
-    <svg viewBox="0 0 1040 864" role="img" aria-label="Eight source databases pass through per-source preparation scripts into derivative CSV tables; GSHP, KSSL, Hohenbrink, Zanjanrood, the restricted EU-HYDI and the unpublished Laikipia form the default merged reference of 20,052 layers, with UNSODA and sDB added only in the all set.">
+    <svg viewBox="0 0 1040 1052" role="img" aria-label="Ten source databases pass through per-source preparation scripts into derivative CSV tables; GSHP, KSSL, Hohenbrink, Zanjanrood, Arizona, the Canary Islands, the restricted EU-HYDI and the unpublished Laikipia form the default merged reference of 20,052 layers, with UNSODA and sDB added only in the all set.">
       <defs>
         <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
           <path d="M 0 1 L 9 5 L 0 9 z" fill="currentColor"/>
@@ -291,21 +291,44 @@
         <text x="268" y="573" font-size="11" fill="var(--accent)">drop sandbox pF 1&#8211;2 (cores not saturated)</text>
         <text x="268" y="588" font-size="11" fill="var(--muted)">field K<tspan baseline-shift="sub" font-size="8">s</tspan> (dry, cracked) kept aside</text>
 
+        <!-- Arizona -->
+        <rect x="16" y="612" width="184" height="78" rx="3" fill="none" stroke="currentColor" opacity=".85"/>
+        <text x="28" y="634" font-size="13" font-weight="600" fill="currentColor">Arizona (USA)</text>
+        <text x="28" y="652" font-size="11" fill="var(--muted)">E. Babaeian, shared data</text>
+        <text x="28" y="668" font-size="11" fill="var(--muted)">21 samples, sand to clay</text>
+        <text x="28" y="682" font-size="11" fill="currentColor">no coordinates</text>
+        <rect x="256" y="612" width="300" height="78" rx="3" fill="var(--sunken)" stroke="currentColor" opacity=".85"/>
+        <text x="268" y="632" font-size="11.5" font-family="IBM Plex Mono, monospace" fill="var(--accent)">prepare_babaeian_az.py</text>
+        <text x="268" y="650" font-size="11" fill="currentColor">refit vG to points up to 1500 kPa</text>
+        <text x="268" y="667" font-size="11" fill="var(--accent)">interpolate a low 500 cm reading (3 samples)</text>
+        <text x="268" y="682" font-size="11" fill="var(--muted)">the file's own vG fits not used</text>
+        <!-- Canary -->
+        <rect x="16" y="706" width="184" height="78" rx="3" fill="none" stroke="currentColor" opacity=".85"/>
+        <text x="28" y="728" font-size="13" font-weight="600" fill="currentColor">Canary Islands</text>
+        <text x="28" y="746" font-size="11" fill="var(--muted)">Armas Espinel 2013</text>
+        <text x="28" y="762" font-size="11" fill="var(--muted)">66 cores, andic soils</text>
+        <text x="28" y="776" font-size="11" fill="currentColor">thesis, Tenerife</text>
+        <rect x="256" y="706" width="300" height="78" rx="3" fill="var(--sunken)" stroke="currentColor" opacity=".85"/>
+        <text x="268" y="726" font-size="11.5" font-family="IBM Plex Mono, monospace" fill="var(--accent)">prepare_armas.py</text>
+        <text x="268" y="744" font-size="11" fill="currentColor">points read from the thesis's vector figures</text>
+        <text x="268" y="761" font-size="11" fill="var(--accent)">checked against its tables and vG fits</text>
+        <text x="268" y="776" font-size="11" fill="var(--muted)">resin-dispersed fractions kept alongside</text>
+
         <!-- UNSODA -->
-        <rect x="16" y="612" width="184" height="58" rx="3" fill="none" stroke="currentColor" opacity=".5"/>
-        <text x="28" y="634" font-size="13" font-weight="600" fill="currentColor" opacity=".75">UNSODA 2.0</text>
-        <text x="28" y="652" font-size="11" fill="var(--muted)">790 soils</text>
-        <rect x="256" y="612" width="300" height="58" rx="3" fill="var(--sunken)" stroke="currentColor" opacity=".5"/>
-        <text x="268" y="632" font-size="11.5" font-family="IBM Plex Mono, monospace" fill="var(--muted)">prepare_unsoda.py</text>
-        <text x="268" y="650" font-size="11" fill="var(--muted)">fit vG to measured points, cm &#8594; kPa</text>
+        <rect x="16" y="800" width="184" height="58" rx="3" fill="none" stroke="currentColor" opacity=".5"/>
+        <text x="28" y="822" font-size="13" font-weight="600" fill="currentColor" opacity=".75">UNSODA 2.0</text>
+        <text x="28" y="840" font-size="11" fill="var(--muted)">790 soils</text>
+        <rect x="256" y="800" width="300" height="58" rx="3" fill="var(--sunken)" stroke="currentColor" opacity=".5"/>
+        <text x="268" y="820" font-size="11.5" font-family="IBM Plex Mono, monospace" fill="var(--muted)">prepare_unsoda.py</text>
+        <text x="268" y="838" font-size="11" fill="var(--muted)">fit vG to measured points, cm &#8594; kPa</text>
 
         <!-- sDB -->
-        <rect x="16" y="686" width="184" height="58" rx="3" fill="none" stroke="currentColor" opacity=".5"/>
-        <text x="28" y="708" font-size="13" font-weight="600" fill="currentColor" opacity=".75">sDB (Belgium)</text>
-        <text x="28" y="726" font-size="11" fill="var(--muted)">PANGAEA, CC-BY-3.0</text>
-        <rect x="256" y="686" width="300" height="58" rx="3" fill="var(--sunken)" stroke="currentColor" opacity=".5"/>
-        <text x="268" y="706" font-size="11.5" font-family="IBM Plex Mono, monospace" fill="var(--muted)">prepare_sdb.py</text>
-        <text x="268" y="724" font-size="11" fill="var(--muted)">fit vG to measured points</text>
+        <rect x="16" y="874" width="184" height="58" rx="3" fill="none" stroke="currentColor" opacity=".5"/>
+        <text x="28" y="896" font-size="13" font-weight="600" fill="currentColor" opacity=".75">sDB (Belgium)</text>
+        <text x="28" y="914" font-size="11" fill="var(--muted)">PANGAEA, CC-BY-3.0</text>
+        <rect x="256" y="874" width="300" height="58" rx="3" fill="var(--sunken)" stroke="currentColor" opacity=".5"/>
+        <text x="268" y="894" font-size="11.5" font-family="IBM Plex Mono, monospace" fill="var(--muted)">prepare_sdb.py</text>
+        <text x="268" y="912" font-size="11" fill="var(--muted)">fit vG to measured points</text>
 
         <!-- derivative tables -->
         <g font-size="11" font-family="IBM Plex Mono, monospace">
@@ -338,23 +361,31 @@
           <text x="608" y="542" fill="var(--accent)">willard_reference</text>
           <text x="608" y="562" font-size="13" font-family="IBM Plex Sans, sans-serif" font-weight="600" fill="currentColor">86</text>
           <text x="608" y="582" font-size="11" font-family="IBM Plex Sans, sans-serif" fill="var(--muted)">0 with K<tspan baseline-shift="sub" font-size="8">s</tspan> &#183; not distributed</text>
+          <rect x="596" y="612" width="196" height="78" rx="3" fill="none" stroke="var(--accent)"/>
+          <text x="608" y="636" fill="var(--accent)">babaeian_az_reference</text>
+          <text x="608" y="656" font-size="13" font-family="IBM Plex Sans, sans-serif" font-weight="600" fill="currentColor">21</text>
+          <text x="608" y="676" font-size="11" font-family="IBM Plex Sans, sans-serif" fill="var(--muted)">21 with K<tspan baseline-shift="sub" font-size="8">s</tspan></text>
+          <rect x="596" y="706" width="196" height="78" rx="3" fill="none" stroke="var(--accent)"/>
+          <text x="608" y="730" fill="var(--accent)">armas_reference</text>
+          <text x="608" y="750" font-size="13" font-family="IBM Plex Sans, sans-serif" font-weight="600" fill="currentColor">66</text>
+          <text x="608" y="770" font-size="11" font-family="IBM Plex Sans, sans-serif" fill="var(--muted)">62 with K<tspan baseline-shift="sub" font-size="8">s</tspan></text>
 
-          <rect x="596" y="612" width="196" height="58" rx="3" fill="none" stroke="currentColor" opacity=".5"/>
-          <text x="608" y="634" fill="var(--muted)">unsoda_reference</text>
-          <text x="608" y="654" font-size="13" font-family="IBM Plex Sans, sans-serif" font-weight="600" fill="var(--muted)">581</text>
+          <rect x="596" y="800" width="196" height="58" rx="3" fill="none" stroke="currentColor" opacity=".5"/>
+          <text x="608" y="822" fill="var(--muted)">unsoda_reference</text>
+          <text x="608" y="842" font-size="13" font-family="IBM Plex Sans, sans-serif" font-weight="600" fill="var(--muted)">581</text>
 
-          <rect x="596" y="686" width="196" height="58" rx="3" fill="none" stroke="currentColor" opacity=".5"/>
-          <text x="608" y="708" fill="var(--muted)">sdb_reference</text>
-          <text x="608" y="728" font-size="13" font-family="IBM Plex Sans, sans-serif" font-weight="600" fill="var(--muted)">165</text>
+          <rect x="596" y="874" width="196" height="58" rx="3" fill="none" stroke="currentColor" opacity=".5"/>
+          <text x="608" y="896" fill="var(--muted)">sdb_reference</text>
+          <text x="608" y="916" font-size="13" font-family="IBM Plex Sans, sans-serif" font-weight="600" fill="var(--muted)">165</text>
         </g>
 
         <!-- reference sets -->
-        <rect x="848" y="48" width="176" height="548" rx="3" fill="var(--accent-w)" stroke="var(--accent)"/>
+        <rect x="848" y="48" width="176" height="736" rx="3" fill="var(--accent-w)" stroke="var(--accent)"/>
         <text x="862" y="72" font-size="11.5" font-family="IBM Plex Mono, monospace" fill="var(--accent)">merged</text>
         <text x="862" y="90" font-size="10.5" font-family="IBM Plex Mono, monospace" fill="var(--muted)">(default)</text>
-        <text x="862" y="130" font-size="28" font-weight="600" fill="currentColor">20,138</text>
+        <text x="862" y="130" font-size="28" font-weight="600" fill="currentColor">20,225</text>
         <text x="862" y="152" font-size="11" fill="var(--muted)">layers</text>
-        <text x="862" y="182" font-size="11" fill="currentColor">9,919 carry a measured</text>
+        <text x="862" y="182" font-size="11" fill="currentColor">10,002 carry a measured</text>
         <text x="862" y="197" font-size="11" fill="currentColor">saturated conductivity</text>
         <text x="862" y="226" font-size="11" fill="var(--muted)">7,740 European layers</text>
         <text x="862" y="241" font-size="11" fill="var(--muted)">(778 + 483 + 6,479)</text>
@@ -364,16 +395,16 @@
         <text x="862" y="336" font-size="11" fill="currentColor">Without the restricted</text>
         <text x="862" y="351" font-size="11" fill="currentColor">EU-HYDI and Laikipia</text>
         <text x="862" y="366" font-size="11" fill="currentColor">tables, merged uses</text>
-        <text x="862" y="381" font-size="11" fill="currentColor">the public 13,255</text>
+        <text x="862" y="381" font-size="11" fill="currentColor">the public 13,342</text>
         <text x="862" y="396" font-size="11" fill="var(--muted)">(--reference public)</text>
 
-        <rect x="848" y="612" width="176" height="132" rx="3" fill="none" stroke="currentColor" opacity=".5"/>
-        <text x="862" y="634" font-size="11.5" font-family="IBM Plex Mono, monospace" fill="var(--muted)">all</text>
-        <text x="862" y="664" font-size="20" font-weight="600" fill="var(--muted)">20,884</text>
-        <text x="862" y="688" font-size="11" fill="var(--muted)">adds UNSODA and sDB;</text>
-        <text x="862" y="703" font-size="11" fill="var(--muted)">both largely duplicated</text>
-        <text x="862" y="718" font-size="11" fill="var(--muted)">inside GSHP already,</text>
-        <text x="862" y="733" font-size="11" fill="var(--muted)">so not in the default</text>
+        <rect x="848" y="800" width="176" height="132" rx="3" fill="none" stroke="currentColor" opacity=".5"/>
+        <text x="862" y="822" font-size="11.5" font-family="IBM Plex Mono, monospace" fill="var(--muted)">all</text>
+        <text x="862" y="852" font-size="20" font-weight="600" fill="var(--muted)">20,971</text>
+        <text x="862" y="876" font-size="11" fill="var(--muted)">adds UNSODA and sDB;</text>
+        <text x="862" y="891" font-size="11" fill="var(--muted)">both largely duplicated</text>
+        <text x="862" y="906" font-size="11" fill="var(--muted)">inside GSHP already,</text>
+        <text x="862" y="921" font-size="11" fill="var(--muted)">so not in the default</text>
       </g>
 
       <g stroke="currentColor" fill="none" opacity=".55">
@@ -383,8 +414,10 @@
         <line x1="200" y1="369" x2="252" y2="369" marker-end="url(#ar)"/>
         <line x1="200" y1="463" x2="252" y2="463" marker-end="url(#ar)"/>
         <line x1="200" y1="557" x2="252" y2="557" marker-end="url(#ar)"/>
-        <line x1="200" y1="641" x2="252" y2="641" marker-end="url(#ar)" opacity=".6"/>
-        <line x1="200" y1="715" x2="252" y2="715" marker-end="url(#ar)" opacity=".6"/>
+        <line x1="200" y1="651" x2="252" y2="651" marker-end="url(#ar)"/>
+        <line x1="200" y1="745" x2="252" y2="745" marker-end="url(#ar)"/>
+        <line x1="200" y1="829" x2="252" y2="829" marker-end="url(#ar)" opacity=".6"/>
+        <line x1="200" y1="903" x2="252" y2="903" marker-end="url(#ar)" opacity=".6"/>
       </g>
       <g stroke="var(--accent)" fill="none">
         <line x1="556" y1="87"  x2="592" y2="87"  marker-end="url(#ara)"/>
@@ -393,24 +426,28 @@
         <line x1="556" y1="369" x2="592" y2="369" marker-end="url(#ara)"/>
         <line x1="556" y1="463" x2="592" y2="463" marker-end="url(#ara)"/>
         <line x1="556" y1="557" x2="592" y2="557" marker-end="url(#ara)"/>
+        <line x1="556" y1="651" x2="592" y2="651" marker-end="url(#ara)"/>
+        <line x1="556" y1="745" x2="592" y2="745" marker-end="url(#ara)"/>
         <line x1="792" y1="87"  x2="844" y2="87"  marker-end="url(#ara)"/>
         <line x1="792" y1="181" x2="844" y2="181" marker-end="url(#ara)"/>
         <line x1="792" y1="275" x2="844" y2="275" marker-end="url(#ara)"/>
         <line x1="792" y1="369" x2="844" y2="369" marker-end="url(#ara)"/>
         <line x1="792" y1="463" x2="844" y2="463" marker-end="url(#ara)"/>
         <line x1="792" y1="557" x2="844" y2="557" marker-end="url(#ara)"/>
+        <line x1="792" y1="651" x2="844" y2="651" marker-end="url(#ara)"/>
+        <line x1="792" y1="745" x2="844" y2="745" marker-end="url(#ara)"/>
       </g>
       <g stroke="currentColor" fill="none" opacity=".4">
-        <line x1="556" y1="641" x2="592" y2="641" marker-end="url(#ar)"/>
-        <line x1="556" y1="715" x2="592" y2="715" marker-end="url(#ar)"/>
-        <line x1="792" y1="641" x2="844" y2="641" marker-end="url(#ar)"/>
-        <line x1="792" y1="715" x2="844" y2="715" marker-end="url(#ar)"/>
+        <line x1="556" y1="829" x2="592" y2="829" marker-end="url(#ar)"/>
+        <line x1="556" y1="903" x2="592" y2="903" marker-end="url(#ar)"/>
+        <line x1="792" y1="829" x2="844" y2="829" marker-end="url(#ar)"/>
+        <line x1="792" y1="903" x2="844" y2="903" marker-end="url(#ar)"/>
       </g>
 
-      <rect x="256" y="768" width="768" height="76" rx="3" fill="none" stroke="currentColor" opacity=".35" stroke-dasharray="3 3"/>
-      <text x="270" y="790" font-size="11.5" font-family="IBM Plex Mono, monospace" fill="currentColor" opacity=".8">free_m.py &#8212; shared by every preparation script</text>
-      <text x="270" y="810" font-size="11" font-family="IBM Plex Sans, sans-serif" fill="var(--muted)">Also writes an unconstrained companion fit (&#952;r, &#952;s, &#945;, n, m) alongside the</text>
-      <text x="270" y="827" font-size="11" font-family="IBM Plex Sans, sans-serif" fill="var(--muted)">Mualem one, refitting measured points where a source ships them.</text>
+      <rect x="256" y="956" width="768" height="76" rx="3" fill="none" stroke="currentColor" opacity=".35" stroke-dasharray="3 3"/>
+      <text x="270" y="978" font-size="11.5" font-family="IBM Plex Mono, monospace" fill="currentColor" opacity=".8">free_m.py &#8212; shared by every preparation script</text>
+      <text x="270" y="998" font-size="11" font-family="IBM Plex Sans, sans-serif" fill="var(--muted)">Also writes an unconstrained companion fit (&#952;r, &#952;s, &#945;, n, m) alongside the</text>
+      <text x="270" y="1015" font-size="11" font-family="IBM Plex Sans, sans-serif" fill="var(--muted)">Mualem one, refitting measured points where a source ships them.</text>
     </svg>
     <figcaption>
       Each source needs a different correction before its curves are comparable.
@@ -427,7 +464,9 @@
       distributed. Laikipia's sandbox did not saturate its cores, so only
       saturation, anchored on porosity, and the pressure plates are kept; its
       table is unpublished and never distributed either, so a checkout without
-      the two runs on the public 13,255.
+      the two runs on the public 13,342. The Arizona and Canary Islands
+      tables are public; the Canary points are read from the thesis's vector
+      figures and checked against its own tables.
     </figcaption>
   </figure>
 
@@ -459,7 +498,7 @@
   </div>
 
   <figure>
-    <svg viewBox="0 12 1040 547" role="img" aria-label="Equal Earth map of 19,502 georeferenced reference layers, binned into 2-degree cells with circle area proportional to count. Europe holds 7,740 layers, up from 1,261 before EU-HYDI + Laikipia was added.">
+    <svg viewBox="0 12 1040 547" role="img" aria-label="Equal Earth map of 19,568 georeferenced reference layers, binned into 2-degree cells with circle area proportional to count. Europe holds 7,740 layers, up from 1,261 before EU-HYDI + Laikipia was added.">
       <g fill="none" stroke="currentColor" stroke-width=".5" opacity=".16">
         <path d="M71.5 435.1L81.6 435.1L91.7 435.1L101.8 435.1L111.8 435.1L121.9 435.1L132.0 435.1L142.1 435.1L152.2 435.1L162.2 435.1L172.3 435.1L182.4 435.1L192.5 435.1L202.5 435.1L212.6 435.1L222.7 435.1L232.8 435.1L242.9 435.1L252.9 435.1L263.0 435.1L273.1 435.1L283.2 435.1L293.2 435.1L303.3 435.1L313.4 435.1L323.5 435.1L333.6 435.1L343.6 435.1L353.7 435.1L363.8 435.1L373.9 435.1L383.9 435.1L394.0 435.1L404.1 435.1L414.2 435.1L424.3 435.1L434.3 435.1L444.4 435.1L454.5 435.1L464.6 435.1L474.6 435.1L484.7 435.1L494.8 435.1L504.9 435.1L515.0 435.1L525.0 435.1L535.1 435.1L545.2 435.1L555.3 435.1L565.4 435.1L575.4 435.1L585.5 435.1L595.6 435.1L605.7 435.1L615.7 435.1L625.8 435.1L635.9 435.1L646.0 435.1L656.1 435.1L666.1 435.1L676.2 435.1L686.3 435.1L696.4 435.1L706.4 435.1L716.5 435.1L726.6 435.1L736.7 435.1L746.8 435.1L756.8 435.1L766.9 435.1L777.0 435.1L787.1 435.1L797.1 435.1L807.2 435.1L817.3 435.1L827.4 435.1L837.5 435.1L847.5 435.1L857.6 435.1L867.7 435.1L877.8 435.1L887.8 435.1L897.9 435.1L908.0 435.1L918.1 435.1L928.2 435.1L938.2 435.1L948.3 435.1L958.4 435.1L968.5 435.1"/>
         <path d="M14.0 290.3L25.4 290.3L36.7 290.3L48.1 290.3L59.5 290.3L70.9 290.3L82.2 290.3L93.6 290.3L105.0 290.3L116.3 290.3L127.7 290.3L139.1 290.3L150.4 290.3L161.8 290.3L173.2 290.3L184.6 290.3L195.9 290.3L207.3 290.3L218.7 290.3L230.0 290.3L241.4 290.3L252.8 290.3L264.2 290.3L275.5 290.3L286.9 290.3L298.3 290.3L309.6 290.3L321.0 290.3L332.4 290.3L343.8 290.3L355.1 290.3L366.5 290.3L377.9 290.3L389.2 290.3L400.6 290.3L412.0 290.3L423.3 290.3L434.7 290.3L446.1 290.3L457.5 290.3L468.8 290.3L480.2 290.3L491.6 290.3L502.9 290.3L514.3 290.3L525.7 290.3L537.1 290.3L548.4 290.3L559.8 290.3L571.2 290.3L582.5 290.3L593.9 290.3L605.3 290.3L616.7 290.3L628.0 290.3L639.4 290.3L650.8 290.3L662.1 290.3L673.5 290.3L684.9 290.3L696.2 290.3L707.6 290.3L719.0 290.3L730.4 290.3L741.7 290.3L753.1 290.3L764.5 290.3L775.8 290.3L787.2 290.3L798.6 290.3L810.0 290.3L821.3 290.3L832.7 290.3L844.1 290.3L855.4 290.3L866.8 290.3L878.2 290.3L889.6 290.3L900.9 290.3L912.3 290.3L923.7 290.3L935.0 290.3L946.4 290.3L957.8 290.3L969.1 290.3L980.5 290.3L991.9 290.3L1003.3 290.3L1014.6 290.3L1026.0 290.3"/>
@@ -869,6 +908,7 @@
         <circle cx="410.6" cy="309.2" r="1.60"/>
         <circle cx="416.9" cy="331.8" r="1.60"/>
         <circle cx="473.0" cy="233.8" r="1.60"/>
+        <circle cx="475.1" cy="182.9" r="5.74"/>
         <circle cx="478.4" cy="241.3" r="1.60"/>
         <circle cx="495.0" cy="241.3" r="1.60"/>
         <circle cx="500.4" cy="271.4" r="2.74"/>
@@ -1183,7 +1223,7 @@
       <g font-family="IBM Plex Sans, sans-serif" font-size="11.5">
         <path d="M473.3 60.9L476.7 60.9L480.0 60.9L483.4 60.9L486.7 60.9L490.1 60.9L493.4 60.9L496.8 60.9L500.1 60.9L503.5 60.9L506.8 60.9L510.2 60.9L513.5 60.9L516.9 60.9L520.2 60.9L523.6 60.9L526.9 60.9L530.3 60.9L533.7 60.9L537.0 60.9L540.4 60.9L543.7 60.9L547.1 60.9L550.4 60.9L553.8 60.9L557.1 60.9L560.5 60.9L563.8 60.9L567.2 60.9L570.5 60.9L573.9 60.9L577.2 60.9L580.6 60.9L583.9 60.9L587.3 60.9L590.7 60.9L594.0 60.9L597.4 60.9L600.7 60.9L604.1 60.9L604.1 60.9L605.5 63.9L607.0 67.1L608.6 70.5L610.2 74.1L611.7 77.8L613.3 81.7L614.9 85.7L616.4 89.9L618.0 94.2L619.5 98.7L621.0 103.3L622.5 107.9L623.9 112.7L625.3 117.6L626.7 122.6L628.0 127.7L629.3 132.9L630.5 138.1L631.7 143.5L632.8 148.9L634.0 154.4L635.0 159.9L636.0 165.6L636.0 165.6L631.4 165.6L626.8 165.6L622.2 165.6L617.5 165.6L612.9 165.6L608.3 165.6L603.6 165.6L599.0 165.6L594.4 165.6L589.8 165.6L585.1 165.6L580.5 165.6L575.9 165.6L571.2 165.6L566.6 165.6L562.0 165.6L557.4 165.6L552.7 165.6L548.1 165.6L543.5 165.6L538.8 165.6L534.2 165.6L529.6 165.6L525.0 165.6L520.3 165.6L515.7 165.6L511.1 165.6L506.4 165.6L501.8 165.6L497.2 165.6L492.6 165.6L487.9 165.6L483.3 165.6L478.7 165.6L474.0 165.6L469.4 165.6L464.8 165.6L460.2 165.6L455.5 165.6L455.5 165.6L456.1 159.9L456.7 154.4L457.3 148.9L458.0 143.5L458.6 138.1L459.3 132.9L460.0 127.7L460.7 122.6L461.5 117.6L462.3 112.7L463.1 107.9L463.9 103.3L464.7 98.7L465.6 94.2L466.4 89.9L467.3 85.7L468.2 81.7L469.0 77.8L469.9 74.1L470.8 70.5L471.6 67.1L472.5 63.9L473.3 60.9Z" fill="none" stroke="currentColor" stroke-width="1.1" stroke-dasharray="4 3" opacity=".75"/>
         <text x="456" y="52" fill="currentColor" font-weight="600">Europe &#183; 1,261 &#8594; 7,740 layers</text>
-        <text x="456" y="182" fill="var(--muted)">39.7 % of the reference</text>
+        <text x="636" y="182" text-anchor="end" fill="var(--muted)">39.6 % of the reference</text>
       </g>
       <g font-family="IBM Plex Sans, sans-serif" font-size="11" fill="currentColor">
         <line x1="302" y1="192" x2="302" y2="228" stroke="currentColor" opacity=".55"/>
@@ -1195,6 +1235,8 @@
         <text x="664" y="72">W. Russia 1,001</text>
         <line x1="576" y1="298" x2="600" y2="322" stroke="currentColor" opacity=".55"/>
         <text x="604" y="326">Sub-Saharan Africa 501</text>
+        <line x1="469" y1="189" x2="446" y2="206" stroke="currentColor" opacity=".55"/>
+        <text x="442" y="210" text-anchor="end">Canary Islands 66</text>
         <line x1="279" y1="149" x2="238" y2="120" stroke="currentColor" opacity=".55"/>
         <text x="234" y="116" text-anchor="end">KSSL, across the US 2,263</text>
       </g>
@@ -1209,7 +1251,7 @@
       </g>
       <g font-family="IBM Plex Sans, sans-serif" font-size="11.5" fill="currentColor">
         <circle cx="640" cy="515" r="6" fill="var(--accent)" fill-opacity=".45" stroke="var(--accent)"/>
-        <text x="654" y="519">Public reference &#183; 12,971 georeferenced layers</text>
+        <text x="654" y="519">Public reference &#183; 13,037 georeferenced layers</text>
         <circle cx="640" cy="537" r="6" fill="var(--add)" fill-opacity=".5" stroke="var(--add)"/>
         <text x="654" y="541">EU-HYDI + Laikipia &#183; +6,531</text>
       </g>
@@ -1217,9 +1259,9 @@
     <figcaption>
       Equal Earth projection, so circle areas compare across latitudes.
       Samples are binned into 2&#176; cells, with circle area proportional to
-      the number of layers. Teal is the public reference (12,971 of its
-      13,255 layers carry coordinates; UNSODA and sDB publish
-      none); orange-red is EU-HYDI (6,479 of 6,797 layers georeferenced) and
+      the number of layers. Teal is the public reference (13,037 of its
+      13,342 layers carry coordinates; UNSODA and sDB publish
+      none, and the 21 Arizona soils have none); orange-red is EU-HYDI (6,479 of 6,797 layers georeferenced) and
       the Laikipia soils (52 of 86; large farms carry no coordinates).
       EU-HYDI is consortium-restricted and Laikipia unpublished: both are part
       of the default reference wherever their tables have been built locally,
@@ -1238,14 +1280,14 @@
         <tr><td>Europe</td><td class="num">1,261</td><td class="num">7,740</td><td class="num">+6,479</td></tr>
         <tr><td>Asia</td><td class="num">1,340</td><td class="num">1,623</td><td class="num">+283</td></tr>
         <tr><td>South America</td><td class="num">639</td><td class="num">639</td><td class="num">+0</td></tr>
-        <tr><td>Africa</td><td class="num">620</td><td class="num">684</td><td class="num">+64</td></tr>
+        <tr><td>Africa</td><td class="num">686</td><td class="num">750</td><td class="num">+64</td></tr>
         <tr><td>Australasia</td><td class="num">111</td><td class="num">111</td><td class="num">+0</td></tr>
-        <tr><td><strong>Georeferenced</strong></td><td class="num">12,971</td><td class="num">19,502</td><td class="num">+6,531</td></tr>
+        <tr><td><strong>Georeferenced</strong></td><td class="num">13,037</td><td class="num">19,568</td><td class="num">+6,531</td></tr>
       </tbody>
     </table>
     <p>
       Europe goes from 9.7 % of the georeferenced
-      reference to 39.8 %, and the Nordic gap is largely
+      reference to 39.6 %, and the Nordic gap is largely
       closed: in Europe above 58&#176;N the reference now holds 1,340 layers against
       167 before, 199 of them above 62&#176;N against 22. What EU-HYDI cannot fill is the south. Greece
       and most of Spain contributed only two retention points per sample —
@@ -1423,8 +1465,8 @@
       which lowers the K<sub>s</sub> error slightly. So is the soil's andic
       state (<span class="m">--andic yes/no</span>): the classifier uses it,
       and the neighbours match on it for the class vote and the fractions but
-      not for K<sub>s</sub>, since the only andic soils with a measured
-      K<sub>s</sub> come from one source.
+      not for K<sub>s</sub>, since, when this was tested, the only andic soils
+      with a measured K<sub>s</sub> came from one source.
     </figcaption>
   </figure>
 
@@ -1445,7 +1487,7 @@
   </div>
 
   <figure>
-    <svg viewBox="0 0 1040 300" role="img" aria-label="A scale of exact-class accuracy showing chance at 8.3 percent, the source-blocked estimate at 29 percent, profile-level leave-one-out at 39 percent, and the model-free Cover and Hart ceiling at 54 percent.">
+    <svg viewBox="0 0 1040 300" role="img" aria-label="A scale of exact-class accuracy showing chance at 8.3 percent, the source-blocked estimate at 31 percent, profile-level leave-one-out at 40 percent, and the model-free Cover and Hart ceiling at 55 percent.">
       <defs>
         <marker id="ar3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
           <path d="M 0 1 L 9 5 L 0 9 z" fill="currentColor"/>
@@ -1470,7 +1512,7 @@
       </g>
 
       <!-- unreachable band beyond ceiling -->
-      <rect x="892" y="120" width="92" height="56" fill="currentColor" opacity=".07"/>
+      <rect x="904" y="120" width="80" height="56" fill="currentColor" opacity=".07"/>
 
       <!-- markers: x = 60 + pct*15.4 -->
       <g font-family="IBM Plex Sans, sans-serif">
@@ -1480,38 +1522,38 @@
         <text x="188" y="92" font-size="11.5" text-anchor="middle" fill="var(--muted)">chance</text>
 
         <!-- source blocked -->
-        <line x1="518" y1="120" x2="518" y2="176" stroke="var(--accent)" stroke-width="2"/>
-        <circle cx="518" cy="176" r="4" fill="var(--accent)"/>
-        <text x="518" y="110" font-size="15" font-weight="600" text-anchor="middle" fill="currentColor">30 %</text>
-        <text x="518" y="90" font-size="11.5" text-anchor="middle" fill="var(--accent)">unseen laboratory</text>
-        <text x="518" y="74" font-size="11" text-anchor="middle" fill="var(--muted)">source-blocked</text>
+        <line x1="536" y1="120" x2="536" y2="176" stroke="var(--accent)" stroke-width="2"/>
+        <circle cx="536" cy="176" r="4" fill="var(--accent)"/>
+        <text x="536" y="110" font-size="15" font-weight="600" text-anchor="middle" fill="currentColor">31 %</text>
+        <text x="536" y="90" font-size="11.5" text-anchor="middle" fill="var(--accent)">unseen laboratory</text>
+        <text x="536" y="74" font-size="11" text-anchor="middle" fill="var(--muted)">source-blocked</text>
 
         <!-- profile LOO -->
-        <line x1="683" y1="120" x2="683" y2="176" stroke="currentColor" stroke-width="2" opacity=".75"/>
-        <circle cx="683" cy="176" r="4" fill="currentColor" opacity=".75"/>
-        <text x="683" y="110" font-size="15" font-weight="600" text-anchor="middle" fill="currentColor">40 %</text>
-        <text x="683" y="90" font-size="11.5" text-anchor="middle" fill="var(--muted)">profile-level leave-one-out</text>
-        <text x="683" y="74" font-size="11" text-anchor="middle" fill="var(--muted)">same labs, different site</text>
+        <line x1="671" y1="120" x2="671" y2="176" stroke="currentColor" stroke-width="2" opacity=".75"/>
+        <circle cx="671" cy="176" r="4" fill="currentColor" opacity=".75"/>
+        <text x="671" y="110" font-size="15" font-weight="600" text-anchor="middle" fill="currentColor">40 %</text>
+        <text x="671" y="90" font-size="11.5" text-anchor="middle" fill="var(--muted)">profile-level leave-one-out</text>
+        <text x="671" y="74" font-size="11" text-anchor="middle" fill="var(--muted)">same labs, different site</text>
 
         <!-- ceiling -->
-        <line x1="892" y1="120" x2="892" y2="176" stroke="currentColor" opacity=".5" stroke-dasharray="3 3"/>
-        <text x="892" y="110" font-size="12" text-anchor="middle" fill="var(--muted)">54 %</text>
-        <text x="892" y="92" font-size="11.5" text-anchor="middle" fill="var(--muted)">Cover &amp; Hart ceiling</text>
-        <text x="938" y="146" font-size="10.5" text-anchor="middle" fill="var(--muted)">unreachable</text>
+        <line x1="904" y1="120" x2="904" y2="176" stroke="currentColor" opacity=".5" stroke-dasharray="3 3"/>
+        <text x="904" y="110" font-size="12" text-anchor="middle" fill="var(--muted)">55 %</text>
+        <text x="904" y="92" font-size="11.5" text-anchor="middle" fill="var(--muted)">Cover &amp; Hart ceiling</text>
+        <text x="944" y="146" font-size="10.5" text-anchor="middle" fill="var(--muted)">unreachable</text>
       </g>
 
       <!-- leakage arrow -->
-      <line x1="677" y1="228" x2="524" y2="228" stroke="currentColor" opacity=".7" marker-end="url(#ar3)"/>
-      <text x="600" y="220" font-size="12" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" fill="currentColor">&#8722;11 points of protocol leakage</text>
+      <line x1="665" y1="228" x2="542" y2="228" stroke="currentColor" opacity=".7" marker-end="url(#ar3)"/>
+      <text x="600" y="220" font-size="12" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" fill="currentColor">&#8722;9 points of protocol leakage</text>
       <text x="600" y="248" font-size="11" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" fill="var(--muted)">what disappears when a whole contributing laboratory is held out</text>
 
       <text x="60" y="284" font-size="11" font-family="IBM Plex Sans, sans-serif" fill="var(--muted)">The ceiling is a property of the four coordinates, not of the database — no amount of additional data moves it.</text>
     </svg>
     <figcaption>
       The Cover &amp; Hart (1967) bound brackets Bayes error from nearest-neighbour
-      error, so it is model-free: roughly 54 % exact class in-distribution and
+      error, so it is model-free: roughly 55 % exact class in-distribution and
       46 % against an unseen laboratory is the hard limit for <em>any</em> method
-      using four van Genuchten parameters. The gap between 30 % and that limit is
+      using four van Genuchten parameters. The gap between 31 % and that limit is
       what better data can still buy; the gap above it is not for sale.
     </figcaption>
   </figure>

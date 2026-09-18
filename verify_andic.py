@@ -112,10 +112,12 @@ def main():
     ctrl = pd.concat([g.sample(min(len(g), n_per_class), random_state=0)
                       for _, g in rest.groupby("texture_class")])
     tg = pd.concat([ref_df[andic], ctrl]).reset_index(drop=True)
-    try:
-        extra = st.load_reference_df("armas").reset_index(drop=True)
-    except FileNotFoundError:
-        extra = None
+    extra = None                 # Canary as a new source, when not in the reference
+    if not ref_df.source_db.eq("Armas_Canarias").any():
+        try:
+            extra = st.load_reference_df("armas").reset_index(drop=True)
+        except FileNotFoundError:
+            pass
     print(f"reference {len(ref_df)}; targets {andic.sum()} andic + {len(ctrl)} "
           f"controls" + (f" + {len(extra)} Canary" if extra is not None else "")
           + f"; n_mc={n_mc}")
@@ -128,7 +130,7 @@ def main():
         report("andic targets (reference)", allt, out, a & ~canary)
         report("controls, stated not andic", allt, out, ~a)
         if canary.any():
-            report("Canary (not in the reference)", allt, out, canary)
+            report("Canary Islands", allt, out, canary)
 
 
 if __name__ == "__main__":
