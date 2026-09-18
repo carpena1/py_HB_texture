@@ -33,7 +33,7 @@ THREE CAVEATS, in order of importance:
    is also smaller (capped per class), which confounds prior with reference
    size; compare the two with that in mind.
 
-Usage:  python verify_ceiling.py [n_per_class] [cap_per_class]
+Usage:  python verify_ceiling.py [n_per_class] [cap_per_class] [--reference=NAME]
 """
 
 import sys
@@ -44,7 +44,7 @@ from sklearn.model_selection import GroupKFold
 
 import swcc_texture as st
 from verify_groups import GROUP
-from verify_variants import ORDER
+from verify_common import ORDER
 
 N_FOLDS = 5
 
@@ -118,13 +118,19 @@ def run(gshp, targets, tpos, groups, label):
 
 
 def main():
-    n_per_class = int(sys.argv[1]) if len(sys.argv) > 1 else 150
-    cap = int(sys.argv[2]) if len(sys.argv) > 2 else 300
+    args = [a for a in sys.argv[1:] if not a.startswith("--")]
+    ref_name = next((a.split("=", 1)[1] for a in sys.argv[1:]
+                     if a.startswith("--reference=")), st.DEFAULT_REFERENCE)
+    n_per_class = int(args[0]) if args else 150
+    cap = int(args[1]) if len(args) > 1 else 300
 
-    g = pd.read_csv(st.REFERENCE_CSV).reset_index(drop=True)
+    g = st.load_reference_df(ref_name).reset_index(drop=True)
+    # KSSL rows carry no source_db, and some layers no profile_id.
+    g["source_db"] = g.source_db.fillna("KSSL")
     g["profile_id"] = g.profile_id.fillna("solo_" + g.layer_id.astype(str))
 
-    for name, ref in (("NATURAL PRIOR (GSHP as-is, 39 % sand)", g),
+    sand = (g.texture_class == "sand").mean() * 100
+    for name, ref in ((f"NATURAL PRIOR ({ref_name} as-is, {sand:.0f} % sand)", g),
                       (f"BALANCED PRIOR (<= {cap}/class, the prior the tool "
                        f"assumes)",
                        pd.concat([x.sample(min(len(x), cap), random_state=0)

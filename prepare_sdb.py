@@ -99,7 +99,10 @@ def main():
                 alpha_kpa=alpha, n=n, thetar=tr, thetas=ts,
                 sand=sand, silt=silt, clay=clay, ksat_cmh=ksat_cmh,
                 depth_cm=TOPSOIL_DEPTH_CM if topsoil else SUBSOIL_DEPTH_CM,
-                rmse=rmse, n_points=int(good.sum()), **fm))
+                rmse=rmse, n_points=int(good.sum()), **fm,
+                sample_type="undisturbed",
+                sample_type_source="sDB: the same Belgian horizons GSHP "
+                                   "labels undisturbed (Belgium_database)"))
 
     out = pd.DataFrame(rows)
     out.to_csv(OUT, index=False)

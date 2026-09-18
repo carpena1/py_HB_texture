@@ -124,8 +124,11 @@ def main():
             sand=sand, silt=silt, clay=clay,
             ksat_cmh=ksat.get(r.Sample_ID, np.nan),
             depth_cm=r.SamplingDepth, lat=r.Lat, lon=r.Lon,
-            source_db="Hohenbrink", oc=oc, porosity=r.Porosity,
-            rmse=rmse, n_points=len(pf), **fm))
+            source_db="Hohenbrink", oc=oc, porosity=r.Porosity, bd=r.BD,
+            rmse=rmse, n_points=len(pf), **fm,
+            sample_type="undisturbed",
+            sample_type_source="Hohenbrink et al. 2023: HYPROP and KSAT on "
+                               "undisturbed cores; WP4 dewpoint for the dry end"))
 
     out = pd.DataFrame(rows)
     out.to_csv(OUT, index=False)

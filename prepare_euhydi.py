@@ -40,6 +40,12 @@ Choices, each matching an existing preparation script:
   * Ksat is K at h = 0 from saturated-conductivity methods only (codes
     800-819 laboratory cores, 835 column, 850-869 in situ). Evaporation,
     crust and hot-air methods reach h = 0 only by extrapolation.
+  * sample_type follows how the WET end was measured: the method of the
+    wettest point whose METHOD description states the preparation
+    ("Undisturbed soil core", "in situ" -> undisturbed; "Disturbed samples"
+    -> disturbed). A dry end on disturbed material is standard practice for
+    undisturbed samples and does not change the label. Codes absent from the
+    METHOD table leave the sample "unknown".
 
 Units:
     HEAD   cm suction      ->  h_kPa = HEAD * 0.0980665
@@ -71,6 +77,16 @@ SATURATION_FRACTION = 0.95
 PARTICLE_DENSITY = 2.65
 PSD_OK = {"measured", "interpolated"}
 SENTINELS = [-999, -999.0, -9999, -9999.0]
+
+
+def preparation(description):
+    """'undisturbed', 'disturbed' or None, from a METHOD description."""
+    t = description.lower()
+    if "undisturbed" in t or "in situ" in t:
+        return "undisturbed"
+    if "disturbed" in t:
+        return "disturbed"
+    return None
 
 
 def is_sat_method(code):
@@ -124,6 +140,8 @@ def main():
     gen = table("GENERAL").set_index("PROFILE_ID")
     chem = table("CHEMICAL").set_index("SAMPLE_ID")
     cond = table("COND")
+    mdesc = table("METHOD").drop_duplicates("CODE_M").set_index("CODE_M").METHOD
+    mdesc.index = mdesc.index.astype(float)
     psize = table("PSIZE")
     for c in ("P_SIZE", "P_PERCENT"):
         psize[c] = pd.to_numeric(psize[c], errors="coerce")
@@ -207,6 +225,14 @@ def main():
         fm = free_m.fit_free_m(h, th,
                                fallback=free_m.mualem_fallback(tr, ts, alpha, n))
 
+        stype, ssrc = "unknown", "EU-HYDI: no retention method states the preparation"
+        for mcode in g.sort_values("HEAD").THETA_M.dropna():
+            d = mdesc.get(float(mcode))
+            k = preparation(d) if isinstance(d, str) else None
+            if k:
+                stype, ssrc = k, f"EU-HYDI retention method {int(mcode)}: {d[:90]}"
+                break
+
         pid = g.PROFILE_ID.iloc[0]
         gi = gen.loc[pid] if pid in gen.index else None
         lat = float(gi.Y_WGS84) if gi is not None and pd.notna(gi.Y_WGS84) else np.nan
@@ -229,8 +255,10 @@ def main():
             depth_cm=(top + bot) / 2.0 if np.isfinite(top + bot) else top,
             lat=lat, lon=lon, source_db=f"EUHYDI_{src}",
             oc=oc, porosity=por, rmse=rmse, n_points=n_measured,
+            # bulk density (g/cm3); from porosity where BD itself is missing
+            bd=bd if np.isfinite(bd) else PARTICLE_DENSITY * (1.0 - por),
             country=gi.ISO_COUNTRY if gi is not None else np.nan,
-            psd_code=code, **fm))
+            psd_code=code, **fm, sample_type=stype, sample_type_source=ssrc))
 
     out = pd.DataFrame(rows)
     out.to_csv(OUT, index=False)
@@ -245,6 +273,7 @@ def main():
     print(f"  profiles:          {out.profile_id.nunique()}   "
           f"contributors: {out.source_db.nunique()}")
     print(f"  texture: {out.psd_code.value_counts().to_dict()}")
+    print(f"  sample type:       {out.sample_type.value_counts().to_dict()}")
     print(f"  median fit RMSE:   {out.rmse.median():.4f}")
 
     # Unit check: class-median alpha and n against GSHP, as prepare_kssl.py.

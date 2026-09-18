@@ -18,6 +18,7 @@ Requires mdbtools (`brew install mdbtools`) to export the .mdb tables.
 """
 
 import io
+import re
 import subprocess
 
 import numpy as np
@@ -64,6 +65,66 @@ def particle_fractions(psd):
     return rows
 
 
+# Sample preparation, read from each soil's lab comment. The type follows the
+# wet end of the retention curve: an undisturbed core for the wet end with
+# disturbed material for the dry end (standard practice) counts as undisturbed.
+# Rules are tried in order; the first match wins.
+PREP_RULES = [
+    (r"disturbed samples were used for h=631"
+     r"|disturbed samples were collected for particle density"
+     r"|100-cm\^3 samples taken f(ro|or)m a depth"
+     r"|undist\. 100cm\^3 core samples"
+     r"|clods were placed on sieved material"
+     r"|retention curve for 1, 3 and 15 bar was obtained on (2 )?repacked",
+     "undisturbed", "UNSODA lab comment: undisturbed cores for the wet end, "
+                    "disturbed material for the dry end"),
+    (r"re-?pack|(?<![a-z])packed|sieved|(?<!un)disturbed|remou?lded"
+     r"|air[- ]dried soil",
+     "disturbed", "UNSODA lab comment: packed or disturbed samples"),
+    (r"undisturbed|undist\.|intact|uhland|drop[- ]hammer|core sampler|in situ",
+     "undisturbed", "UNSODA lab comment: undisturbed samples"),
+    (r"\bcores?\b|sampling rings",
+     "undisturbed", "UNSODA lab comment: cores sampled in the field"),
+]
+# A few UNSODA curves are for organic liquids, not water; they are dropped.
+NOT_WATER = r"benzene|xylene|cymene|benzyl"
+
+
+def sample_types():
+    """Return ({code: (sample_type, source)}, set of non-water codes)."""
+    meth = mdb_table("methodology")
+    meth["code"] = pd.to_numeric(meth["code"], errors="coerce")
+    lab = mdb_table("comment_lab_general")
+    cgen = mdb_table("comment_general")
+    meth = (meth.merge(lab, on="comment_lab_ID", how="left")
+                .merge(cgen, on="comment_general_ID", how="left"))
+    lab_txt = meth["comment_lab"].fillna("").astype(str)
+    not_water = set(meth.loc[meth["comment_general"].fillna("").astype(str)
+                             .str.contains(NOT_WATER, case=False), "code"])
+
+    # GSHP labels the UNSODA soils it contains; used where the text is silent.
+    gshp = pd.read_csv("data/WRC_dataset_surya_et_al_2021_final.csv",
+                       low_memory=False, encoding="latin-1",
+                       usecols=["layer_id", "source_db", "disturbed_undisturbed"])
+    gshp = gshp[gshp.source_db == "UNSODA"].drop_duplicates("layer_id")
+    gshp_label = dict(zip(pd.to_numeric(gshp.layer_id.str.replace(
+        "UNSODA", "", regex=False), errors="coerce"),
+        gshp.disturbed_undisturbed.str.strip().str.lower()))
+
+    types = {}
+    for code, txt in zip(meth["code"], lab_txt):
+        for pattern, stype, src in PREP_RULES:
+            if re.search(pattern, txt, re.I):
+                types[code] = (stype, src)
+                break
+        else:
+            g = gshp_label.get(code, "unknown")
+            types[code] = ((g, "GSHP disturbed_undisturbed field")
+                           if g in ("disturbed", "undisturbed") else
+                           ("unknown", "no preparation stated in UNSODA or GSHP"))
+    return types, not_water
+
+
 def main():
     gen = mdb_table("general")
     props = mdb_table("soil_properties")
@@ -71,6 +132,7 @@ def main():
     psd = mdb_table("particle_size")
 
     fracs = particle_fractions(psd)
+    types, not_water = sample_types()
     gen = gen.set_index("code")
     props = props.set_index("code")
 
@@ -79,7 +141,8 @@ def main():
     for code, g in ht.groupby("code"):
         g = g.dropna(subset=["preshead", "theta"])
         g = g[(g.preshead >= 0) & (g.theta > 0)]
-        if len(g) < MIN_POINTS or code not in fracs or code not in gen.index:
+        if (len(g) < MIN_POINTS or code not in fracs or code not in gen.index
+                or code in not_water):
             continue
         h = g["preshead"].to_numpy(float) * CM_TO_KPA
         theta = g["theta"].to_numpy(float)
@@ -120,6 +183,9 @@ def main():
                             alpha_kpa=alpha, n=n, thetar=thetar, thetas=thetas,
                             sand=sand, silt=silt, clay=clay,
                             ksat_cmh=ksat_cmh, depth_cm=depth, rmse=rmse,
+                            sample_type=types.get(code, ("unknown",))[0],
+                            sample_type_source=types.get(
+                                code, (None, "no methodology record"))[1],
                             **fm))
 
     out = pd.DataFrame(records)
@@ -129,6 +195,8 @@ def main():
     print(f"  with ksat:  {out['ksat_cmh'].notna().sum()}")
     print(f"  with depth: {out['depth_cm'].notna().sum()}")
     print(f"  median fit RMSE: {out['rmse'].median():.4f}")
+    print(f"  non-water curves dropped: {sorted(int(c) for c in not_water)}")
+    print(f"  sample type:     {out.sample_type.value_counts().to_dict()}")
     print(out["texture_class"].value_counts())
 
     # --- unit sanity check -------------------------------------------------

@@ -9,7 +9,8 @@ Units in the output table:
     alpha_kpa  [kPa^-1]   (GSHP alpha is in m^-1 of water head; 1 m = 9.80665 kPa)
     thetar, thetas [m3/m3]
     sand, silt, clay [%]  (renormalized to sum to 100)
-    ksat_cmh   [cm/h]     (GSHP ksat_lab / ksat_field are in cm/day)
+    ksat_cmh   [cm/h]     (GSHP ksat_lab / ksat_field are in cm/day, except
+                           Florida_database, whose values are already cm/h)
 """
 
 import pandas as pd
@@ -60,12 +61,22 @@ def main():
                      ("clay", "clay_tot_psa")]:
         out[col] = (lay[raw] / s * 100).where(ok)
 
-    # Ksat: prefer lab, fall back to field; convert cm/day -> cm/h.
+    # Ksat: prefer lab, fall back to field; convert cm/day -> cm/h. Florida is
+    # the exception: its values are already cm/h. The Florida Soil
+    # Characterization metadata gives KSat in cm/hr, and GSHP's Florida medians
+    # read as cm/h match the class means (sand 24, sandy loam 1.1, clay 0.14;
+    # Carsel & Parrish 29.7, 4.4, 0.20), while read as cm/day they fall 24x low.
     ksat = lay["ksat_lab"].fillna(lay["ksat_field"])
-    out["ksat_cmh"] = ksat.where(ksat > 0) / 24.0
+    per_day = pd.Series(24.0, index=lay.index).where(
+        lay["source_db"] != "Florida_database", 1.0)
+    out["ksat_cmh"] = ksat.where(ksat > 0) / per_day
 
     # Sample mid-depth (cm), used as an optional covariate.
     out["depth_cm"] = (lay["hzn_top"] + lay["hzn_bot"]) / 2.0
+
+    # Oven-dry bulk density (g/cm3), an optional user covariate.
+    bd = pd.to_numeric(lay["db_od"], errors="coerce")
+    out["bd"] = bd.where((bd > 0.1) & (bd < 2.3))
 
     # Coordinates, used to test how much region-matched reference data matters
     # (see verify_region.py).
@@ -94,6 +105,27 @@ def main():
     # reference rows it costs.
     oc = pd.to_numeric(lay["oc"], errors="coerce")
     out["oc"] = oc.where((oc >= 0) & (oc < 60))
+
+    # Sample type: how the WET end of the retention curve was measured -- an
+    # undisturbed sample (core, clod or in situ) versus repacked or sieved
+    # material. A dry end measured on sieved soil is standard practice for
+    # undisturbed samples and does not change the label. GSHP's own
+    # disturbed_undisturbed field is used, except for Florida_database, which
+    # GSHP leaves "unknown": one of the dataset's authors (W. G. Harris, pers.
+    # comm., 2026-09-12) recalls the rings for conductivity and water release
+    # being collected in the field, per horizon, as undisturbed samples, with
+    # no repacking, and the release curves measured at many pressure steps.
+    stype = lay["disturbed_undisturbed"].fillna("unknown").astype(str) \
+        .str.strip().str.lower()
+    fl = lay["source_db"] == "Florida_database"
+    out["sample_type"] = stype.where(~fl, "undisturbed")
+    out["sample_type_source"] = (
+        pd.Series("GSHP disturbed_undisturbed field (Gupta et al. 2022)",
+                  index=out.index)
+        .where(stype != "unknown",
+               "GSHP lists it as unknown; the source gives no preparation")
+        .where(~fl, "Florida: field rings per horizon, undisturbed "
+                    "(W. G. Harris, pers. comm.)"))
 
     # Unconstrained-m parameters. GSHP publishes only the Mualem-constrained
     # fit, but it also ships the measured (h, theta) points those were fitted
@@ -126,6 +158,7 @@ def main():
     print(f"  with fractions:  {out['sand'].notna().sum()}")
     print(f"  with ksat:       {out['ksat_cmh'].notna().sum()}")
     print(f"  with depth:      {out['depth_cm'].notna().sum()}")
+    print(f"  sample type:     {out.sample_type.value_counts().to_dict()}")
     print(out["texture_class"].value_counts())
 
 

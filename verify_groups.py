@@ -64,7 +64,8 @@ def preds_gshp():
         keep = df[df.layer_id != row.layer_id].reset_index(drop=True)
         loo = st.GshpReference(df=keep)
         out.append((n, st.estimate(H, theta, ref=loo,
-                                   clf=st.TextureGBM(df=keep))["texture_class"]))
+                                   clf=st.TextureGBM(df=keep),
+                                   sample_type=row.sample_type)["texture_class"]))
     return out
 
 

@@ -16,7 +16,7 @@ ordinary profile-level LOO, so the two are paired and the gap is the leakage.
 Both objectives are reported: texture (exact class and aggregated group) and
 Ksat (ksat_metrics).
 
-Usage:  python verify_source_blocked.py [n_per_source] [n_mc]
+Usage:  python verify_source_blocked.py [n_per_source] [n_mc] [--reference=NAME]
 """
 
 import sys
@@ -26,9 +26,9 @@ import pandas as pd
 
 import ksat_metrics as km
 import swcc_texture as st
-from verify_by_class import mcnemar
+from verify_common import mcnemar
 from verify_groups import GROUP
-from verify_variants import COLS
+from verify_common import COLS
 
 MIN_SOURCE = 80          # skip contributors too small to score meaningfully
 H = np.arange(0.0, 150.0 + 0.1, 5.0)
@@ -54,10 +54,16 @@ def predict(ref, targets, blocked_mask, n_mc):
 
 
 def main():
-    n_per_source = int(sys.argv[1]) if len(sys.argv) > 1 else 200
-    n_mc = int(sys.argv[2]) if len(sys.argv) > 2 else 60
+    args = [a for a in sys.argv[1:] if not a.startswith("--")]
+    ref_name = next((a.split("=", 1)[1] for a in sys.argv[1:]
+                     if a.startswith("--reference=")), st.DEFAULT_REFERENCE)
+    n_per_source = int(args[0]) if args else 200
+    n_mc = int(args[1]) if len(args) > 1 else 60
 
-    gshp = pd.read_csv(st.REFERENCE_CSV)
+    gshp = st.load_reference_df(ref_name)
+    # KSSL rows carry no source_db, and some layers no profile_id.
+    gshp["source_db"] = gshp.source_db.fillna("KSSL")
+    gshp["profile_id"] = gshp.profile_id.fillna("solo_" + gshp.layer_id.astype(str))
     ref = st.GshpReference(df=gshp[REF_COLS].reset_index(drop=True))
     src_all = gshp.source_db.to_numpy()
 

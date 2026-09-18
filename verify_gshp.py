@@ -67,7 +67,9 @@ def main():
         ref = st.GshpReference(df=loo)
         # The classifier must also be blind to the target layer.
         clf = st.TextureGBM(df=loo)
-        res = st.estimate(h, theta, ref=ref, clf=clf)
+        # The target's own sample type, as a user with the metadata would pass.
+        res = st.estimate(h, theta, ref=ref, clf=clf,
+                          sample_type=row.sample_type)
 
         probs = res["class_probabilities"]
         pred = res["texture_class"]

@@ -15,7 +15,9 @@ Three things are checked:
   3. how often the kNN "second opinion" agrees, and whether agreement is
      actually informative about correctness.
 
-Usage:  python verify_hybrid.py [n_per_class] [n_mc]
+Usage:  python verify_hybrid.py [n_per_class] [n_mc] [--reference=NAME] [--blocked]
+        --blocked holds out one whole contributing laboratory at a time
+        instead of profile-grouped folds.
 """
 
 import sys
@@ -26,27 +28,34 @@ from sklearn.model_selection import GroupKFold
 
 import ksat_metrics as km
 import swcc_texture as st
-from verify_by_class import mcnemar
+from verify_common import mcnemar
 from verify_groups import GROUP
-from verify_tau import prf
-from verify_variants import COLS, ORDER
+from verify_common import prf
+from verify_common import COLS, ORDER
 
 H = np.arange(0.0, 150.0 + 0.1, 5.0)
 N_FOLDS = 5
 
 
 def main():
-    n_per_class = int(sys.argv[1]) if len(sys.argv) > 1 else 150
-    n_mc = int(sys.argv[2]) if len(sys.argv) > 2 else 40
+    args = [a for a in sys.argv[1:] if not a.startswith("--")]
+    n_per_class = int(args[0]) if args else 150
+    n_mc = int(args[1]) if len(args) > 1 else 40
+    ref_name = next((a.split("=", 1)[1] for a in sys.argv[1:]
+                     if a.startswith("--reference=")), st.DEFAULT_REFERENCE)
+    blocked = "--blocked" in sys.argv[1:]
 
-    g = pd.read_csv(st.REFERENCE_CSV).reset_index(drop=True)
+    g = st.load_reference_df(ref_name).reset_index(drop=True)
+    g["source_db"] = g.source_db.fillna("KSSL")   # KSSL rows carry none
     g["profile_id"] = g.profile_id.fillna("solo_" + g.layer_id.astype(str))
     tsel = pd.concat([x.sample(min(len(x), n_per_class), random_state=0)
                       for _, x in g.groupby("texture_class")])
     tpos = np.array([g.index.get_loc(i) for i in tsel.index])
     truth = tsel.texture_class.to_numpy()
     obs = tsel.ksat_cmh.to_numpy(float)
-    print(f"reference {len(g)} layers; targets {len(tsel)}; n_mc={n_mc}\n")
+    print(f"reference {ref_name}: {len(g)} layers; targets {len(tsel)}; "
+          f"n_mc={n_mc}; folds: "
+          f"{'one laboratory out' if blocked else 'profile-grouped 5-fold'}\n")
 
     n = len(tsel)
     p_knn, p_hyb, p_2nd = (np.empty(n, object) for _ in range(3))
@@ -54,13 +63,18 @@ def main():
     lo = {m: np.full(n, np.nan) for m in ("knn", "hyb")}
     hi = {m: np.full(n, np.nan) for m in ("knn", "hyb")}
 
-    for tr_idx, te_idx in GroupKFold(n_splits=N_FOLDS).split(
-            g, groups=g.profile_id):
+    if blocked:
+        src = g.source_db.to_numpy()
+        splits = [(np.where(src != s)[0], np.where(src == s)[0])
+                  for s in np.unique(src)]
+    else:
+        splits = GroupKFold(n_splits=N_FOLDS).split(g, groups=g.profile_id)
+    for tr_idx, te_idx in splits:
         sel = np.isin(tpos, te_idx)
         if not sel.any():
             continue
         train = g.iloc[tr_idx]
-        ref = st.GshpReference(df=g[COLS].reset_index(drop=True))
+        ref = st.GshpReference(df=g[COLS + ["sample_type"]].reset_index(drop=True))
         mask = np.ones(len(g), dtype=bool)
         mask[tr_idx] = False
         ref.set_excluded(mask)
@@ -69,8 +83,11 @@ def main():
         idx = np.where(sel)[0]
         for j, row in zip(idx, tsel[sel].itertuples()):
             theta = st.vg_theta(H, row.thetar, row.thetas, row.alpha_kpa, row.n)
-            a = st.estimate(H, theta, ref=ref, n_mc=n_mc)
-            b = st.estimate(H, theta, ref=ref, n_mc=n_mc, clf=clf)
+            # Each target's own sample type, as the tool uses it by default.
+            a = st.estimate(H, theta, ref=ref, n_mc=n_mc,
+                            sample_type=row.sample_type)
+            b = st.estimate(H, theta, ref=ref, n_mc=n_mc, clf=clf,
+                            sample_type=row.sample_type)
             p_knn[j] = a["texture_class"]
             p_hyb[j] = b["texture_class"]
             p_2nd[j] = next(iter(b["knn_class_probabilities"]))

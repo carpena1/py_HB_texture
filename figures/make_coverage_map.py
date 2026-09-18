@@ -2,6 +2,7 @@
 
     .venv/bin/python figures/make_coverage_map.py                 # default reference
     .venv/bin/python figures/make_coverage_map.py public euhydi   # base + addition
+    .venv/bin/python figures/make_coverage_map.py public euhydi+willard
 
 With two arguments the base set is drawn in the accent colour and the added
 set underneath it in a second colour, so what the addition contributes is
@@ -27,7 +28,7 @@ import pandas as pd
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.dirname(HERE))
 import swcc_texture as st                     # noqa: E402
-from verify_region import EU_BBOX             # noqa: E402
+from verify_common import EU_BBOX             # noqa: E402
 
 LAND_URL = ("https://raw.githubusercontent.com/nvkelso/natural-earth-vector/"
             "master/geojson/ne_110m_land.geojson")
@@ -37,14 +38,17 @@ LAT_N, LAT_S = 84.0, -58.0
 W, PAD_X, PAD_TOP = 1040.0, 14.0, 44.0
 LABEL = {"euhydi": "EU-HYDI", "hohenbrink": "Hohenbrink", "kssl": "KSSL",
          "gshp": "GSHP", "merged": "Default reference",
-         "public": "Public reference"}
+         "public": "Public reference", "willard": "Laikipia"}
 BAKE = {"var(--accent)": "#0E6E73", "var(--add)": "#B8471E",
         "var(--muted)": "#5C6A70", "var(--sunken)": "#EAEEEC",
         "currentColor": "#141A1D"}
 REGIONS = {"North America": (-170, -52, 15, 72),
            "Europe": (*EU_BBOX["lon"], *EU_BBOX["lat"]),
            "Asia": (32, 150, 5, 78), "South America": (-82, -34, -56, 13),
-           "Africa": (-18, 52, -35, 37), "Australasia": (110, 180, -48, -8)}
+           # Two boxes, so Africa stops taking in Iran and eastern Arabia:
+           # east of 43 E only the Horn, south of 12 N, is African.
+           "Africa": [(-18, 43, -35, 37), (43.01, 52, -35, 12)],
+           "Australasia": (110, 180, -48, -8)}
 
 A1, A2, A3, A4 = 1.340264, -0.081106, 0.000893, 0.003796
 M = math.sqrt(3) / 2.0
@@ -125,6 +129,9 @@ def cells(d):
 
 
 def in_region(d, box):
+    """Layers inside a (w, e, s, n) box, or inside any of a list of boxes."""
+    if isinstance(box, list):
+        return sum(in_region(d, b) for b in box)
     w, e, s, n = box
     return int((d.lon.between(w, e) & d.lat.between(s, n)).sum())
 
@@ -133,7 +140,11 @@ def main():
     base_name = sys.argv[1] if len(sys.argv) > 1 else "merged"
     add_name = sys.argv[2] if len(sys.argv) > 2 else None
     base = georef(st.load_reference_df(base_name))
-    add = georef(st.load_reference_df(add_name)) if add_name else base.iloc[:0]
+    # An addition may join several sets with "+", e.g. euhydi+willard.
+    add = (georef(pd.concat([st.load_reference_df(n) for n in add_name.split("+")],
+                            ignore_index=True)) if add_name else base.iloc[:0])
+    if add_name:
+        LABEL.setdefault(add_name, " + ".join(LABEL.get(n, n) for n in add_name.split("+")))
     allr = pd.concat([base, add], ignore_index=True)
 
     cb, ca = cells(base), cells(add)

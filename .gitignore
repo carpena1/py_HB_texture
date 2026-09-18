@@ -42,6 +42,31 @@ data/unsoda_psd.csv
 # Hohenbrink et al. (2023) raw distribution (23 MB) — rebuild
 # data/hohenbrink_reference.csv with prepare_hohenbrink.py.
 data/Hohenbrink_raw/
+
+# Laikipia, Kenya soils (the user's own team, unpublished; exact site
+# locations and a submitted manuscript). Not distributed.
+data/willard_raw/
+data/willard_reference.csv
+
+# Canary Islands volcanic ("sorriba") soils: Armas-Espinel et al. (2003) paper
+# and the source dissertation (copyright). Not distributed; the derived tables
+# stay local until their distribution is decided.
+data/armas_raw/
+data/armas_reference.csv
+data/armas_points.csv
+
+# Smithsonian Global Volcanism Program volcano lists (downloaded reference
+# data, used to flag volcanic soils); rebuilt on demand.
+data/volcanoes_raw/
+
+# Metadata document for GSHP's Florida_database (Florida Soil Characterization
+# Data, UF); a third-party source document, not distributed.
+data/FL_soils_GSHP/
+
+# Babaeian's raw files, including the published SSSAJ paper (copyright). The
+# derived data/babaeian_zanjanrood_reference.csv may be distributed: the data owner
+# shared it for that.
+data/babaeian_Zanjanrood_raw/
 # ---------------------------------------------------------------------------
 # EU-HYDI (European Hydropedological Data Inventory) is consortium-restricted:
 # per EUR 26053 EN the intellectual property stays with the individual data
@@ -53,3 +78,27 @@ data/euhydi_reference.csv
 data/euhydi*
 data/EUHYDI*
 data/HYDI*
+
+# A user's own lab-verified curves (add_local_data.py); private by default.
+data/local_reference.csv
+
+# Per-sample validation predictions (include EU-HYDI samples); aggregate figures only are committed.
+figures/cache/
+
+# Babaeian's Arizona soils (the data owner's spreadsheet and fit plots); under
+# test, not distributed until that is decided.
+data/babaeian_AZ_raw/
+data/babaeian_az_reference.csv
+# Per-soil reports for external test sets not (yet) distributed.
+figures/external/babaeian_az/
+figures/external/willard/
+
+# Third-party soil registries downloaded to resolve volcanic-soil flags
+# (Africa Soil Profiles Database, Russian soil register). Rebuilt on demand.
+data/soil_registries_raw/
+
+# Volcanic inventory (prepare_volcanic.py): network/registry caches, and the
+# flags of restricted or unpublished layers. data/volcanic_flags.csv (public
+# layers only) may be distributed.
+data/volcanic_raw/
+data/volcanic_flags_restricted.csv

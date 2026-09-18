@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- py_HB_texture. Land outline: Natural Earth 110 m, public domain. -->
-<svg xmlns="http://www.w3.org/2000/svg" width="1040" height="486" viewBox="0 0 1040 486" role="img" aria-label="A measured curve is fitted to four van Genuchten parameters, sampled 300 times from the fit covariance, then passed to both a gradient-boosted classifier which returns the texture class and a k-nearest-neighbour search which returns particle fractions, conductivity and all uncertainty ranges.">
+<svg xmlns="http://www.w3.org/2000/svg" width="1040" height="486" viewBox="0 0 1040 486" role="img" aria-label="A measured curve is fitted to four van Genuchten parameters, sampled 300 times from the fit covariance, then passed to both a gradient-boosted classifier, which also receives the sample type and returns the texture class, and a k-nearest-neighbour search which returns particle fractions, conductivity from neighbours of the same sample type, and all uncertainty ranges.">
       <defs>
         <marker id="ar2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
           <path d="M 0 1 L 9 5 L 0 9 z" fill="#141A1D"/>
@@ -16,7 +16,8 @@
         <text x="28" y="210" font-size="13" font-weight="600" fill="#141A1D">Measured SWCC</text>
         <text x="28" y="232" font-size="11" fill="#5C6A70">h [kPa], &#952; [&#8211;]</text>
         <text x="28" y="250" font-size="11" fill="#5C6A70">&#8805; 5 points</text>
-        <text x="28" y="272" font-size="11" fill="#5C6A70">lab core or sensor</text>
+        <text x="28" y="268" font-size="11" fill="#5C6A70">+ sample type, andic</text>
+        <text x="28" y="284" font-size="11" fill="#5C6A70">+ depth, bulk density</text>
 
         <!-- fit -->
         <rect x="216" y="186" width="176" height="104" rx="3" fill="#EAEEEC" stroke="#141A1D"/>
@@ -45,8 +46,8 @@
         <!-- kNN -->
         <rect x="644" y="298" width="196" height="130" rx="3" fill="none" stroke="#0E6E73"/>
         <text x="656" y="322" font-size="13" font-weight="600" fill="#0E6E73">k-nearest neighbours</text>
-        <text x="656" y="344" font-size="11" fill="#141A1D">k = 30 in standardised</text>
-        <text x="656" y="359" font-size="11" fill="#141A1D">4-parameter space</text>
+        <text x="656" y="344" font-size="11" fill="#141A1D">k = 30, standardised 4 params</text>
+        <text x="656" y="359" font-size="11" fill="#141A1D">(+ bulk density, andic)</text>
         <text x="656" y="382" font-size="11" fill="#5C6A70">weight 1/d&#178;, times</text>
         <text x="656" y="397" font-size="11" fill="#5C6A70">inverse class frequency</text>
         <text x="656" y="415" font-size="11" fill="#5C6A70">(&#964; = 1, uniform prior)</text>
@@ -64,8 +65,8 @@
         <text x="900" y="344" font-size="11" fill="#5C6A70">sand / silt / clay %</text>
         <text x="900" y="359" font-size="11" fill="#5C6A70">with 5&#8211;95 % range</text>
         <text x="900" y="382" font-size="11" fill="#5C6A70">K<tspan baseline-shift="sub" font-size="8">s</tspan> median + range,</text>
-        <text x="900" y="397" font-size="11" fill="#5C6A70">from neighbours that</text>
-        <text x="900" y="412" font-size="11" fill="#5C6A70">carry a measurement</text>
+        <text x="900" y="397" font-size="11" fill="#5C6A70">from undisturbed</text>
+        <text x="900" y="412" font-size="11" fill="#5C6A70">neighbours with K<tspan baseline-shift="sub" font-size="8">s</tspan></text>
       </g>
 
       <g stroke="#141A1D" fill="none">
@@ -85,7 +86,7 @@
 
       <rect x="16" y="382" width="592" height="88" rx="3" fill="none" stroke="#141A1D" opacity=".35" stroke-dasharray="3 3"/>
       <text x="30" y="404" font-size="12" font-weight="600" font-family="IBM Plex Sans, sans-serif" fill="#141A1D">The split is deliberate</text>
-      <text x="30" y="426" font-size="11" font-family="IBM Plex Sans, sans-serif" fill="#5C6A70">The classifier is more accurate on the class but returns nothing else — no fractions, no K<tspan baseline-shift="sub" font-size="8">s</tspan>, no intervals,</text>
+      <text x="30" y="426" font-size="11" font-family="IBM Plex Sans, sans-serif" fill="#5C6A70">The classifier supplies the class but returns nothing else — no fractions, no K<tspan baseline-shift="sub" font-size="8">s</tspan>, no intervals,</text>
       <text x="30" y="442" font-size="11" font-family="IBM Plex Sans, sans-serif" fill="#5C6A70">no list of comparable real soils. The neighbourhood supplies all of those, and its own class vote is kept as</text>
-      <text x="30" y="458" font-size="11" font-family="IBM Plex Sans, sans-serif" fill="#5C6A70">a confidence flag: when the two agree the answer is right 48 % of the time, when they disagree, 29 %.</text>
+      <text x="30" y="458" font-size="11" font-family="IBM Plex Sans, sans-serif" fill="#5C6A70">a confidence flag: when the two agree the answer is right 51 % of the time, when they disagree, 26 %.</text>
     </svg>

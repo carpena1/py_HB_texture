@@ -25,7 +25,7 @@ verify_ceiling.py for a model-free bound.
 
 Ksat is reported too: GBM regresses log10 Ksat, kNN uses its neighbour median.
 
-Usage:  python verify_gbm.py [n_per_class] [n_mc] [--depth]
+Usage:  python verify_gbm.py [n_per_class] [n_mc] [--depth] [--reference=NAME]
 """
 
 import sys
@@ -117,7 +117,10 @@ def main():
     n_per_class = int(args[0]) if args else 150
     n_mc = int(args[1]) if len(args) > 1 else 40
 
-    gshp = pd.read_csv(st.REFERENCE_CSV).reset_index(drop=True)
+    ref_name = next((a.split("=", 1)[1] for a in sys.argv[1:]
+                     if a.startswith("--reference=")), st.DEFAULT_REFERENCE)
+    gshp = st.load_reference_df(ref_name).reset_index(drop=True)
+    gshp["source_db"] = gshp.source_db.fillna("KSSL")   # KSSL rows carry none
     if use_depth:
         gshp = gshp[gshp.depth_cm.notna()].reset_index(drop=True)
     # 168 layers carry no profile_id; treat each as its own profile so grouped

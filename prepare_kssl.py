@@ -183,7 +183,8 @@ def main():
 
     rows = []
     skip = dict(points=0, texture=0, bd=0, theta=0, fit=0, rmse=0, porosity=0)
-    for row, bdi, por in zip(df.itertuples(), bd.to_numpy(), porosity):
+    for row, bdi, por, bdo in zip(df.itertuples(), bd.to_numpy(), porosity,
+                                  bd_od.to_numpy()):
         h, th = [], []
         for col, kpa in RETENTION.items():
             w = getattr(row, col)
@@ -265,7 +266,13 @@ def main():
             ksat_cmh=np.nan,          # KSSL distributes none -- see docstring
             depth_cm=depth, lat=row.lat, lon=row.lon,
             rmse=rmse, n_points=n_measured, porosity=por, **fm,
-            oc=oc, texture_lab=row.texture_lab))
+            # Wet end on natural clods, dry end on sieved soil: the standard
+            # practice for undisturbed samples.
+            sample_type="undisturbed",
+            sample_type_source="KSSL method codes: wet end on natural clods "
+                               "(DbWR1/4B1c), dry end sieved <2 mm (3C1/3C2)",
+            oc=oc, texture_lab=row.texture_lab,
+            bd=bdo))                  # oven-dry bulk density, g/cm3
 
     out = pd.DataFrame(rows)
     out.to_csv(OUT, index=False)
