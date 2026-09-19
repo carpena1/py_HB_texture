@@ -88,5 +88,5 @@
       <text x="30" y="404" font-size="12" font-weight="600" font-family="IBM Plex Sans, sans-serif" fill="#141A1D">The split is deliberate</text>
       <text x="30" y="426" font-size="11" font-family="IBM Plex Sans, sans-serif" fill="#5C6A70">The classifier supplies the class but returns nothing else — no fractions, no K<tspan baseline-shift="sub" font-size="8">s</tspan>, no intervals,</text>
       <text x="30" y="442" font-size="11" font-family="IBM Plex Sans, sans-serif" fill="#5C6A70">no list of comparable real soils. The neighbourhood supplies all of those, and its own class vote is kept as</text>
-      <text x="30" y="458" font-size="11" font-family="IBM Plex Sans, sans-serif" fill="#5C6A70">a confidence flag: when the two agree the answer is right 51 % of the time, when they disagree, 26 %.</text>
+      <text x="30" y="458" font-size="11" font-family="IBM Plex Sans, sans-serif" fill="#5C6A70">a confidence flag: when the two agree the answer is right 47 % of the time, when they disagree, 27 %.</text>
     </svg>

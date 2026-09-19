@@ -19,7 +19,7 @@ every fold, and each sample is scored with and without depth and bulk
 density. Always answering the dataset's most common class is the baseline
 to beat, not chance.
 
-Usage:  python verify_external.py willard|babaeian_zanjanrood|babaeian_az|armas
+Usage:  python verify_external.py willard|babaeian_zanjanrood|babaeian_az|armas|tong
                                   [n_mc] [--truth=resin]
 """
 
@@ -34,13 +34,15 @@ import ksat_metrics as km
 import prepare_armas
 import prepare_babaeian_az
 import prepare_babaeian_zanjanrood
+import prepare_tong
 import prepare_willard
 import swcc_texture as st
 from verify_common import GROUP, mcnemar
 
 DATASETS = {"willard": prepare_willard,
             "babaeian_zanjanrood": prepare_babaeian_zanjanrood,
-            "babaeian_az": prepare_babaeian_az, "armas": prepare_armas}
+            "babaeian_az": prepare_babaeian_az, "armas": prepare_armas,
+            "tong": prepare_tong}
 N_FOLDS = 20
 
 

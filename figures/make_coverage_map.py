@@ -198,6 +198,8 @@ def main():
         <text x="604" y="326">Sub-Saharan Africa {int(src.get("AfSPDB", 0)):,}</text>
         <line x1="469" y1="189" x2="446" y2="206" stroke="currentColor" opacity=".55"/>
         <text x="442" y="210" text-anchor="end">Canary Islands {int(src.get("Armas_Canarias", 0)):,}</text>
+        <line x1="802" y1="162" x2="826" y2="196" stroke="currentColor" opacity=".55"/>
+        <text x="830" y="208">Yellow River Basin {int(src.get("Tong_YellowRiver", 0)):,}</text>
         <line x1="279" y1="149" x2="238" y2="120" stroke="currentColor" opacity=".55"/>
         <text x="234" y="116" text-anchor="end">KSSL, across the US {int(src.get("KSSL", 0)):,}</text>'''
 

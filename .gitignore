@@ -87,6 +87,12 @@ figures/cache/
 # Babaeian's Arizona soils (the data owner's spreadsheet and fit plots); the
 # derived data/babaeian_az_reference.csv is distributed.
 data/babaeian_AZ_raw/
+# Tong et al. (2024) Yellow River Basin download from PANGAEA (CC BY 4.0);
+# the derived data/tong_reference.csv is distributable.
+data/tong_raw/
+# ANSIS (Australian National Soil Information System) query download; terms
+# vary by data provider, so the raw download stays local.
+data/ansis_raw/
 # Per-soil reports for external test sets.
 figures/external/babaeian_az/
 figures/external/willard/

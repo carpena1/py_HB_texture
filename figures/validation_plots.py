@@ -36,10 +36,10 @@ GROUPED = ["sand", "loamy sand",
 # verify_holdout.py: the 1,711 targets with the curve alone, and the tool as
 # run with --depth and --bulk-density on the HOLDOUT_N targets that carry both
 # (name, exact, group, exact with both, group with both).
-HOLDOUT_N = 1659
-HOLDOUT = [("Soil alone\n(the standard)", 41.2, 64.8, 45.0, 66.7),
-           ("Whole profile", 39.7, 63.8, 41.4, 65.0),
-           ("Whole data source", 30.5, 58.3, 31.9, 57.9)]
+HOLDOUT_N = 1681
+HOLDOUT = [("Soil alone\n(the standard)", 39.4, 63.8, 44.6, 66.8),
+           ("Whole profile", 37.2, 62.9, 42.8, 66.9),
+           ("Whole data source", 28.7, 56.3, 29.0, 57.0)]
 
 
 def style():
@@ -313,8 +313,8 @@ def fig_holdout():
     title(fig, "What is hidden along with the test soil",
           f"Same {HOLDOUT_N:,} soils (those with depth and bulk density). Chance is 8 % "
           "exact, 25 % group.\nHiding the soil's whole data source costs about 9 points. "
-          "Depth and bulk density add 4 points\nfor a new depth at a known site, "
-          "under 2 (not significant) beyond it.")
+          "Depth and bulk density add about 5 points\nwhile the source is in the "
+          "reference, and nothing for a new source.")
     save(fig, "v6_holdout_levels")
 
 
