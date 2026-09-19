@@ -412,6 +412,15 @@ UNSODA 2.0 (581 soils) and the Belgian sDB (165) are also prepared and can be
 loaded with `--reference all`, but most of their soils are already inside
 GSHP, so they are not in the default.
 
+The CSIRO Boorowa Farm soils (57 intact and repacked samples from seven NSW
+sites, 2025; `prepare_boorowa.py`) are kept as an independent Australian test
+set rather than joined: their CC BY-NC-SA licence keeps them local, and they
+are too few to change the class balance. As a new source they read well —
+42 % exact class and 72 % texture group, against 68 % for always answering
+their majority class, sandy loam — but the clays among them are mostly read
+as sandy clay loam (`verify_external.py boorowa`; per-soil report with
+`figures/make_external_report.py boorowa`).
+
 **Volcanic parent material and andic properties** (`volcanic`, `andic`,
 joined from `data/volcanic_flags.csv` by `prepare_volcanic.py`) are two
 separate fields, because they differ: the Laikipia soils sit on Mount
@@ -650,7 +659,7 @@ target's laboratory in the reference is worth +5 points, which is what
 **Building the reference** — each script documents where to obtain its raw
 input: `prepare_gshp.py`, `prepare_kssl.py`, `prepare_hohenbrink.py`,
 `prepare_babaeian_zanjanrood.py`, `prepare_babaeian_az.py`,
-`prepare_armas.py`, `prepare_tong.py`, `prepare_euhydi.py`, `prepare_willard.py`,
+`prepare_armas.py`, `prepare_tong.py`, `prepare_boorowa.py`, `prepare_euhydi.py`, `prepare_willard.py`,
 `prepare_unsoda.py`, `prepare_sdb.py`; `prepare_volcanic.py` (the volcanic and andic fields);
 `free_m.py` (an unconstrained companion fit written alongside the Mualem
 one).

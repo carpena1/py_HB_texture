@@ -93,9 +93,15 @@ data/tong_raw/
 # ANSIS (Australian National Soil Information System) query download; terms
 # vary by data provider, so the raw download stays local.
 data/ansis_raw/
+# Canada National Pedon Database downloads (Open Government Licence - Canada)
+data/npdb_raw/
+# CSIRO Boorowa Farm soil physics (CC BY-NC-SA 4.0): raw and derived stay local
+data/boorowa_raw/
+data/boorowa_reference.csv
 # Per-soil reports for external test sets.
 figures/external/babaeian_az/
 figures/external/willard/
+figures/external/boorowa/
 
 # Third-party soil registries downloaded to resolve volcanic-soil flags
 # (Africa Soil Profiles Database, Russian soil register). Rebuilt on demand.

@@ -79,6 +79,9 @@ REFERENCE_SETS = {
     # laser-diffraction texture) but no harm to the rest and +6 pp for silt
     # loam when added (verify_external.py).
     "tong": ["tong_reference.csv"],
+    # CSIRO Boorowa Farm, NSW (2025; prepare_boorowa.py), CC BY-NC-SA, so
+    # restricted; under test with verify_external.py.
+    "boorowa": ["boorowa_reference.csv"],
     "all": ["gshp_reference.csv", "kssl_reference.csv",
             "hohenbrink_reference.csv", "babaeian_zanjanrood_reference.csv",
             "euhydi_reference.csv", "willard_reference.csv",
@@ -93,7 +96,8 @@ DEFAULT_REFERENCE = "merged"
 # that includes one still loads without it -- from its other tables, with a
 # note on stderr -- so a fresh clone of the public repository runs. A set made
 # only of restricted tables cannot load at all.
-RESTRICTED_TABLES = {"euhydi_reference.csv", "willard_reference.csv"}
+RESTRICTED_TABLES = {"euhydi_reference.csv", "willard_reference.csv",
+                     "boorowa_reference.csv"}
 _noted_missing = set()
 
 # A user's own lab-verified curves, written by add_local_data.py. Joins the

@@ -52,9 +52,11 @@ ARMS = {  # name: (bulk density, organic carbon)
 # named here, for information only.
 KS_TRUTH = {"willard": ("ksat_mpd_cmh",
                         "field permeameter Ks, dry season (not in the reference)")}
-LABELS = {"babaeian_az": "Arizona soils", "willard": "Laikipia soils"}
+LABELS = {"babaeian_az": "Arizona soils", "willard": "Laikipia soils",
+          "boorowa": "Boorowa Farm soils (CSIRO, NSW)"}
 CURVE_NOTE = {"willard": "saturation at 95 % of porosity and the pressure-plate "
-                         "points, pF 2.15-4.2"}
+                         "points, pF 2.15-4.2",
+              "boorowa": "10 cm to 15 bar: suction tables and pressure plates"}
 MATCH_COLOR = {"exact": "#2a78d6", "same group": "#e8a33d",
                "wrong group": "#d6452a"}
 
@@ -99,16 +101,21 @@ def arm_stats(tg, p):
                    group_pct=np.mean([GROUP[a] == GROUP[b]
                                       for a, b in zip(pred, truth)]) * 100,
                    top2_pct=np.mean([t in s for t, s in zip(truth, g.top2)]) * 100)
+        # Soils an option cannot run (organic carbon missing) are left out of
+        # its fraction statistics; fractions_n says how many were scored.
+        has = np.isfinite(g.pred_sand.to_numpy(float))
+        row["fractions_n"] = int(has.sum())
         for c in ("sand", "silt", "clay"):
-            err = g[f"pred_{c}"].to_numpy() - tg[c].to_numpy()
-            ss = np.sum((tg[c] - tg[c].mean()) ** 2)
+            obs = tg[c].to_numpy()[has]
+            err = g[f"pred_{c}"].to_numpy()[has] - obs
+            ss = np.sum((obs - obs.mean()) ** 2)
             row.update({f"{c}_mae": np.mean(np.abs(err)),
                         f"{c}_bias": np.mean(err),
                         f"{c}_rmse": np.sqrt(np.mean(err ** 2)),
                         f"{c}_r2": 1 - np.sum(err ** 2) / ss,
                         f"{c}_cover_pct": np.mean(
-                            (tg[c].to_numpy() >= g[f"pred_{c}_p5"].to_numpy())
-                            & (tg[c].to_numpy() <= g[f"pred_{c}_p95"].to_numpy())) * 100})
+                            (obs >= g[f"pred_{c}_p5"].to_numpy()[has])
+                            & (obs <= g[f"pred_{c}_p95"].to_numpy()[has])) * 100})
         row["fractions_mae"] = np.mean([row[f"{c}_mae"] for c in ("sand", "silt", "clay")])
         s = km.ksat_scores(tg.ksat_cmh.to_numpy(float), g.ks_med.to_numpy(float),
                            g.ks_p5.to_numpy(float), g.ks_p95.to_numpy(float))
@@ -124,11 +131,13 @@ def arm_stats(tg, p):
 
 def best_arms(stats):
     """Class: exact, then group, then top-2 accuracy. Fractions: mean absolute
-    error. Ks: median |log10 error|, then RMSE. Ties keep the fewer covariates."""
+    error, among the options that score every soil. Ks: median |log10 error|,
+    then RMSE. Ties keep the fewer covariates."""
     s = stats.reset_index(drop=True)
     cls = s.sort_values(["exact_pct", "group_pct", "top2_pct"], ascending=False,
                         kind="stable").covariates.iloc[0]
-    frac = s.sort_values("fractions_mae", kind="stable").covariates.iloc[0]
+    full = s[s.fractions_n == s.n]
+    frac = full.sort_values("fractions_mae", kind="stable").covariates.iloc[0]
     ks = s.sort_values(["ks_median_factor", "ks_rmse_log10"],
                        kind="stable").covariates.iloc[0]
     return cls, frac, ks
@@ -402,12 +411,17 @@ def fig_arms(stats, out, label):
         b.text(v + 0.1, yv, f"{v:.1f}", va="center", fontsize=8)
     b.set_xlabel("fractions, mean |error| (points)"); b.set_yticks(yy, [])
     c = axes[2]
-    c.barh(yy, stats.ks_median_factor, height=0.5, color=vp.S1)
-    for yv, v, w, n, nt in zip(yy, stats.ks_median_factor, stats.ks_within_2x_pct,
-                               stats.ks_n, stats.n):
-        extra = f"; n={n}" if n < nt else ""
-        c.text(v + 0.03, yv, f"×{v:.2f}  ({w:.0f} % within 2×{extra})", va="center", fontsize=8)
-    c.set_xlim(1, max(stats.ks_median_factor) * 1.6)
+    if stats.ks_n.max() > 0:
+        c.barh(yy, stats.ks_median_factor, height=0.5, color=vp.S1)
+        for yv, v, w, n, nt in zip(yy, stats.ks_median_factor, stats.ks_within_2x_pct,
+                                   stats.ks_n, stats.n):
+            extra = f"; n={n}" if n < nt else ""
+            c.text(v + 0.03, yv, f"×{v:.2f}  ({w:.0f} % within 2×{extra})", va="center", fontsize=8)
+        c.set_xlim(1, max(stats.ks_median_factor) * 1.6)
+    else:
+        c.text(0.5, 0.5, "no measured Ks in this set", ha="center", va="center",
+               transform=c.transAxes, fontsize=9, color=vp.INK2)
+        c.set_xticks([])
     c.set_xlabel("Ks, typical error factor"); c.set_yticks(yy, [])
     vp.title(fig, f"{label}: which covariates help",
              "The same soils predicted with each option; the best for each output is used "
@@ -462,7 +476,7 @@ def main():
     base_exact = top.iloc[0] / len(tg) * 100
     base_group = np.mean(truth.map(GROUP) == GROUP[top.index[0]]) * 100
     st_short = stats[["covariates", "exact_pct", "group_pct", "top2_pct",
-                      "sand_mae", "silt_mae", "clay_mae", "fractions_mae",
+                      "sand_mae", "silt_mae", "clay_mae", "fractions_mae", "fractions_n",
                       "ks_n", "ks_median_factor", "ks_bias_log10", "ks_rmse_log10",
                       "ks_within_2x_pct", "ks_within_10x_pct", "ks_cover_pct",
                       "ks_spearman"]]
@@ -500,7 +514,10 @@ def main():
     fig_triangle(tg, pf, soils, out, frac, cls, label)
     fig_confusion(soils, conf, out, cls, label)
     fig_fractions(tg, pf, out, frac, label)
-    fig_ks(tg, pk, out, ks, label, ks_label)
+    if tg.ksat_cmh.notna().any():
+        fig_ks(tg, pk, out, ks, label, ks_label)
+    else:
+        print("  no measured Ks in this set: Ks figure skipped")
     fig_arms(stats, out, label)
 
 
