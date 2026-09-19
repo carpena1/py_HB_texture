@@ -1,10 +1,12 @@
 """Should andic properties join the neighbour search (fractions, Ks, the kNN
 class vote)?
 
-Same targets and folds as verify_volcanic.py: every volcanic layer (known or
-probable), a control draw of other soils, and the Canary set as a new
-source. Each target is matched on its fitted parameters (no Monte Carlo, so
-the arms differ only in how neighbours are chosen):
+Same targets as verify_volcanic.py: every volcanic layer (known or
+probable) and a control draw of other soils; the Canary set is predicted as
+a new source only when it is not in the reference. Profile folds as there;
+the new-source design leaves one source out at a time. Each target is
+matched on its fitted parameters (no Monte Carlo, so the arms differ only
+in how neighbours are chosen):
 
   base          the shipped search: four vG parameters
   dim 1, dim 2  + a distance penalty of lambda standard units between a
@@ -82,7 +84,10 @@ def run(ref_df, ref, a_ref, tg, key, extra):
     a_all = andic_code(allt)
     groups = np.array(sorted(tg[key].unique()))
     np.random.default_rng(SEED).shuffle(groups)
-    chunks = list(np.array_split(groups, N_FOLDS))
+    # One source out at a time: 5 folds of sources can hold out every andic
+    # source with a measured Ks at once (Campania and the Canary Islands).
+    chunks = ([[g] for g in groups] if key == "source_db"
+              else list(np.array_split(groups, N_FOLDS)))
     for j in range(n):
         t = allt.iloc[j]
         if j < len(tg):
@@ -151,7 +156,7 @@ def main():
           f"targets {volc.sum()} volcanic + {len(ctrl)} controls"
           + (f" + {len(extra)} Canary" if extra is not None else ""))
     for key, name in (("profile_id", "profile folds (source in the reference)"),
-                      ("source_db", "source folds (new source)")):
+                      ("source_db", "leave-one-source-out (new source)")):
         allt, out = run(ref_df, ref, a_ref, tg, key, extra if key == "source_db" else None)
         v = allt.volcanic.isin(["known", "probable"]).to_numpy()
         a = allt.andic.isin(["yes", "likely"]).to_numpy()
@@ -159,6 +164,10 @@ def main():
         report("andic targets", allt, out, a)
         report("volcanic, not andic", allt, out, v & ~a)
         report("control (not volcanic)", allt, out, ~v)
+        for src in ("EUHYDI_Romano", "Armas_Canarias"):   # the andic sources with Ks
+            m = a & allt.source_db.eq(src).to_numpy()
+            if m.any():
+                report(f"andic, {src}", allt, out, m)
         if key == "source_db" and extra is not None:
             c = np.r_[np.zeros(len(tg), bool), np.ones(len(extra), bool)]
             report("Canary (not in the reference)", allt, out, c)

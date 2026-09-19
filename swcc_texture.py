@@ -108,9 +108,9 @@ VOLCANIC_TABLES = ("volcanic_flags.csv", "volcanic_flags_restricted.csv")
 # it as a feature (reference: yes/likely 1, no 0, unknown missing), and the
 # neighbour search adds ANDIC_LAMBDA standard units of distance between soils
 # that differ in it (reference unknown counts as not andic) -- for the class
-# vote and the fractions only. Ks neighbours ignore it: when tested, the only
-# andic soils with a measured Ks came from one source (the Canary Islands
-# have since added a second). See verify_volcanic.py and verify_andic_knn.py.
+# vote and the fractions only. Ks neighbours ignore it: of the two andic
+# sources with a measured Ks (Campania, Canary Islands), each misleads the
+# other when matched on it. See verify_volcanic.py and verify_andic_knn.py.
 ANDIC_CODE = {"yes": 1.0, "likely": 1.0, "no": 0.0}
 ANDIC_LAMBDA = 1.0
 

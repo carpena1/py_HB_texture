@@ -599,11 +599,16 @@ stating "no" with the source in the reference has moved exact class by −6.2
 to +2.1 pp across draws (−2.9 pp, p=0.16, here): no consistent effect, so
 leaving the flag out costs nothing. The classifier takes the flag as a feature; the
 neighbours add one standard unit of distance between soils that differ in
-it, which moves the class vote and the fractions but not Ks — when this was
-tested the only andic soils with a measured Ks came from one source
-(Campania), so matching Ks on it helped that source and misled every other
-(`verify_andic_knn.py`); the Canary Islands soils now add a second, not yet
-retested. The gain also depends on andic soils from more than
+it, which moves the class vote and the fractions but not Ks. Retested with
+both andic sources that carry a measured Ks (Campania, 102 soils; the Canary
+Islands, 62; `verify_andic_knn.py`, each source left out in turn): the
+one-unit penalty does not move Ks for a new source (−0.05 dex, p=0.25), and
+the stronger versions (two units, or andic-only neighbours) help Campania
+(−1.1 dex, p<0.001) but hurt the Canary Islands (+0.9 to +1.0 dex,
+p≈0.05). Each source's Ks transfers badly to the other, so Ks neighbours
+keep ignoring the flag until a third andic source with Ks can settle it.
+With the source in the reference the penalty lowers Ks error for Campania
+(−0.5 to −0.8 dex), but that is a soil's own source matching itself. The gain also depends on andic soils from more than
 one source: with KSSL and Campania held out together (278 of the 341), the
 flag cost 11 points. The Canary soils' exact class is scored against a
 hexametaphosphate texture that under-disperses allophane.
@@ -620,7 +625,7 @@ Each was tested with paired designs; the scripts are in `dev/`.
 | Weight neighbours by fit quality | +0.0 pp | GSHP fits are mostly well constrained |
 | More European data (EU-HYDI) for an unseen European laboratory | +2.6 pp (p=0.19) | kept for coverage; the gap is laboratory protocol, not geography |
 | Volcanic parent material as a classifier feature | +7 to +11 pp with the source in the reference; texture group −7 to −35 pp for non-andic volcanic soils from a new source | acts as a source label; the andic flag carries the useful part |
-| Andic properties in the Ks neighbour search | Ks +0.1 to +1.0 dex worse for a new source | one source held every andic Ks (before the Canary Islands joined) |
+| Andic properties in the Ks neighbour search | one unit: −0.05 dex (p=0.25) for a new source; stronger: Campania −1.1 dex, Canary Islands +0.9 to +1.0 dex | the two andic sources with Ks mislead each other |
 | Stronger andic matching (2 units, or andic-only neighbours) | fractions −2 to −3 points for andic soils, but Canary exact −14 pp (p=0.012) | the one-unit penalty keeps most of the gain without it |
 
 What *has* helped: the gradient-boosted classifier out-of-laboratory, the
