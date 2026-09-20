@@ -112,3 +112,8 @@ data/soil_registries_raw/
 # layers only) may be distributed.
 data/volcanic_raw/
 data/volcanic_flags_restricted.csv
+
+# Measured retention points dumped by the prepare scripts for the IvG refits
+# (ivg_fits.py); rebuilt on demand from each source's raw data.
+data/kssl_points.csv
+data/hohenbrink_points.csv

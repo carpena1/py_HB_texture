@@ -35,6 +35,7 @@ import swcc_texture as st
 
 RAW = os.path.join("data", "Hohenbrink_raw")
 OUT = os.path.join("data", "hohenbrink_reference.csv")
+POINTS = os.path.join("data", "hohenbrink_points.csv")
 CM_TO_KPA = 0.0980665
 PF_BIN = 0.25            # width of the log-suction bins used for thinning
 MIN_POINTS = 6
@@ -58,6 +59,14 @@ def thin(pf, theta):
     return g.pf.to_numpy(), g.theta.to_numpy()
 
 
+def measured_points():
+    """{layer_id: (h kPa, theta)}: the points each kept curve was fitted to,
+    as written to POINTS by main() (including any saturation anchor)."""
+    d = pd.read_csv(POINTS)
+    return {k: (g.h_kpa.to_numpy(), g.theta.to_numpy())
+            for k, g in d.groupby("layer_id", sort=False)}
+
+
 def main():
     if not os.path.isdir(RAW):
         raise SystemExit(f"{RAW} not found")
@@ -72,7 +81,7 @@ def main():
             / 24.0)
     by_sample = {k: v for k, v in ret.groupby("Sample_ID")}
 
-    rows = []
+    rows, pts = [], []
     skip = dict(points=0, texture=0, theta=0, fit=0, rmse=0)
     for r in info.itertuples():
         g = by_sample.get(r.Sample_ID)
@@ -113,6 +122,7 @@ def main():
                                fallback=free_m.mualem_fallback(tr, ts, alpha, n))
 
         oc = r.Corg if np.isfinite(r.Corg) else np.nan
+        pts += [(f"HB_{r.Sample_ID}", a, b) for a, b in zip(h, theta)]
         rows.append(dict(
             layer_id=f"HB_{r.Sample_ID}",
             # No profile field is published; samples sharing a site and depth
@@ -132,6 +142,7 @@ def main():
 
     out = pd.DataFrame(rows)
     out.to_csv(OUT, index=False)
+    pd.DataFrame(pts, columns=["layer_id", "h_kpa", "theta"]).to_csv(POINTS, index=False)
     print(f"samples read:    {len(info)}")
     print(f"reference layers: {len(out)}   (skipped: {skip})")
     print(f"  with ksat:      {out.ksat_cmh.notna().sum()}")

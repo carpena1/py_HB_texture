@@ -67,6 +67,7 @@ import swcc_texture as st
 
 RAW = os.path.join("data", "euhydi_raw", "HYDI-v1.accdb")
 OUT = os.path.join("data", "euhydi_reference.csv")
+POINTS = os.path.join("data", "euhydi_points.csv")
 CM_TO_KPA = 0.0980665
 PF_BIN = 0.25
 MIN_POINTS = 5
@@ -130,6 +131,14 @@ def usda_from_size_classes(psize):
     return out
 
 
+def measured_points():
+    """{layer_id: (h kPa, theta)}: the points each kept curve was fitted to,
+    as written to POINTS by main() (including any saturation anchor)."""
+    d = pd.read_csv(POINTS)
+    return {k: (g.h_kpa.to_numpy(), g.theta.to_numpy())
+            for k, g in d.groupby("layer_id", sort=False)}
+
+
 def main():
     if not os.path.exists(RAW):
         raise SystemExit(f"{RAW} not found -- EU-HYDI is consortium-restricted "
@@ -158,7 +167,7 @@ def main():
               & cond.COND_M.fillna(-1).map(is_sat_method)]
     ksat = ks.groupby("SAMPLE_ID").COND.median() / 24.0
 
-    rows = []
+    rows, pts = [], []
     skip = dict(points=0, theta=0, texture=0, porosity=0, fit=0, rmse=0)
     n_anchor = 0
     for sid, g in ret.groupby("SAMPLE_ID"):
@@ -246,6 +255,7 @@ def main():
             c = c.iloc[0] if isinstance(c, pd.DataFrame) else c
             oc = float(c.OC) if pd.notna(c.OC) and 0 <= float(c.OC) < 60 else np.nan
 
+        pts += [(f"EUHYDI_{sid}", a, b) for a, b in zip(h, th)]
         rows.append(dict(
             layer_id=f"EUHYDI_{sid}", profile_id=f"EUHYDI_{pid}",
             texture_class=st.usda_class(sand, silt, clay),
@@ -262,6 +272,7 @@ def main():
 
     out = pd.DataFrame(rows)
     out.to_csv(OUT, index=False)
+    pd.DataFrame(pts, columns=["layer_id", "h_kpa", "theta"]).to_csv(POINTS, index=False)
     print(f"samples with retention data: {ret.SAMPLE_ID.nunique()}")
     print(f"reference layers: {len(out)}   (skipped: {skip})")
     print(f"  wet-end anchored:  {n_anchor}")

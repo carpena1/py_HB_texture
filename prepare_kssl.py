@@ -82,6 +82,7 @@ import swcc_texture as st
 
 DB = "data/kssl_raw/NCSSLabDataMartSQLite.sqlite3"
 OUT = "data/kssl_reference.csv"
+POINTS = "data/kssl_points.csv"
 
 # column -> matric potential in kPa
 RETENTION = {
@@ -167,6 +168,14 @@ def load():
     return df
 
 
+def measured_points():
+    """{layer_id: (h kPa, theta)}: the points each kept curve was fitted to,
+    as written to POINTS by main() (including any saturation anchor)."""
+    d = pd.read_csv(POINTS)
+    return {k: (g.h_kpa.to_numpy(), g.theta.to_numpy())
+            for k, g in d.groupby("layer_id", sort=False)}
+
+
 def main():
     if not os.path.exists(DB):
         raise SystemExit(f"{DB} not found -- download the Lab Data Mart "
@@ -181,7 +190,7 @@ def main():
     bd_od = df.bulk_density_oven_dry.fillna(df.bulk_density_third_bar)
     porosity = 1.0 - bd_od.to_numpy() / PARTICLE_DENSITY
 
-    rows = []
+    rows, pts = [], []
     skip = dict(points=0, texture=0, bd=0, theta=0, fit=0, rmse=0, porosity=0)
     for row, bdi, por, bdo in zip(df.itertuples(), bd.to_numpy(), porosity,
                                   bd_od.to_numpy()):
@@ -257,6 +266,7 @@ def main():
         fm = free_m.fit_free_m(h, theta,
                                fallback=free_m.mualem_fallback(tr, ts, alpha, n))
 
+        pts += [(f"KSSL_{row.layer_key}", a, b) for a, b in zip(h, theta)]
         rows.append(dict(
             layer_id=f"KSSL_{row.layer_key}",
             profile_id=f"KSSL_{row.pedon_key}",
@@ -276,6 +286,7 @@ def main():
 
     out = pd.DataFrame(rows)
     out.to_csv(OUT, index=False)
+    pd.DataFrame(pts, columns=["layer_id", "h_kpa", "theta"]).to_csv(POINTS, index=False)
     print(f"skipped: {skip}")
     print(f"\nKSSL layers usable: {len(out)}  -> {OUT}")
     print(f"  bulk density from 1/3-bar for {n_bd33} layers, oven-dry "

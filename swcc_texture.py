@@ -191,6 +191,26 @@ def vg_theta(h, thetar, thetas, alpha, n, m=None):
 CURVE_HEADS = np.array([1.0, 3.0, 10.0, 33.0, 100.0, 330.0, 1000.0, 1500.0])
 
 
+# Fixed heads for feature_mode="heads": saturation and the middle and dry
+# range where texture, rather than structure, governs the curve. In cm, as
+# soil physics quotes them, and beyond the 15 bar most laboratories stop at,
+# so the last one is the model's own extrapolation.
+HEADS_CM = np.array([0.0, 50.0, 100.0, 330.0, 1000.0, 5000.0, 15000.0,
+                     100000.0])
+HEADS_KPA = HEADS_CM * 0.0980665
+
+
+def _head_features(thetar, thetas, alpha, n, heads=None):
+    """Retention sampled at `heads` (kPa), shape (n_rows, n_heads)."""
+    heads = CURVE_HEADS if heads is None else heads
+    thetar, thetas, alpha, n = (np.atleast_1d(np.asarray(x, dtype=float))
+                                for x in (thetar, thetas, alpha, n))
+    m = 1.0 - 1.0 / n
+    ah = alpha[:, None] * np.asarray(heads)[None, :]
+    return (thetar[:, None] + (thetas - thetar)[:, None]
+            * (1.0 + ah ** n[:, None]) ** (-m[:, None]))
+
+
 def _curve_features(thetar, thetas, alpha, n):
     """Retention sampled at CURVE_HEADS, shape (n_rows, n_heads).
 
@@ -389,10 +409,11 @@ class GshpReference:
                             if "sample_type" in df.columns else None)
         self.andic = (df["andic"].isin(["yes", "likely"]).to_numpy(float)
                       if "andic" in df.columns else None)
-        if feature_mode in ("curve", "curve_white"):
-            cols = list(_curve_features(
+        if feature_mode in ("curve", "curve_white", "heads"):
+            cols = list(_head_features(
                 df["thetar"].to_numpy(), df["thetas"].to_numpy(),
-                df["alpha_kpa"].to_numpy(), df["n"].to_numpy()).T)
+                df["alpha_kpa"].to_numpy(), df["n"].to_numpy(),
+                HEADS_KPA if feature_mode == "heads" else CURVE_HEADS).T)
         elif feature_mode == "vg":
             if use_m:
                 cols = [np.log10(df["alpha_kpa_m"]), np.log10(df["n_m"] - 1.0),
@@ -450,8 +471,11 @@ class GshpReference:
         With sample_type, only rows of that type are eligible. With andic
         (1.0 or 0.0), rows that differ from it are ANDIC_LAMBDA standard
         units further away."""
-        if self.feature_mode in ("curve", "curve_white"):
-            f = list(_curve_features(thetar, thetas, alpha, n).ravel())
+        if self.feature_mode in ("curve", "curve_white", "heads"):
+            f = list(_head_features(
+                thetar, thetas, alpha, n,
+                HEADS_KPA if self.feature_mode == "heads"
+                else CURVE_HEADS).ravel())
         elif self.use_m:
             if m is None:
                 raise ValueError("this reference uses free m; pass m=...")
@@ -510,7 +534,8 @@ class TextureGBM:
 
     def __init__(self, path=None, df=None, reference=DEFAULT_REFERENCE,
                  use_depth=False, use_m=False, use_sample_type=True,
-                 covariates=(), random_state=0):
+                 covariates=(), random_state=0, feature_mode="vg",
+                 fractions=False):
         try:
             from sklearn.ensemble import HistGradientBoostingClassifier
         except ImportError:
@@ -536,6 +561,10 @@ class TextureGBM:
         # the targets) for a source it has never seen; see
         # verify_covariates.py.
         self.covariates = tuple(covariates)
+        # feature_mode="heads" replaces the four vG parameters with water
+        # contents at HEADS_CM, the curve read where texture governs it
+        # rather than structure; see verify_alt_predictors.py.
+        self.feature_mode = feature_mode
         self.clf = HistGradientBoostingClassifier(
             max_iter=400, learning_rate=0.06, max_leaf_nodes=31,
             l2_regularization=1.0, early_stopping=True,
@@ -555,10 +584,22 @@ class TextureGBM:
             df["m"].to_numpy() if use_m else None, stype, covs),
             df["texture_class"].to_numpy())
         self.classes_ = self.clf.classes_
+        # Companion sand/clay regressors on the same table and covariates, so
+        # a caller that wants the particle fractions the command line reports
+        # does not have to build and pass a second model. estimate() picks it
+        # up automatically.
+        self.frac = FractionGBM(
+            df=df, use_sample_type=use_sample_type, covariates=covariates,
+            random_state=random_state, feature_mode=feature_mode
+        ) if fractions else None
 
     def _features(self, thetar, thetas, alpha, n, depth=None, m=None,
                   stype=None, covs=()):
-        cols = [np.log10(alpha), np.log10(np.asarray(n) - 1.0), thetar, thetas]
+        if self.feature_mode == "heads":
+            cols = list(_head_features(thetar, thetas, alpha, n, HEADS_KPA).T)
+        else:
+            cols = [np.log10(alpha), np.log10(np.asarray(n) - 1.0), thetar,
+                    thetas]
         if self.use_depth:
             cols.append(np.log10(1.0 + np.clip(np.asarray(depth, float), 0,
                                                None)))
@@ -588,9 +629,78 @@ class TextureGBM:
         return dict(zip(self.classes_, p.mean(axis=0)))
 
 
+class FractionGBM:
+    """Gradient-boosted regressors for sand and clay, silt by difference.
+
+    Predicting sand and clay directly and taking silt = 100 - sand - clay
+    keeps the sum constraint while dropping silt, the weakest of the three.
+    NOT ADOPTED, and off by default: it beats the neighbour mean on targets
+    drawn from the reference (silt 11.5 vs 12.7 points, verify_alt_predictors
+    .py) but is worse on an outside source, where boosting shrinks extreme
+    clays towards the mean -- on five external sets clay error rises from
+    10.9 to 14.3 points, Laikipia's clays from 16.0 to 28.1
+    (verify_fractions.py). Kept because it is the natural home for a better
+    regressor if one is found.
+
+    Features are the classifier's, so it takes the same feature_mode,
+    covariates and sample type.
+    """
+
+    def __init__(self, path=None, df=None, reference=DEFAULT_REFERENCE,
+                 use_sample_type=True, covariates=(), random_state=0,
+                 feature_mode="vg"):
+        try:
+            from sklearn.ensemble import HistGradientBoostingRegressor
+        except ImportError:
+            raise ImportError(
+                "the fraction regressors need scikit-learn: pip install "
+                "scikit-learn")
+        import pandas as pd
+        if df is None:
+            df = (pd.read_csv(path) if path is not None
+                  else load_reference_df(reference))
+        df = df[df["sand"].notna() & df["clay"].notna()]
+        self.use_depth = False
+        self.use_m = False
+        self.use_sample_type = use_sample_type
+        self.covariates = tuple(covariates)
+        self.feature_mode = feature_mode
+        stype = (df["sample_type"].map(SAMPLE_TYPE_CODE).to_numpy(float)
+                 if use_sample_type and "sample_type" in df.columns
+                 else np.full(len(df), np.nan))
+        covs = [df[c].to_numpy(float) if c in df.columns
+                else np.full(len(df), np.nan) for c in self.covariates]
+        x = TextureGBM._features(
+            self, *(df[c].to_numpy() for c in
+                    ("thetar", "thetas", "alpha_kpa", "n")),
+            None, None, stype, covs)
+        self.models = {}
+        for name in ("sand", "clay"):
+            m = HistGradientBoostingRegressor(
+                max_iter=400, learning_rate=0.06, max_leaf_nodes=31,
+                l2_regularization=1.0, early_stopping=True,
+                validation_fraction=0.15, random_state=random_state)
+            self.models[name] = m.fit(x, df[name].to_numpy(float))
+
+    def fractions(self, thetar, thetas, alpha, n, depth=None, m=None,
+                  sample_type=None, bulk_density=None, andic=None):
+        """Mean (sand, silt, clay) over the Monte Carlo draws, in %."""
+        st_code = np.full(np.shape(thetar),
+                          SAMPLE_TYPE_CODE.get(sample_type, np.nan))
+        given = {"depth_cm": depth, "bd": bulk_density, "andic_code": andic}
+        covs = [np.full(np.shape(thetar), np.nan if given[c] is None
+                        else given[c], dtype=float) for c in self.covariates]
+        x = TextureGBM._features(self, thetar, thetas, alpha, n, None, None,
+                                 st_code, covs)
+        sand = np.clip(self.models["sand"].predict(x), 0.0, 100.0)
+        clay = np.clip(self.models["clay"].predict(x), 0.0, 100.0 - sand)
+        return (float(sand.mean()), float((100.0 - sand - clay).mean()),
+                float(clay.mean()))
+
+
 def estimate(h, theta, ref=None, n_mc=300, k=30, seed=0, depth=None,
              om=None, clf=None, sample_type=None, bulk_density=None,
-             andic=None):
+             andic=None, clf_frac=None):
     """Full pipeline: fit vG, then kNN inference with MC uncertainty.
 
     Returns a dict with fitted parameters, class probabilities, particle
@@ -608,6 +718,14 @@ def estimate(h, theta, ref=None, n_mc=300, k=30, seed=0, depth=None,
     andic ("yes"/"no", or None for not known) reaches the classifier when it
     was trained with covariates=["andic_code"], and the neighbour search for
     the class vote and the fractions; Ks neighbours ignore it.
+
+    clf_frac, a FractionGBM -- or TextureGBM(fractions=True), whose
+    companion regressors estimate() picks up on its own -- adds
+    "fractions_gbm": sand and clay predicted directly, silt by difference.
+    NOT the reported fractions: it beats the neighbour mean on targets drawn
+    from the reference but is worse on an outside source, where it shrinks
+    extreme clays towards the mean (verify_alt_predictors.py,
+    verify_fractions.py).
     """
     andic_code = (None if andic is None else
                   ANDIC_CODE[andic] if isinstance(andic, str) else float(bool(andic)))
@@ -688,10 +806,22 @@ def estimate(h, theta, ref=None, n_mc=300, k=30, seed=0, depth=None,
                  if v > 0}
         source = "gbm"
 
+    gbm_frac = None
+    if clf_frac is None:
+        clf_frac = getattr(clf, "frac", None)
+    if clf_frac is not None:
+        gbm_frac = clf_frac.fractions(
+            draws[:, 0], draws[:, 1], 10.0 ** draws[:, 2],
+            1.0 + 10.0 ** draws[:, 3], depth=depth,
+            m=draws[:, 4] if free_m else None, sample_type=sample_type,
+            bulk_density=bulk_density, andic=andic_code)
+
     frac_vals = np.array(frac_vals); frac_w = np.array(frac_w)
     frac_mean = (frac_vals * frac_w[:, None]).sum(axis=0) / frac_w.sum()
     frac_lo = [_wpercentile(frac_vals[:, j], frac_w, 5) for j in range(3)]
     frac_hi = [_wpercentile(frac_vals[:, j], frac_w, 95) for j in range(3)]
+
+    mean_frac = frac_mean
 
     ks_vals = np.array(ks_vals); ks_w = np.array(ks_w)
     ks = {"n_neighbors_with_ksat": float(np.mean(ks_neighbor_counts)), "k": k,
@@ -723,12 +853,15 @@ def estimate(h, theta, ref=None, n_mc=300, k=30, seed=0, depth=None,
         "class_source": source,
         "knn_class_probabilities": knn_probs,
         "fractions": {
-            "sand": frac_mean[0], "silt": frac_mean[1], "clay": frac_mean[2],
+            "sand": mean_frac[0], "silt": mean_frac[1], "clay": mean_frac[2],
             "p5": dict(zip(("sand", "silt", "clay"), frac_lo)),
             "p95": dict(zip(("sand", "silt", "clay"), frac_hi)),
-            "class_of_mean": usda_class(*frac_mean),
+            "class_of_mean": usda_class(*mean_frac),
         },
         "ksat": ks,
+        **({} if gbm_frac is None else {"fractions_gbm": dict(
+            zip(("sand", "silt", "clay"), gbm_frac),
+            class_of_mean=usda_class(*gbm_frac))}),
     }
 
 
