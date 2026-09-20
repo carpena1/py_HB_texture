@@ -15,10 +15,12 @@ numbers are comparable with verify_holdout.py's:
 Both are reported with the curve alone and with depth and bulk density, on
 the same targets and folds as verify_holdout.py (150 layers per class).
 
-Designs: profile (a new site from a source the reference holds) and source
-(a laboratory the reference has never seen).
+Designs, as verify_holdout.py: layer (only the test soil hidden), profile
+(a new site from a source the reference holds) and source (a laboratory the
+reference has never seen).
 
-Usage:  python verify_alt_predictors.py [profile|source] [n_per_class] [n_mc]
+Usage:  python verify_alt_predictors.py [layer|profile|source] [n_per_class]
+                                        [n_mc]
 """
 
 import sys
@@ -127,7 +129,11 @@ def main():
                     for _, x in g.groupby("texture_class")]
                    ).reset_index(drop=True)
     rng = np.random.default_rng(0)
-    if design == "profile":
+    if design == "layer":
+        lay = np.array(tg.layer_id)
+        rng.shuffle(lay)
+        fold_list = [("layer_id", set(x)) for x in np.array_split(lay, N_FOLDS)]
+    elif design == "profile":
         p = np.array(sorted(tg.profile_id.unique()))
         rng.shuffle(p)
         fold_list = [("profile_id", set(x)) for x in np.array_split(p, N_FOLDS)]
