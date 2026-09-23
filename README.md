@@ -605,7 +605,9 @@ soils, and the tool says so.
 pore-size distribution: the capillary equation turns each suction into a pore
 radius, Hagen-Poiseuille makes each pore conduct, and the sum over the pores
 is a Ks that uses no neighbours at all (Childs and Collis-George 1950;
-Marshall 1958; Hillel 1980, ch. 8 and 9; `ks_physical.py`). The tool reports
+Marshall 1958; Hillel 1980, ch. 8 and 9; `ks_physical.py`; the method, its
+corrections and every test are summarised in the
+[physics brief](Ks_physical_estimation/physics_brief.md)). The tool reports
 it beside the kNN value, the way the neighbour vote sits beside the
 classifier's class, both as it comes out of the theory (*raw*) and divided
 by a matching factor (*matched*).
@@ -793,7 +795,7 @@ target's laboratory in the reference is worth +5 points, which is what
 **The tool**
 
 - `swcc_texture.py` — fit, inference and command line
-- `ks_physical.py` — the capillary-bundle Ks (pores capped at 50 cm suction), the second opinion; `Ks_physical_estimation/physics_brief.md` summarises the method, its two corrections, the tests and the references
+- `ks_physical.py` — the capillary-bundle Ks (pores capped at 50 cm suction), the second opinion; the [physics brief](Ks_physical_estimation/physics_brief.md) summarises the method, its two corrections, the tests and the references
 - `add_local_data.py` — add your own lab-verified curves to the reference
 - `data/*_reference.csv` — the reference tables (EU-HYDI's built locally only)
 - `Testing/` — example curves: `<i>_<code>_CnP.csv` (Carsel & Parrish class
