@@ -85,6 +85,10 @@ REFERENCE_SETS = {
     # CSIRO Boorowa Farm, NSW (2025; prepare_boorowa.py), CC BY-NC-SA, so
     # restricted; under test with verify_external.py.
     "boorowa": ["boorowa_reference.csv"],
+    # New Jersey Coastal Plain, USDA-SCS Soil Survey Investigations Report 26
+    # (1974; prepare_nj_ssir26.py): intact-core Ks, the Arya-Paris test set;
+    # under test with verify_external.py.
+    "nj_ssir26": ["nj_ssir26_reference.csv"],
     "all": ["gshp_reference.csv", "kssl_reference.csv",
             "hohenbrink_reference.csv", "babaeian_zanjanrood_reference.csv",
             "euhydi_reference.csv", "willard_reference.csv",

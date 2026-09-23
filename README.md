@@ -447,6 +447,25 @@ of them); the seven clays and sandy clays are read correctly four times
 (`verify_external.py boorowa`; per-soil report with
 `figures/make_external_report.py boorowa`).
 
+The **New Jersey Coastal Plain soils** of Soil Survey Investigations Report
+26 (USDA-SCS and Rutgers, 1974; `prepare_nj_ssir26.py`) are a second
+independent test set, and the only one with a Ks measured on intact cores
+for every soil: 236 horizons from 46 pedons sampled in 1956–61, the same
+soils on which Arya et al. (1982) tested the Arya–Paris model. Rutgers
+measured saturation, 0.02–1 bar and Ks on 3-inch cores and 2–15 bar on
+crushed samples; texture is the SCS pipette analysis. The sheets were
+transcribed from the scan and checked against the NASA report's
+independent copy of 181 of the curves (97.8 % of 1,439 points agree within
+0.011) and against the NCSS database's clay (225 layers, all within 0.8
+points). The soils are mostly coarse: 109 sandy loams, 50 sands and 32
+loamy sands. As a new source they read 56.4 % exact class (46.2 % for always
+answering sandy loam), 78.8 % texture group and macro-F1 46 against 9, with
+clay over-predicted (17 % against 11 %). Here the fixed heads beat the vG
+parameters by 14 points of exact class. Ks is within ×1.8 for the kNN
+(ρ = 0.75, 93 % within 10×) and ×2.2 for the capillary bundle (ρ = 0.80,
+91 %); uncapped, the bundle would be ×17 (`verify_external.py nj_ssir26`;
+`figures/make_external_report.py nj_ssir26`).
+
 **Volcanic parent material and andic properties** (`volcanic`, `andic`,
 joined from `data/volcanic_flags.csv` by `prepare_volcanic.py`) are two
 separate fields, because they differ: the Laikipia soils sit on Mount
@@ -626,7 +645,9 @@ Yellow River, +0.04 dex, EU-HYDI Romano, +0.02, and EU-HYDI Lilly, +0.36,
 whose saturated water content exceeds the porosity), in every texture group,
 and it ranks soils far better (ρ = 0.51 against 0.29). The external sets
 agree (`figures/make_external_report.py`, fig6): Zanjanrood ×1.95 against
-the kNN's ×2.35, Arizona ×2.0 against ×2.0. The kNN keeps two advantages:
+the kNN's ×2.35, Arizona ×2.0 against ×2.0, and on the New Jersey soils'
+intact-core Ks, which played no part in choosing the cap or the factor,
+×2.2 against ×1.8 with the better ranking (ρ 0.80 against 0.75). The kNN keeps two advantages:
 its 5–95 % band, which the physics has not got, and its gain when the
 user's own laboratory is in the reference — 0.53 dex for a new site from a
 source the reference holds, 0.40 for a new depth (table above) — which the
@@ -783,7 +804,7 @@ target's laboratory in the reference is worth +5 points, which is what
 **Building the reference** — each script documents where to obtain its raw
 input: `prepare_gshp.py`, `prepare_kssl.py`, `prepare_hohenbrink.py`,
 `prepare_babaeian_zanjanrood.py`, `prepare_babaeian_az.py`,
-`prepare_armas.py`, `prepare_tong.py`, `prepare_boorowa.py`, `prepare_euhydi.py`, `prepare_willard.py`,
+`prepare_armas.py`, `prepare_tong.py`, `prepare_boorowa.py`, `prepare_nj_ssir26.py`, `prepare_euhydi.py`, `prepare_willard.py`,
 `prepare_unsoda.py`, `prepare_sdb.py`; `prepare_volcanic.py` (the volcanic and andic fields);
 `free_m.py` (an unconstrained companion fit written alongside the Mualem
 one).
@@ -811,6 +832,13 @@ prediction is made, what the validation proves) with its SVGs, and
 - Armas-Espinel, S., Hernández-Moreno, J.M., Muñoz-Carpena, R. and Regalado,
   C.M. (2003). Physical properties of "sorriba"-cultivated volcanic soils from
   Tenerife in relation to andic diagnostic parameters. *Geoderma* 117:297–311.
+- Arya, L.M., Richter, J.C. and Davidson, S.A. (1982). A comparison of soil
+  moisture characteristics predicted by the Arya-Paris model with
+  laboratory-measured data. AgRISTARS Soil Moisture report SM-L2-04247
+  (JSC-17820), NASA Johnson Space Center, Houston.
+- Arya, L.M. and Paris, J.F. (1981). A physicoempirical model to predict the
+  soil moisture characteristic from particle-size distribution and bulk
+  density data. *Soil Science Society of America Journal* 45:1023–1030.
 - Babaeian, E., Homaee, M., Vereecken, H., Montzka, C., Norouzi, A.A. and
   van Genuchten, M.Th. (2015). A comparative study of multiple approaches for
   predicting the soil–water retention curve: hyperspectral information vs.
@@ -863,6 +891,10 @@ prediction is made, what the validation proves) with its SVGs, and
 - Schaap, M.G., Leij, F.J. and van Genuchten, M.Th. (2001). ROSETTA: a computer
   program for estimating soil hydraulic parameters with hierarchical
   pedotransfer functions. *Journal of Hydrology* 251:163–176.
+- Soil Conservation Service, USDA (1974). *Soil survey laboratory data and
+  descriptions for some soils of New Jersey*. Soil Survey Investigations
+  Report No. 26, with the New Jersey Agricultural Experiment Station, Rutgers
+  University. HathiTrust uc1.d0005445648.
 - Soil Survey Staff, NRCS, USDA. *National Cooperative Soil Survey Soil
   Characterization Database* (Kellogg Soil Survey Laboratory).
   https://ncsslabdatamart.sc.egov.usda.gov/ (accessed 2026-08-09). Public
@@ -901,6 +933,9 @@ The bundled GSHP-derived table (`data/gshp_reference.csv`) is itself CC BY 4.0
 — cite Gupta et al. (2022) and Zenodo record 6640246 when reusing it. The sDB
 table is CC-BY-3.0 (Vereecken et al. 2017). The Zanjanrood table
 (`data/babaeian_zanjanrood_reference.csv`) holds E. Babaeian's own measurements,
-distributed with the data owner's permission; cite Babaeian et al. (2015). EU-HYDI data and anything derived
+distributed with the data owner's permission; cite Babaeian et al. (2015). The
+New Jersey table (`data/nj_ssir26_reference.csv`) is transcribed from US
+government publications (USDA-SCS 1974; Arya et al. 1982), which are in the
+public domain. EU-HYDI data and anything derived
 from it at sample level are not part of this repository, nor are the
 unpublished Laikipia data.

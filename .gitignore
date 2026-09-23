@@ -95,6 +95,9 @@ data/tong_raw/
 data/ansis_raw/
 # Canada National Pedon Database downloads (Open Government Licence - Canada)
 data/npdb_raw/
+# Arya, Richter and Davidson (1982), NASA AgRISTARS SM-L2-04247: 181 New Jersey
+# horizons (SCS Soil Survey Investigations Report 26). A 9 MB scan, kept local.
+data/arya_nj_raw/
 # CSIRO Boorowa Farm soil physics (CC BY-NC-SA 4.0): raw and derived stay local
 data/boorowa_raw/
 data/boorowa_reference.csv
@@ -103,6 +106,7 @@ figures/external/babaeian_az/
 figures/external/willard/
 figures/external/boorowa/
 figures/external/babaeian_zanjanrood/
+figures/external/nj_ssir26/
 
 # Third-party soil registries downloaded to resolve volcanic-soil flags
 # (Africa Soil Profiles Database, Russian soil register). Rebuilt on demand.

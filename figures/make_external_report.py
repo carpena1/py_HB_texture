@@ -72,10 +72,12 @@ KS_TRUTH = {"willard": ("ksat_mpd_cmh",
                         "field permeameter Ks, dry season (not in the reference)")}
 LABELS = {"babaeian_az": "Arizona soils", "willard": "Laikipia soils",
           "boorowa": "Boorowa Farm soils (CSIRO, NSW)",
-          "babaeian_zanjanrood": "Zanjanrood watershed soils (Iran)"}
+          "babaeian_zanjanrood": "Zanjanrood watershed soils (Iran)",
+          "nj_ssir26": "New Jersey Coastal Plain soils (SSIR 26)"}
 CURVE_NOTE = {"willard": "the original laboratory values, pF 0-4.2, rescaled per sample so that pF 0 sits at 95 % of porosity",
               "boorowa": "10 cm to 15 bar: suction tables and pressure plates",
-              "babaeian_zanjanrood": "0-100 cm on intact cores (hanging column), 330-15,000 cm on disturbed samples (sand box and pressure plates)"}
+              "babaeian_zanjanrood": "0-100 cm on intact cores (hanging column), 330-15,000 cm on disturbed samples (sand box and pressure plates)",
+              "nj_ssir26": "saturation and 0.02-1 bar on intact cores, 2-15 bar on crushed samples; Ks on the cores"}
 MATCH_COLOR = {"exact": "#2a78d6", "same group": "#e8a33d",
                "wrong group": "#d6452a"}
 
