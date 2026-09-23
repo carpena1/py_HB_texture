@@ -122,3 +122,6 @@ data/volcanic_flags_restricted.csv
 # (ivg_fits.py); rebuilt on demand from each source's raw data.
 data/kssl_points.csv
 data/hohenbrink_points.csv
+
+# The original problem description, kept locally only.
+Problem_description.docx
