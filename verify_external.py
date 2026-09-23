@@ -99,12 +99,23 @@ def held_out(ref, tg, key, pts, n_mc, rng):
 def report(title, tg, out):
     truth = tg.texture_class.to_numpy()
     grp = lambda p: np.array([GROUP[a] == GROUP[b] for a, b in zip(p, truth)])
+
+    def macro_f1(pred):
+        """F1 averaged over the classes the set actually contains, as the
+        project's overall testing reports it (verify_blend.py)."""
+        f = []
+        for c in sorted(set(truth)):
+            tp = int(np.sum((pred == c) & (truth == c)))
+            den = int(np.sum(pred == c) + np.sum(truth == c))
+            f.append(200 * tp / den if den else 0.0)
+        return float(np.mean(f))
     print(f"\n=== {title} (n={len(tg)}) ===")
     for a, name in (("base", "tool (curve only)"),
                     ("cov", "+ depth & bulk density"),
                     ("knn", "kNN second opinion")):
         print(f"  {name:<24s} exact {np.mean(out[a] == truth)*100:5.1f} %   "
-              f"group {grp(out[a]).mean()*100:5.1f} %")
+              f"group {grp(out[a]).mean()*100:5.1f} %   "
+              f"macro-F1 {macro_f1(out[a]):5.1f}")
     top2 = np.mean([t in p for t, p in zip(truth, out["top2"])])
     print(f"  true class in the tool's top 2: {top2*100:.1f} %")
     ca, cb = out["base"] == truth, out["cov"] == truth
@@ -175,9 +186,14 @@ def main():
     print(f"{name}: {len(tg)} samples from {tg.profile_id.nunique()} sites; "
           f"classes {top.to_dict()}")
     print(f"default reference: {len(ref)} layers; n_mc={n_mc}")
+    one = np.full(len(tg), top.index[0], dtype=object)
+    base_f1 = np.mean([200 * int(np.sum((one == c) & (truth.to_numpy() == c)))
+                       / max(int(np.sum(one == c) + np.sum(truth.to_numpy() == c)), 1)
+                       for c in sorted(set(truth))])
     print(f"always answering '{top.index[0]}': exact "
           f"{top.iloc[0] / len(tg)*100:.1f} %, group "
-          f"{np.mean(truth.map(GROUP) == GROUP[top.index[0]])*100:.1f} %")
+          f"{np.mean(truth.map(GROUP) == GROUP[top.index[0]])*100:.1f} %, "
+          f"macro-F1 {base_f1:.1f}")
 
     rng = np.random.default_rng(0)
     outs = {"new": empty(len(tg))}

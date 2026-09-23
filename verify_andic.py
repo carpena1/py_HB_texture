@@ -15,6 +15,14 @@ target's own value stated (andic targets "yes", controls "no").
 
 Classifier and neighbours are rebuilt from the same reduced reference in
 every fold; the classifier with the flag is trained with it as a feature.
+As in the tool, a target stated "yes" is matched on
+swcc_texture.ANDIC_FEATURE_MODE and every other target on the default
+predictors.
+
+Each arm also reports the ensemble of the two opinions: the class
+maximising the geometric mean of the classifier's and the neighbours'
+probabilities (the log pool of verify_blend.py at its selected weight, 0.5,
+fixed here rather than tuned on these soils).
 
 Usage:  python verify_andic.py [n_per_class] [n_mc]
 """
@@ -40,7 +48,7 @@ def run(ref_df, tg, key, n_mc, extra=None):
     allt = pd.concat([tg, extra], ignore_index=True) if extra is not None else tg
     n = len(allt)
     out = {a: dict(cls=np.empty(n, object), knn=np.empty(n, object),
-                   frac=np.full((n, 3), np.nan), ks=np.full(n, np.nan))
+                   ens=np.empty(n, object), frac=np.full((n, 3), np.nan), ks=np.full(n, np.nan))
            for a in ("without", "with")}
     groups = np.array(sorted(tg[key].unique()))
     np.random.default_rng(0).shuffle(groups)
@@ -57,16 +65,28 @@ def run(ref_df, tg, key, n_mc, extra=None):
         ref = st.GshpReference(df=train)
         clf0 = st.TextureGBM(df=train)
         clf1 = st.TextureGBM(df=train, covariates=["andic_code"])
+        if st.ANDIC_FEATURE_MODE == ref.feature_mode:
+            ref_a, clf1_a = ref, clf1
+        else:
+            ref_a = st.GshpReference(df=train, feature_mode=st.ANDIC_FEATURE_MODE)
+            clf1_a = st.TextureGBM(df=train, covariates=["andic_code"],
+                                   feature_mode=st.ANDIC_FEATURE_MODE)
         for j in np.where(test)[0]:
             r = allt.iloc[j]
             h, th = points(r)
             flag = "yes" if r.andic in ("yes", "likely") else "no"
-            for arm, clf, a in (("without", clf0, None), ("with", clf1, flag)):
-                e = st.estimate(h, th, ref=ref, clf=clf, n_mc=n_mc,
+            routed = (ref_a, clf1_a) if flag == "yes" else (ref, clf1)
+            for arm, (rf, clf), a in (("without", (ref, clf0), None),
+                                      ("with", routed, flag)):
+                e = st.estimate(h, th, ref=rf, clf=clf, n_mc=n_mc,
                                 sample_type=r.sample_type, andic=a)
                 o = out[arm]
                 o["cls"][j] = e["texture_class"]
                 o["knn"][j] = next(iter(e["knn_class_probabilities"]))
+                pg, pk = e["class_probabilities"], e["knn_class_probabilities"]
+                o["ens"][j] = max(st.USDA_CLASSES, key=lambda c: (
+                    np.log(max(pg.get(c, 0.0), 1e-12))
+                    + np.log(max(pk.get(c, 0.0), 1e-12))))
                 o["frac"][j] = [e["fractions"][c] for c in ("sand", "silt", "clay")]
                 o["ks"][j] = e["ksat"]["median_cmh"]
     return allt, out
@@ -83,13 +103,16 @@ def report(title, allt, out, mask):
         ok = o["cls"][mask] == t
         g = np.array([GROUP[a] == GROUP[b] for a, b in zip(o["cls"][mask], t)])
         kk = o["knn"][mask] == t
+        ee = o["ens"][mask] == t
+        eg = np.array([GROUP[a] == GROUP[b] for a, b in zip(o["ens"][mask], t)])
         err = np.abs(o["frac"][mask] - meas).mean(axis=1)
         ke = np.abs(np.log10(o["ks"][mask]) - np.log10(obs))
-        res[arm] = (ok, g, kk, err, ke)
+        res[arm] = (ok, g, kk, err, ke, ee, eg)
         print(f"    {arm:<8s} exact {ok.mean()*100:5.1f} %  group {g.mean()*100:5.1f} %  "
-              f"kNN {kk.mean()*100:5.1f} %  fractions MAE {err.mean():4.1f}"
+              f"kNN {kk.mean()*100:5.1f} %  ensemble {ee.mean()*100:5.1f} % / "
+              f"group {eg.mean()*100:5.1f} %  fractions MAE {err.mean():4.1f}"
               + (f"  Ks med |log err| {np.nanmedian(ke):.2f}" if np.isfinite(ke).sum() else ""))
-    (a0, g0, k0, e0, s0), (a1, g1, k1, e1, s1) = res["without"], res["with"]
+    (a0, g0, k0, e0, s0, _, _), (a1, g1, k1, e1, s1, x1, y1) = res["without"], res["with"]
     line = (f"    with vs without: exact {(a1.mean()-a0.mean())*100:+.1f} pp "
             f"p={mcnemar(a0, a1):.3f}, group {(g1.mean()-g0.mean())*100:+.1f} pp "
             f"p={mcnemar(g0, g1):.3f}, kNN {(k1.mean()-k0.mean())*100:+.1f} pp")
@@ -99,6 +122,9 @@ def report(title, allt, out, mask):
     if fin.any():
         line += f", Ks identical: {np.allclose(s0[fin], s1[fin])}"
     print(line)
+    print(f"    with flag, ensemble vs classifier: exact {(x1.mean()-a1.mean())*100:+.1f} pp "
+          f"p={mcnemar(a1, x1):.3f}, group {(y1.mean()-g1.mean())*100:+.1f} pp "
+          f"p={mcnemar(g1, y1):.3f}")
 
 
 def main():

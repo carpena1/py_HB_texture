@@ -4,12 +4,16 @@ Step 1 (slow, ~45 min, cached): every target layer is predicted with only
 itself removed from the reference and from the classifier's training data,
 by each prediction method the project has tried:
 
-    knn         neighbour vote alone
-    hybrid      the shipped default: the classifier decides the class
+    knn         neighbour vote alone (vG parameters)
+    hybrid      the classifier decides the class, on the four vG
+                parameters -- the default until 2026-09
     + depth & bulk density, which also join the neighbour search
-    heads       water content at fixed heads instead of the four vG
-                parameters (swcc_texture.HEADS_CM), curve alone and with
-                the covariates
+    heads       water content at fixed heads (swcc_texture.HEADS_CM), the
+                default since 2026-09, curve alone and with the covariates
+
+    ensemble    the geometric mean of the classifier's and the neighbours'
+                class probabilities (verify_blend.py), the combination that
+                won there
 
 and both ways of getting the particle fractions -- the neighbour mean the
 tool reports and the sand/clay regressors (FractionGBM). The same run records
@@ -56,7 +60,7 @@ def compute():
 
     # Nearest neighbour of each target in the full reference, itself excluded,
     # in the standardised coordinates the kNN uses.
-    ref_all = st.GshpReference(df=df.reset_index(drop=True))
+    ref_all = st.GshpReference(df=df.reset_index(drop=True), feature_mode="vg")
     pos = pd.Series(np.arange(len(df)), index=df.layer_id.to_numpy())
     nn = []
     for lid in tg.layer_id:
@@ -71,7 +75,9 @@ def compute():
     rng.shuffle(lay)
     cols = ["pred_base", "pred_cov", "pred_knn", "ks_med", "ks_p5", "ks_p95",
             "ks_cov_med", "ks_cov_p5", "ks_cov_p95",
-            "pred_heads", "pred_heads_cov", "ks_heads_med", "ks_heads_cov_med"]
+            "pred_heads", "pred_heads_cov", "ks_heads_med", "ks_heads_cov_med",
+            "ks_heads_p5", "ks_heads_p95", "ks_heads_cov_p5", "ks_heads_cov_p95",
+            "pred_ens", "pred_ens_cov"]
     frac_cols = [f"{how}_{c}" for how in ("fknn", "fgbm", "fgbm_cov")
                  for c in ("sand", "silt", "clay")]
     cols += frac_cols
@@ -80,11 +86,13 @@ def compute():
     for k, held in enumerate(np.array_split(lay, N_FOLDS), 1):
         held = set(held)
         train = df[~df.layer_id.isin(held)].reset_index(drop=True)
-        ref = st.GshpReference(df=train)
-        ref_bd = st.GshpReference(df=train, use_bd=True)
-        base = st.TextureGBM(df=train, fractions=True)
+        # The vG arms are pinned: the tool's default is now the fixed heads,
+        # built explicitly below.
+        ref = st.GshpReference(df=train, feature_mode="vg")
+        ref_bd = st.GshpReference(df=train, use_bd=True, feature_mode="vg")
+        base = st.TextureGBM(df=train, fractions=True, feature_mode="vg")
         cov = st.TextureGBM(df=train, covariates=["depth_cm", "bd"],
-                            fractions=True)
+                            fractions=True, feature_mode="vg")
         ref_h = st.GshpReference(df=train, feature_mode="heads")
         ref_h_bd = st.GshpReference(df=train, feature_mode="heads",
                                     use_bd=True)
@@ -115,6 +123,19 @@ def compute():
                 ah["texture_class"], bh["texture_class"]]
             tg.loc[j, ["ks_heads_med", "ks_heads_cov_med"]] = [
                 ah["ksat"]["median_cmh"], bh["ksat"]["median_cmh"]]
+            tg.loc[j, ["ks_heads_p5", "ks_heads_p95",
+                       "ks_heads_cov_p5", "ks_heads_cov_p95"]] = [
+                ah["ksat"]["p5_cmh"], ah["ksat"]["p95_cmh"],
+                bh["ksat"]["p5_cmh"], bh["ksat"]["p95_cmh"]]
+            # ensemble: geometric mean of the two opinions, as verify_blend.py
+            for col, res in (("pred_ens", a), ("pred_ens_cov", b)):
+                p_gbm = np.array([res["class_probabilities"].get(c, 0.0)
+                                  for c in st.USDA_CLASSES])
+                p_knn = np.array([res["knn_class_probabilities"].get(c, 0.0)
+                                  for c in st.USDA_CLASSES])
+                tg.loc[j, col] = st.USDA_CLASSES[int(np.argmax(
+                    np.sqrt(np.clip(p_gbm, 0, None)
+                            * np.clip(p_knn, 0, None))))]
             # fractions: the neighbour mean the tool reports, and the
             # regressors, with and without the covariates
             for pre, res in (("fknn", a), ("fgbm", a), ("fgbm_cov", b)):

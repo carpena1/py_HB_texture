@@ -9,10 +9,11 @@ matched on its fitted parameters (no Monte Carlo, so the arms differ only
 in how neighbours are chosen):
 
   base          the shipped search: four vG parameters
-  dim 1, dim 2  + a distance penalty of lambda standard units between a
-                target and a reference soil that differ in andic
+  dim <lambda>  + a distance penalty of lambda standard units (0.5 to 3)
+                between a target and a reference soil that differ in andic
                 properties (reference yes/likely = 1, everything else 0;
-                the target states its own value)
+                the target states its own value); the tool uses
+                swcc_texture.ANDIC_LAMBDA
   filter        andic targets take neighbours only from andic reference
                 soils; other targets only from the rest
 
@@ -35,7 +36,8 @@ from scipy.stats import wilcoxon
 K = 30
 N_FOLDS = 5
 SEED = int(sys.argv[2]) if len(sys.argv) > 2 else 0
-ARMS = {"base": ("dim", 0.0), "dim 1": ("dim", 1.0), "dim 2": ("dim", 2.0),
+ARMS = {"base": ("dim", 0.0), "dim 0.5": ("dim", 0.5), "dim 1": ("dim", 1.0),
+        "dim 1.5": ("dim", 1.5), "dim 2": ("dim", 2.0), "dim 3": ("dim", 3.0),
         "filter": ("filter", None)}
 
 
@@ -46,8 +48,17 @@ def andic_code(df):
 def knn(ref, a_ref, t, a_t, excluded, arm):
     """Class vote, weighted fraction mean and Ks median for one target."""
     mode, lam = ARMS[arm]
-    f = (np.array([np.log10(t.alpha_kpa), np.log10(t.n - 1.0), t.thetar,
-                   t.thetas]) - ref.mean) / ref.std
+    # The reference decides the coordinates (vG parameters or fixed heads),
+    # so ask it rather than rebuilding the four vG features here.
+    if ref.feature_mode in ("curve", "curve_white", "heads"):
+        raw = st._head_features(
+            t.thetar, t.thetas, t.alpha_kpa, t.n,
+            st.HEADS_KPA if ref.feature_mode == "heads"
+            else st.CURVE_HEADS).ravel()
+    else:
+        raw = np.array([np.log10(t.alpha_kpa), np.log10(t.n - 1.0), t.thetar,
+                        t.thetas])
+    f = (raw - ref.mean) / ref.std
     d2 = ((ref.z - f) ** 2).sum(axis=1)
     if mode == "dim":
         d2 = d2 + (lam * (a_ref - a_t)) ** 2
