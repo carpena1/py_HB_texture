@@ -138,8 +138,8 @@ default reference (it is in `data/unsoda_reference.csv`, which only
       silt   51.9 %  [ 19.5 -  74.6]
       clay   17.7 %  [  9.0 -  33.0]
 
-    Ks = 2.01 cm/h  [5-95 %: 8.33e-05 - 34.7]  (from ~12 of 30 undisturbed neighbors with measured Ksat)
-      physical second opinion agrees: 0.42 cm/h matched (4.8x below), 0.458 raw (Marshall 1958 capillary bundle, pores capped at 50 cm suction; matched is raw / 1.09)
+    Predicted Ks: 2.01 cm/h  [5-95 %: 8.33e-05 - 34.7]   (from the kNN; ~12 of 30 undisturbed neighbors with measured Ksat)
+      physical second opinion agrees: 0.42 cm/h, 4.8x below  (0.458 raw; Marshall 1958 capillary bundle, pores capped at 50 cm suction, matched = raw / 1.09)
 
 - **A clear answer.** The classifier puts more than half its probability on
   the true class, nearly four times the next one, and the neighbour vote
@@ -184,8 +184,8 @@ the two opinions on the class split.
       silt   10.6 %  [  5.3 -  25.9]
       clay   23.1 %  [  6.0 -  41.0]
 
-    Ks = 4.82 cm/h  [5-95 %: 0.64 - 21.2]  (from ~17 of 30 neighbors with measured Ksat)
-      physical second opinion agrees: 8.79 cm/h matched (1.8x above), 9.58 raw (Marshall 1958 capillary bundle, pores capped at 50 cm suction; matched is raw / 1.09)
+    Predicted Ks: 4.82 cm/h  [5-95 %: 0.64 - 21.2]   (from the kNN; ~17 of 30 neighbors with measured Ksat)
+      physical second opinion agrees: 8.79 cm/h, 1.8x above  (9.58 raw; Marshall 1958 capillary bundle, pores capped at 50 cm suction, matched = raw / 1.09)
 
 - **A preference for the wrong class.** The classifier gives sandy loam
   46.8 %; the true class, sandy clay loam, is third (17.5 %).
@@ -218,8 +218,8 @@ the two opinions on the class split.
       silt   19.7 %  [  4.0 -  68.6]
       clay    7.0 %  [  1.5 -  16.8]
 
-    Ks = 7.65 cm/h  [5-95 %: 0.026 - 30.2]  (from ~23 of 30 neighbors with measured Ksat)
-      physical second opinion agrees: 10.5 cm/h matched (1.4x above), 11.4 raw (Marshall 1958 capillary bundle, pores capped at 50 cm suction; matched is raw / 1.09)
+    Predicted Ks: 7.65 cm/h  [5-95 %: 0.026 - 30.2]   (from the kNN; ~23 of 30 neighbors with measured Ksat)
+      physical second opinion agrees: 10.5 cm/h, 1.4x above  (11.4 raw; Marshall 1958 capillary bundle, pores capped at 50 cm suction, matched = raw / 1.09)
 
 - **The same split, the other way round.** The classifier names the true
   class, loam (43.9 %); the neighbour vote says sandy loam. The Carsel &

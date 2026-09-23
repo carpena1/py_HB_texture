@@ -1097,28 +1097,28 @@ def main():
     for c in ("sand", "silt", "clay"):
         print(f"  {c:<5s} {fr[c]:5.1f} %  [{fr['p5'][c]:5.1f} - {fr['p95'][c]:5.1f}]")
     ks = res["ksat"]
-    print(f"\nKs = {ks['median_cmh']:.3g} cm/h  "
-          f"[5-95 %: {ks['p5_cmh']:.3g} - {ks['p95_cmh']:.3g}]  "
-          f"(from ~{ks['n_neighbors_with_ksat']:.0f} of {ks['k']} "
-          f"{ks['sample_type'] + ' ' if ks['sample_type'] else ''}"
-          f"neighbors with measured Ksat"
-          f"{', matched on bulk density' if ref.use_bd else ''})")
-    # Agreement is judged on the matched value, so a constant offset alone
-    # does not count as disagreement.
     phys, matched = ks["physical_cmh"], ks["physical_matched_cmh"]
-    tail = (f"Marshall 1958 capillary bundle, pores capped at "
-            f"{ks_physical.AIR_ENTRY_CM:g} cm suction; matched is raw / "
-            f"{ks_physical.MATCHING_FACTOR:g}")
+    how = (f"{phys:.3g} raw; Marshall 1958 capillary bundle, pores capped at "
+           f"{ks_physical.AIR_ENTRY_CM:g} cm suction, matched = raw / "
+           f"{ks_physical.MATCHING_FACTOR:g}")
     if np.isfinite(ks["median_cmh"]):
+        print(f"\nPredicted Ks: {ks['median_cmh']:.3g} cm/h  "
+              f"[5-95 %: {ks['p5_cmh']:.3g} - {ks['p95_cmh']:.3g}]   "
+              f"(from the kNN; ~{ks['n_neighbors_with_ksat']:.0f} of {ks['k']} "
+              f"{ks['sample_type'] + ' ' if ks['sample_type'] else ''}"
+              f"neighbors with measured Ksat"
+              f"{', matched on bulk density' if ref.use_bd else ''})")
+        # Agreement is judged on the matched value, so a constant offset
+        # alone does not count as disagreement.
         gap = abs(np.log10(matched / ks["median_cmh"]))
         print(f"  physical second opinion "
-              f"{'agrees' if gap <= 1.0 else 'DISAGREES'}: {matched:.3g} cm/h "
-              f"matched ({10 ** gap:.1f}x "
-              f"{'above' if matched > ks['median_cmh'] else 'below'}), "
-              f"{phys:.3g} raw ({tail})")
+              f"{'agrees' if gap <= 1.0 else 'DISAGREES'}: {matched:.3g} cm/h, "
+              f"{10 ** gap:.1f}x {'above' if matched > ks['median_cmh'] else 'below'}"
+              f"  ({how})")
     else:
-        print(f"  physical estimate: {matched:.3g} cm/h matched, "
-              f"{phys:.3g} raw ({tail})")
+        print(f"\nPredicted Ks: none from the kNN (no neighbor carries a "
+              f"measured Ksat)")
+        print(f"  physical estimate: {matched:.3g} cm/h  ({how})")
 
     if args.json:
         with open(args.json, "w") as f:
