@@ -2,17 +2,27 @@
 fractions and Ks, as tables and figures.
 
 Every soil is predicted from its measured retention points with the default
-reference (the set itself left out), as the command line would, under four
-covariate options: the curve only, + bulk density, + organic carbon, and
-both. Bulk density reaches the classifier and the neighbour search; organic
-carbon reaches the neighbour search only (fractions and Ks), the classifier
-does not take it. For each output -- class, fractions, Ks -- the option that
-scores best over the set is reported, and named in the table's covariates
-columns. That choice is made on the same soils it is scored on, so the
-reported numbers are an upper bound; all four options are in the stats table.
+reference (the set itself left out), as the command line would, under eight
+arms: two predictor sets crossed with four covariate options. The predictor
+sets are the fitted van Genuchten parameters, which the tool ships, and water
+content at the fixed heads of swcc_texture.HEADS_CM. The covariate options
+are the curve only, + bulk density, + organic carbon, and both; bulk density
+reaches the classifier and the neighbour search, organic carbon reaches the
+neighbour search only (fractions and Ks), the classifier does not take it.
+
+For each output -- class, fractions, Ks -- the arm that scores best over the
+set is reported, and named in the table's covariates columns. That choice is
+made on the same soils it is scored on, so the reported numbers are an upper
+bound, and doubling the arms widens that bound; all eight are in the stats
+table, which is the honest comparison.
+
+The Ks is also compared with the physical, capillary-bundle Ks and its
+variants (raw, matched, air-entry capped, Peters et al. 2023, blended with the
+kNN) on the default arm: ks_variants.csv and fig6.
 
 Outputs go to figures/external/<name>/ (git-ignored while the set is not
-distributed): soils.csv, groups.csv, stats.csv, report.md and fig1-fig5.
+distributed): soils.csv, groups.csv, stats.csv, ks_variants.csv, report.md
+and fig1-fig6.
 
 Usage:  python figures/make_external_report.py babaeian_az [n_mc] [--replot]
 
@@ -36,27 +46,36 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt                                # noqa: E402
 from scipy.stats import spearmanr                              # noqa: E402
 
+import ks_physical                                             # noqa: E402
 import ksat_metrics as km                                      # noqa: E402
 import swcc_texture as st                                      # noqa: E402
 import validation_plots as vp                                  # noqa: E402
 from verify_common import GROUP, GROUP_ORDER                   # noqa: E402
 from verify_external import DATASETS                           # noqa: E402
 
-ARMS = {  # name: (bulk density, organic carbon)
+COVARIATES = {  # name: (bulk density, organic carbon)
     "none": (False, False),
     "bulk density": (True, False),
     "organic carbon": (False, True),
     "bulk density + organic carbon": (True, True),
 }
+# The two predictor sets the curve can be reduced to before matching: the
+# fitted van Genuchten parameters (what the tool ships) and water content at
+# the fixed heads of swcc_texture.HEADS_CM.
+PREDICTORS = {"vG parameters": "vg", "fixed heads": "heads"}
+ARMS = {f"{pl} | {cl}": (mode, bd, oc)
+        for pl, mode in PREDICTORS.items()
+        for cl, (bd, oc) in COVARIATES.items()}
 # Sets whose reference Ks is empty are scored against another measured Ks,
 # named here, for information only.
 KS_TRUTH = {"willard": ("ksat_mpd_cmh",
                         "field permeameter Ks, dry season (not in the reference)")}
 LABELS = {"babaeian_az": "Arizona soils", "willard": "Laikipia soils",
-          "boorowa": "Boorowa Farm soils (CSIRO, NSW)"}
-CURVE_NOTE = {"willard": "saturation at 95 % of porosity and the pressure-plate "
-                         "points, pF 2.15-4.2",
-              "boorowa": "10 cm to 15 bar: suction tables and pressure plates"}
+          "boorowa": "Boorowa Farm soils (CSIRO, NSW)",
+          "babaeian_zanjanrood": "Zanjanrood watershed soils (Iran)"}
+CURVE_NOTE = {"willard": "the original laboratory values, pF 0-4.2, rescaled per sample so that pF 0 sits at 95 % of porosity",
+              "boorowa": "10 cm to 15 bar: suction tables and pressure plates",
+              "babaeian_zanjanrood": "0-100 cm on intact cores (hanging column), 330-15,000 cm on disturbed samples (sand box and pressure plates)"}
 MATCH_COLOR = {"exact": "#2a78d6", "same group": "#e8a33d",
                "wrong group": "#d6452a"}
 
@@ -66,14 +85,16 @@ def predict(name, n_mc):
     pts = DATASETS[name].measured_points()
     ref_df = st.load_reference_df()
     ref_df = ref_df[~ref_df.layer_id.isin(tg.layer_id)].reset_index(drop=True)
-    clfs = {False: st.TextureGBM(df=ref_df),
-            True: st.TextureGBM(df=ref_df, covariates=["bd"])}
+    clfs = {(m, bd): st.TextureGBM(df=ref_df, feature_mode=m,
+                                   covariates=["bd"] if bd else [])
+            for m in set(PREDICTORS.values()) for bd in (False, True)}
     rows = []
-    for arm, (use_bd, use_oc) in ARMS.items():
-        ref = st.GshpReference(df=ref_df, use_bd=use_bd, use_om=use_oc)
+    for arm, (mode, use_bd, use_oc) in ARMS.items():
+        ref = st.GshpReference(df=ref_df, use_bd=use_bd, use_om=use_oc,
+                               feature_mode=mode)
         for _, r in tg.iterrows():
             h, th = pts[r.layer_id]
-            e = st.estimate(h, th, ref=ref, clf=clfs[use_bd], n_mc=n_mc,
+            e = st.estimate(h, th, ref=ref, clf=clfs[(mode, use_bd)], n_mc=n_mc,
                             sample_type=r.sample_type,
                             bulk_density=r.bd if use_bd else None,
                             om=r.oc if use_oc else None)   # the reference matches on oc
@@ -85,19 +106,90 @@ def predict(name, n_mc):
                 **{f"pred_{c}": f[c] for c in ("sand", "silt", "clay")},
                 **{f"pred_{c}_p5": f["p5"][c] for c in ("sand", "silt", "clay")},
                 **{f"pred_{c}_p95": f["p95"][c] for c in ("sand", "silt", "clay")},
-                ks_med=k["median_cmh"], ks_p5=k["p5_cmh"], ks_p95=k["p95_cmh"]))
+                ks_med=k["median_cmh"], ks_p5=k["p5_cmh"], ks_p95=k["p95_cmh"],
+                **{f"vg_{c}": e["vg_fit"][c]
+                   for c in ("thetar", "thetas", "alpha_kpa", "n", "m")},
+                vg_m_free=e["vg_fit"]["m_is_free"]))
     return tg, pd.DataFrame(rows)
 
 
+# The physical Ks variants scored against the tool's kNN. Each is computed on
+# the tool's own van Genuchten fit of the measured points; h_min_cm is the
+# air-entry cap of ks_physical.marshall_ks: none, 10 cm roughly where
+# macropores begin (radius 0.15 mm), and the tool's 50 cm. "matched" divides
+# by the source-balanced factor of ks_physical.MATCHING_FACTOR, refitted here
+# on the reference without this set, and for each cap on its own.
+PHYS_CAPS = {"no cap": None, "cap 10 cm": 10.0,
+             f"cap {ks_physical.AIR_ENTRY_CM:g} cm (the tool)": ks_physical.AIR_ENTRY_CM}
+DEFAULT_ARM = "fixed heads | none"
+
+
+def _marshall(g, h_min_cm):
+    m = np.where(g.vg_m_free.astype(bool), g.vg_m, 1.0 - 1.0 / g.vg_n)
+    return ks_physical.marshall_ks(g.vg_thetar, g.vg_thetas, g.vg_alpha_kpa,
+                                   g.vg_n, m=m, h_min_cm=h_min_cm)
+
+
+def matching_factors(ref_df):
+    """ks_physical.MATCHING_FACTOR's definition on this reference, per cap:
+    the median over the sources of each one's median physics / measured."""
+    d = ref_df[ref_df.ksat_cmh > 0]
+    out = {}
+    for cap, h in PHYS_CAPS.items():
+        e = (np.log10(ks_physical.marshall_ks(d.thetar, d.thetas, d.alpha_kpa,
+                                              d.n, h_min_cm=h))
+             - np.log10(d.ksat_cmh.to_numpy(float)))
+        ok = np.isfinite(e)
+        out[cap] = 10 ** np.median(pd.Series(e[ok]).groupby(
+            d.source_db.fillna("KSSL").to_numpy()[ok]).median())
+    return out
+
+
+def ks_variants(tg, p, factors):
+    """kNN, the physics variants and half-and-half geometric blends, all on
+    the default arm's fit, scored against the set's Ks."""
+    g = p[p.arm == DEFAULT_ARM].set_index("layer_id").loc[tg.layer_id]
+    knn = g.ks_med.to_numpy(float)
+    v = {"kNN (the tool)": knn}
+    for cap, h in PHYS_CAPS.items():
+        raw = _marshall(g, h)
+        if cap != "cap 10 cm":
+            v[f"physical, {cap}, raw"] = raw
+        v[f"physical, {cap}, matched"] = raw / factors[cap]
+    v["Peters et al. 2023"] = ks_physical.peters_ks(g.vg_thetar, g.vg_thetas,
+                                                    g.vg_alpha_kpa)
+    for cap in PHYS_CAPS:
+        v[f"half kNN, half {cap}, matched"] = np.sqrt(
+            knn * v[f"physical, {cap}, matched"])
+    obs = tg.ksat_cmh.to_numpy(float)
+    rows = []
+    for name, pred in v.items():
+        s = km.ksat_scores(obs, pred, np.full(len(obs), np.nan),
+                           np.full(len(obs), np.nan))
+        ok = np.isfinite(obs) & (obs > 0) & np.isfinite(pred) & (pred > 0)
+        e = np.log10(pred[ok]) - np.log10(obs[ok])
+        rows.append(dict(variant=name, n=s["n"],
+                         median_factor=10 ** np.median(np.abs(e)),
+                         bias_log10=s["bias_log10"], within_2x_pct=s["within_2x"] * 100,
+                         within_10x_pct=s["within_10x"] * 100,
+                         spearman=s["spearman"]))
+    return pd.DataFrame(rows), v
+
+
 def arm_stats(tg, p):
-    """One row of set statistics per covariate option."""
+    """One row of set statistics per predictor set and covariate option."""
     out = []
     for arm, g in p.groupby("arm", sort=False):
         g = g.set_index("layer_id").loc[tg.layer_id]
         truth = tg.texture_class.to_numpy()
         pred = g.pred_class.to_numpy()
-        row = dict(covariates=arm, n=len(tg),
+        pred_set, cov = arm.split(" | ")
+        row = dict(arm=arm, predictors=pred_set, covariates=cov, n=len(tg),
                    exact_pct=np.mean(pred == truth) * 100,
+                   macro_f1=float(np.mean(
+                       [200 * int(np.sum((pred == c) & (truth == c)))
+                        / max(int(np.sum(pred == c) + np.sum(truth == c)), 1)
+                        for c in sorted(set(truth))])),
                    group_pct=np.mean([GROUP[a] == GROUP[b]
                                       for a, b in zip(pred, truth)]) * 100,
                    top2_pct=np.mean([t in s for t, s in zip(truth, g.top2)]) * 100)
@@ -132,14 +224,15 @@ def arm_stats(tg, p):
 def best_arms(stats):
     """Class: exact, then group, then top-2 accuracy. Fractions: mean absolute
     error, among the options that score every soil. Ks: median |log10 error|,
-    then RMSE. Ties keep the fewer covariates."""
+    then RMSE. Ties keep the earlier arm, which is the vG parameters with the
+    fewer covariates."""
     s = stats.reset_index(drop=True)
     cls = s.sort_values(["exact_pct", "group_pct", "top2_pct"], ascending=False,
-                        kind="stable").covariates.iloc[0]
+                        kind="stable").arm.iloc[0]
     full = s[s.fractions_n == s.n]
-    frac = full.sort_values("fractions_mae", kind="stable").covariates.iloc[0]
+    frac = full.sort_values("fractions_mae", kind="stable").arm.iloc[0]
     ks = s.sort_values(["ks_median_factor", "ks_rmse_log10"],
-                       kind="stable").covariates.iloc[0]
+                       kind="stable").arm.iloc[0]
     return cls, frac, ks
 
 
@@ -159,17 +252,17 @@ def soil_table(tg, p, cls, frac, ks):
             "class probability": round(c.pred_prob, 2),
             "reported group": GROUP[r.texture_class],
             "predicted group": GROUP[c.pred_class], "match": match,
-            "covariates (class)": cls,
+            "predictors | covariates (class)": cls,
             **{f"{x} reported": round(r[x], 1) for x in ("sand", "silt", "clay")},
             **{f"{x} predicted [p5-p95]":
                f"{f[f'pred_{x}']:.1f} [{f[f'pred_{x}_p5']:.0f}-{f[f'pred_{x}_p95']:.0f}]"
                for x in ("sand", "silt", "clay")},
-            "covariates (fractions)": frac,
+            "predictors | covariates (fractions)": frac,
             "Ks measured (cm/h)": round(r.ksat_cmh, 3),
             "Ks predicted (cm/h)": round(k.ks_med, 3),
             "Ks p5-p95 (cm/h)": f"{k.ks_p5:.3g}-{k.ks_p95:.3g}",
             "Ks predicted/measured": round(k.ks_med / r.ksat_cmh, 2),
-            "covariates (Ks)": ks,
+            "predictors | covariates (Ks)": ks,
             "bulk density (g/cm3)": r.bd, "organic matter (%)": round(r.om, 2),
             "sample type": r.sample_type,
             "_clay_order": r.clay})
@@ -278,8 +371,8 @@ def fig_triangle(tg, pf, soils, out, frac_arm, cls_arm, label):
     ax.set_aspect("equal"); ax.axis("off")
     vp.title(fig, f"{label}: reported and predicted texture",
              f"Arrow from the measured fractions to the predicted ones "
-             f"(covariates: {frac_arm}).\nColour: whether the predicted class "
-             f"(covariates: {cls_arm}) is exact, in the same group, or wrong.")
+             f"({frac_arm}).\nColour: whether the predicted class "
+             f"({cls_arm}) is exact, in the same group, or wrong.")
     save(fig, out, "fig1_texture_triangle")
 
 
@@ -313,7 +406,7 @@ def fig_confusion(soils, conf, out, cls_arm, label):
     a2.set_title(f"Texture group — {grp:.0f} % right", fontsize=10, color=vp.INK, loc="left")
     vp.title(fig, f"{label}: reported against predicted class",
              f"Counts of soils; the diagonal is a correct prediction. "
-             f"Covariates: {cls_arm}.")
+             f"Predictors and covariates: {cls_arm}.")
     save(fig, out, "fig2_class_confusion")
 
 
@@ -340,7 +433,7 @@ def fig_fractions(tg, pf, out, frac_arm, label):
         ax.set_xlabel(f"reported {c} (%)"); ax.set_ylabel(f"predicted {c} (%)")
     vp.title(fig, f"{label}: particle fractions",
              f"Predicted mean with its 5–95 % range against the reported value. "
-             f"Covariates: {frac_arm}.")
+             f"Predictors and covariates: {frac_arm}.")
     save(fig, out, "fig3_fractions")
 
 
@@ -387,23 +480,25 @@ def fig_ks(tg, pk, out, ks_arm, label, ks_label="measured Ks"):
     ax.legend(title="reported group", loc="upper left", fontsize=8.5, title_fontsize=8.5)
     vp.title(fig, f"{label}: saturated conductivity",
              f"Predicted median with its 5–95 % range. Line = perfect; bands = within\n"
-             f"2× (darker) and 10× (lighter). Covariates: {ks_arm}.")
+             f"2× (darker) and 10× (lighter). Predictors and covariates: {ks_arm}.")
     save(fig, out, "fig4_ks")
 
 
 def fig_arms(stats, out, label):
-    fig, axes = plt.subplots(1, 3, figsize=(12, 3.6))
-    fig.subplots_adjust(top=0.72, bottom=0.12, left=0.2, right=0.98, wspace=0.55)
-    names = stats.covariates.tolist()
+    fig, axes = plt.subplots(1, 3, figsize=(12.6, 5.6))
+    fig.subplots_adjust(top=0.82, bottom=0.1, left=0.26, right=0.98, wspace=0.55)
+    names = [a.replace(" | ", ": ") for a in stats.arm]
     yy = np.arange(len(names))[::-1]
     a = axes[0]
-    a.barh(yy + 0.18, stats.exact_pct, height=0.34, color=vp.S1, label="exact class")
-    a.barh(yy - 0.18, stats.group_pct, height=0.34, color=vp.S2, label="texture group")
-    for yv, v1, v2 in zip(yy, stats.exact_pct, stats.group_pct):
-        a.text(v1 + 1, yv + 0.18, f"{v1:.0f}", va="center", fontsize=8)
-        a.text(v2 + 1, yv - 0.18, f"{v2:.0f}", va="center", fontsize=8)
-    a.set_xlim(0, 100); a.set_xlabel("% of soils")
-    a.legend(fontsize=8, loc="lower left", bbox_to_anchor=(0.0, 1.0), ncol=2)
+    bars = [("exact class", stats.exact_pct, vp.S1, 0.26),
+            ("texture group", stats.group_pct, vp.S2, 0.0),
+            ("macro-F1", stats.macro_f1, vp.S3, -0.26)]
+    for lab, v, col, off in bars:
+        a.barh(yy + off, v, height=0.25, color=col, label=lab)
+        for yv, x in zip(yy, v):
+            a.text(x + 1, yv + off, f"{x:.0f}", va="center", fontsize=8)
+    a.set_xlim(0, 100); a.set_xlabel("% of soils (macro-F1 on the same scale)")
+    a.legend(fontsize=8, loc="lower left", bbox_to_anchor=(0.0, 1.0), ncol=3)
     a.set_yticks(yy, names)
     b = axes[1]
     b.barh(yy, stats.fractions_mae, height=0.5, color=vp.S1)
@@ -423,10 +518,60 @@ def fig_arms(stats, out, label):
                transform=c.transAxes, fontsize=9, color=vp.INK2)
         c.set_xticks([])
     c.set_xlabel("Ks, typical error factor"); c.set_yticks(yy, [])
-    vp.title(fig, f"{label}: which covariates help",
-             "The same soils predicted with each option; the best for each output is used "
-             "in the other figures and the table.")
+    vp.title(fig, f"{label}: which predictors and covariates help",
+             "The same soils predicted with each predictor set (the fitted vG "
+             "parameters, or water content at fixed heads) and each covariate "
+             "option;\nthe best for each output is used in the other figures and "
+             "the table. The choice is made on these same soils, so it is an "
+             "upper bound.")
     save(fig, out, "fig5_covariate_options")
+
+
+def fig_ks_variants(tg, var, values, factors, out, label, ks_label):
+    fig, (a, b) = plt.subplots(1, 2, figsize=(12.6, 5.8),
+                               gridspec_kw=dict(width_ratios=[1.25, 1]))
+    fig.subplots_adjust(top=0.8, bottom=0.11, left=0.25, right=0.98, wspace=0.3)
+    yy = np.arange(len(var))[::-1]
+    cols = [vp.S1 if v.startswith("kNN") else vp.S3 if v.startswith("half")
+            else vp.S2 for v in var.variant]
+    a.barh(yy, var.median_factor, height=0.55, color=cols)
+    for yv, r in zip(yy, var.itertuples()):
+        a.text(r.median_factor * 1.04, yv,
+               f"×{r.median_factor:.1f}   {r.within_10x_pct:.0f} % within 10×   "
+               f"bias {r.bias_log10:+.2f}   ρ {r.spearman:.2f}",
+               va="center", fontsize=7.5)
+    a.set_xscale("log")
+    a.set_xlim(1, var.median_factor.max() * 12)
+    a.set_yticks(yy, var.variant)
+    a.set_xlabel("Ks, typical error factor (median |log10 error|)")
+    obs = tg.ksat_cmh.to_numpy(float)
+    tool = f"cap {ks_physical.AIR_ENTRY_CM:g} cm (the tool)"
+    show = [("kNN (the tool)", vp.S1, "o"),
+            (f"physical, {tool}, matched", vp.S2, "s"),
+            (f"half kNN, half {tool}, matched", vp.S3, "^")]
+    allv = np.concatenate([obs] + [values[k] for k, _, _ in show])
+    allv = allv[np.isfinite(allv) & (allv > 0)]
+    lim = (10 ** np.floor(np.log10(allv.min())), 10 ** np.ceil(np.log10(allv.max())))
+    xx = np.array(lim)
+    b.fill_between(xx, xx / 10, xx * 10, color=vp.GRID, alpha=0.55, lw=0, zorder=0)
+    b.fill_between(xx, xx / 2, xx * 2, color=vp.GRID, lw=0, zorder=0)
+    b.plot(xx, xx, color=vp.INK2, lw=1, zorder=1)
+    for k, col, mk in show:
+        b.scatter(obs, values[k], s=16, color=col, marker=mk, alpha=0.75,
+                  label=k, zorder=3, lw=0)
+    b.set_xscale("log"); b.set_yscale("log")
+    b.set_xlim(lim); b.set_ylim(lim); b.set_aspect("equal")
+    b.set_xlabel(f"{ks_label} (cm/h)"); b.set_ylabel("predicted Ks (cm/h)")
+    b.legend(loc="lower right", fontsize=8)
+    vp.title(fig, f"{label}: the physical Ks against the kNN",
+             "Capillary bundle (Marshall 1958) on the tool's van Genuchten fit, "
+             "with no pore wider than the one that empties at the cap's suction;\n"
+             "raw, or divided by the matching factor (matched; refitted on the "
+             "reference without this set: "
+             + ", ".join(f"{k} {v:.2f}" for k, v in factors.items())
+             + "),\nPeters et al. (2023), and half-and-half geometric blends "
+             "with the kNN (fixed heads, no covariates).")
+    save(fig, out, "fig6_ks_physics")
 
 
 def fmt_md(df):
@@ -458,6 +603,12 @@ def main():
         col, ks_label = KS_TRUTH[name]
         tg["ksat_cmh"] = tg[col]
     stats = arm_stats(tg, p)
+    ref_df = st.load_reference_df()
+    factors = matching_factors(ref_df[~ref_df.layer_id.isin(tg.layer_id)])
+    has_ks = bool((tg.ksat_cmh > 0).any())
+    if has_ks:
+        var, var_values = ks_variants(tg, p, factors)
+        var.round(3).to_csv(os.path.join(out, "ks_variants.csv"), index=False)
     cls, frac, ks = best_arms(stats)
     soils = soil_table(tg, p, cls, frac, ks)
     conf, gsum = group_table(soils)
@@ -475,7 +626,13 @@ def main():
     top = truth.value_counts()
     base_exact = top.iloc[0] / len(tg) * 100
     base_group = np.mean(truth.map(GROUP) == GROUP[top.index[0]]) * 100
-    st_short = stats[["covariates", "exact_pct", "group_pct", "top2_pct",
+    one = np.full(len(tg), top.index[0], dtype=object)
+    base_f1 = float(np.mean(
+        [200 * int(np.sum((one == c) & (truth.to_numpy() == c)))
+         / max(int(np.sum(one == c) + np.sum(truth.to_numpy() == c)), 1)
+         for c in sorted(set(truth))]))
+    st_short = stats[["predictors", "covariates", "exact_pct", "group_pct",
+                      "macro_f1", "top2_pct",
                       "sand_mae", "silt_mae", "clay_mae", "fractions_mae", "fractions_n",
                       "ks_n", "ks_median_factor", "ks_bias_log10", "ks_rmse_log10",
                       "ks_within_2x_pct", "ks_within_10x_pct", "ks_cover_pct",
@@ -486,21 +643,31 @@ def main():
           f"({CURVE_NOTE.get(name, 'points to 1500 kPa')}) with the default "
           f"reference, which does not hold "
           f"this set; n_mc={n_mc}. Always answering the most common class "
-          f"('{top.index[0]}') scores {base_exact:.1f} % exact and {base_group:.1f} % "
-          f"on the texture group.",
+          f"('{top.index[0]}') scores {base_exact:.1f} % exact, {base_group:.1f} % "
+          f"on the texture group and {base_f1:.1f} macro-F1 (F1 averaged over "
+          f"the classes this set contains, as the overall validation reports "
+          f"it).",
           "",
-          f"Covariates used: class -- **{cls}**; fractions -- **{frac}**; "
-          f"Ks -- **{ks}**. Each is the option that scored best on these same "
-          f"soils (see the option table), so the figures are an upper bound. "
+          f"Predictors and covariates used: class -- **{cls}**; fractions -- "
+          f"**{frac}**; Ks -- **{ks}** (predictor set | covariates). Each is "
+          f"the arm that scored best on these same soils (see the arm table), "
+          f"so the figures are an upper bound. "
           f"Ks is compared with: {ks_label}.",
           "", "## Soils (sorted by clay)", "", fmt_md(soils), "",
           "## Texture groups", "", fmt_md(group_rows), "",
           "Reported (rows) against predicted (columns) group:", "",
           fmt_md(conf.reset_index()), "", fmt_md(gsum), "",
-          "## Set statistics by covariate option", "",
+          "## Set statistics by predictor set and covariate option", "",
           "Accuracy in %; fractions mean |error| in points; Ks bias and RMSE in "
           "log10 cm/h, within-factor and p5-p95 cover in %.", "",
           fmt_md(st_short), ""]
+    if has_ks:
+        md += ["## Physical Ks against the kNN", "",
+               f"On the default arm's van Genuchten fit ({DEFAULT_ARM}); see "
+               f"fig6. Matching factors refitted on the reference without this "
+               f"set: " + ", ".join(f"{k} {v:.2f}" for k, v in factors.items())
+               + ". median_factor is the typical error factor; bias is the "
+               "mean log10 error.", "", fmt_md(var), ""]
     with open(os.path.join(out, "report.md"), "w") as fh:
         fh.write("\n".join(md))
     print(f"  wrote {out}/report.md and tables")
@@ -519,6 +686,9 @@ def main():
     else:
         print("  no measured Ks in this set: Ks figure skipped")
     fig_arms(stats, out, label)
+    if has_ks:
+        print(fmt_md(var))
+        fig_ks_variants(tg, var, var_values, factors, out, label, ks_label)
 
 
 if __name__ == "__main__":

@@ -102,6 +102,7 @@ data/boorowa_reference.csv
 figures/external/babaeian_az/
 figures/external/willard/
 figures/external/boorowa/
+figures/external/babaeian_zanjanrood/
 
 # Third-party soil registries downloaded to resolve volcanic-soil flags
 # (Africa Soil Profiles Database, Russian soil register). Rebuilt on demand.

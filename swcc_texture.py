@@ -7,7 +7,8 @@ Framework (see Problem_description.docx):
  2. Infer USDA texture class, particle fractions (% sand/silt/clay) and
     saturated hydraulic conductivity Ks (cm/h) by distance-weighted
     k-nearest-neighbor lookup in the GSHP database (Gupta et al. 2022),
-    using the fitted vG parameters as coordinates.
+    using the fitted curve's water content at fixed heads (HEADS_CM) as
+    coordinates -- or the fitted vG parameters for a soil stated andic.
 
 Uncertainty: vG fit uncertainty is propagated by Monte Carlo sampling of
 the fit covariance; each draw votes through its own kNN neighborhood.
@@ -26,6 +27,8 @@ import sys
 
 import numpy as np
 from scipy.optimize import curve_fit
+
+import ks_physical
 
 # Resolve reference tables relative to this script, so the tool works from any
 # working directory.
@@ -115,8 +118,14 @@ VOLCANIC_TABLES = ("volcanic_flags.csv", "volcanic_flags_restricted.csv")
 # vote and the fractions only. Ks neighbours ignore it: of the two andic
 # sources with a measured Ks (Campania, Canary Islands), each misleads the
 # other when matched on it. See verify_volcanic.py and verify_andic_knn.py.
+# ANDIC_LAMBDA = 1.5 (2026-09, was 1.0): for andic soils from a new source it
+# lifts the texture group by 8 pp over 1.0 on the vG parameters and by 11 pp
+# on the fixed heads (whose eight coordinates spread soils further apart, so
+# 1.0 barely separates them), both p<0.001, with lower fraction error; beyond
+# 1.5 the penalty acts as a filter and gains nothing. Other soils are
+# unaffected at every value.
 ANDIC_CODE = {"yes": 1.0, "likely": 1.0, "no": 0.0}
-ANDIC_LAMBDA = 1.0
+ANDIC_LAMBDA = 1.5
 
 # How the wet end of a sample's retention curve was measured: on an intact
 # core or on repacked material (see the prepare_*.py scripts). Encoded for the
@@ -126,6 +135,23 @@ SAMPLE_TYPE_CODE = {"undisturbed": 0.0, "disturbed": 1.0}
 # Local covariates a user may supply: sample mid-depth (cm) and bulk density
 # (g/cm3). Reference column names; see TextureGBM(covariates=...).
 COVARIATES = ("depth_cm", "bd")
+
+# Which predictors the reference and the classifier use when the caller does
+# not say: water content at HEADS_CM (the default since 2026-09), or the four
+# vG parameters. Fixed heads predict better for a new site, a new laboratory
+# and a new source, and on four of six outside sets (verify_holdout.py,
+# verify_external.py). The environment variable exists so a whole validation
+# run can be repeated on the other set without editing every script
+# (SWCC_FEATURE_MODE=vg); nothing in the shipped path sets it.
+DEFAULT_FEATURE_MODE = os.environ.get("SWCC_FEATURE_MODE", "heads")
+
+# Soils stated to be andic (--andic yes) are matched on the vG parameters
+# instead. The fixed-head classifier barely uses the flag: for andic soils
+# from a new source it reaches 22.9 % exact / 39.9 % group against 33.7 % /
+# 59.2 % on the vG parameters, and pooling it with the neighbour vote
+# recovers only a third of that (verify_andic.py). Soils stated "no" and
+# unstated soils stay on the default.
+ANDIC_FEATURE_MODE = "vg"
 
 
 def load_reference_df(name=DEFAULT_REFERENCE):
@@ -335,7 +361,7 @@ def usda_centroids(step=0.25):
 class GshpReference:
     def __init__(self, path=None, df=None, reference=DEFAULT_REFERENCE,
                  use_depth=False, use_om=False, use_bd=False, use_m=False,
-                 tau=1.0, feature_mode="vg",
+                 tau=1.0, feature_mode=None,
                  quality_weight=False):
         """Build the reference from the CSV at `path`, or from a preloaded
         DataFrame `df` (used for leave-one-out verification, where the target
@@ -346,6 +372,7 @@ class GshpReference:
         without a depth are dropped in that case.
         """
         import pandas as pd
+        feature_mode = feature_mode or DEFAULT_FEATURE_MODE
         if df is None:
             df = (pd.read_csv(path) if path is not None
                   else load_reference_df(reference))
@@ -517,8 +544,9 @@ class GshpReference:
 class TextureGBM:
     """Gradient-boosted classifier for the texture class only.
 
-    Trained on the same four van Genuchten features the kNN uses, plus the
-    sample type. On the 20,052-layer reference it is level with neighbour
+    Trained on the same features the kNN uses (feature_mode: water content
+    at fixed heads by default, or the four van Genuchten parameters), plus
+    the sample type. On the 20,052-layer reference it is level with neighbour
     voting on exact class, in-distribution (-0.5 points, p=0.72) and against
     an unseen laboratory (-0.2, p=0.88), and better on the texture group for
     an unseen laboratory (+2.3 points); see verify_hybrid.py. It
@@ -534,7 +562,7 @@ class TextureGBM:
 
     def __init__(self, path=None, df=None, reference=DEFAULT_REFERENCE,
                  use_depth=False, use_m=False, use_sample_type=True,
-                 covariates=(), random_state=0, feature_mode="vg",
+                 covariates=(), random_state=0, feature_mode=None,
                  fractions=False):
         try:
             from sklearn.ensemble import HistGradientBoostingClassifier
@@ -542,6 +570,7 @@ class TextureGBM:
             raise ImportError(
                 "the hybrid model needs scikit-learn: pip install scikit-learn")
         import pandas as pd
+        feature_mode = feature_mode or DEFAULT_FEATURE_MODE
         if df is None:
             df = (pd.read_csv(path) if path is not None
                   else load_reference_df(reference))
@@ -648,7 +677,7 @@ class FractionGBM:
 
     def __init__(self, path=None, df=None, reference=DEFAULT_REFERENCE,
                  use_sample_type=True, covariates=(), random_state=0,
-                 feature_mode="vg"):
+                 feature_mode=None):
         try:
             from sklearn.ensemble import HistGradientBoostingRegressor
         except ImportError:
@@ -656,6 +685,7 @@ class FractionGBM:
                 "the fraction regressors need scikit-learn: pip install "
                 "scikit-learn")
         import pandas as pd
+        feature_mode = feature_mode or DEFAULT_FEATURE_MODE
         if df is None:
             df = (pd.read_csv(path) if path is not None
                   else load_reference_df(reference))
@@ -704,7 +734,9 @@ def estimate(h, theta, ref=None, n_mc=300, k=30, seed=0, depth=None,
     """Full pipeline: fit vG, then kNN inference with MC uncertainty.
 
     Returns a dict with fitted parameters, class probabilities, particle
-    fractions and Ks with 5-95 % ranges.
+    fractions and Ks with 5-95 % ranges, plus a reference-free capillary-bundle
+    Ks ("physical_cmh") as an independent second opinion, and the same divided
+    by ks_physical.MATCHING_FACTOR ("physical_matched_cmh").
 
     sample_type ("undisturbed" or "disturbed") is how the target's curve was
     measured. The GBM receives it as a feature, and for "undisturbed" Ks comes
@@ -734,7 +766,8 @@ def estimate(h, theta, ref=None, n_mc=300, k=30, seed=0, depth=None,
     if np.any(theta > 1.0):          # auto-detect percent input
         theta = theta / 100.0
     if ref is None:
-        ref = GshpReference()
+        ref = GshpReference(feature_mode=ANDIC_FEATURE_MODE
+                            if andic_code == 1.0 else None)
 
     # The reference decides the coordinate system: a use_m reference is
     # indexed on the unconstrained five-parameter fit, so the target has to
@@ -825,7 +858,22 @@ def estimate(h, theta, ref=None, n_mc=300, k=30, seed=0, depth=None,
 
     ks_vals = np.array(ks_vals); ks_w = np.array(ks_w)
     ks = {"n_neighbors_with_ksat": float(np.mean(ks_neighbor_counts)), "k": k,
-          "sample_type": ks_type}
+          "sample_type": ks_type,
+          # A second opinion on Ks, the way the kNN vote is one on the class:
+          # capillary theory applied to the fitted curve, with no neighbours
+          # behind it (ks_physical.py; pores capped at AIR_ENTRY_CM). For a
+          # source the reference does not hold it is the better of the two
+          # (0.61 against 0.79 dex source-blocked, rank correlation 0.51
+          # against 0.29), but it has no band and cannot gain from the
+          # user's own data joining the reference, so the kNN stays the Ks.
+          # Where the matched value and the kNN agree within a factor of 10
+          # -- 79 % of soils -- the kNN's own error is 0.65 dex against 1.68
+          # where they disagree, so agreement is a confidence signal and a
+          # gap of orders of magnitude warns about the curve, the units or
+          # the method (verify_ks_physical.py).
+          "physical_cmh": float(ks_physical.marshall_ks(
+              thetar, thetas, alpha, n, m=m_fit if free_m else None)[0])}
+    ks["physical_matched_cmh"] = ks["physical_cmh"] / ks_physical.MATCHING_FACTOR
     if len(ks_vals):
         log_ks = np.log10(ks_vals)
         ks.update(median_cmh=10.0 ** _wpercentile(log_ks, ks_w, 50),
@@ -982,8 +1030,10 @@ def main():
     if args.andic is not None and "andic_code" not in df.columns:
         sys.exit("--andic needs the volcanic flags (data/volcanic_flags.csv); "
                  "build them with prepare_volcanic.py")
+    # An andic soil is matched on the predictors that use the flag best.
+    mode = ANDIC_FEATURE_MODE if args.andic == "yes" else None
     ref = GshpReference(df=df, tau=args.tau,
-                        use_bd=args.bulk_density is not None)
+                        use_bd=args.bulk_density is not None, feature_mode=mode)
     if df["ksat_cmh"].notna().sum() == 0:
         print(f"note: the '{args.reference}' reference carries no measured "
               f"Ksat, so no Ks estimate can be made.", file=sys.stderr)
@@ -997,7 +1047,8 @@ def main():
             given = {"depth_cm": args.depth, "bd": args.bulk_density,
                      "andic_code": args.andic}
             clf = TextureGBM(df=df, covariates=[c for c in given
-                                                if given[c] is not None])
+                                                if given[c] is not None],
+                             feature_mode=mode)
         except ImportError as exc:
             if args.model is not None:
                 raise SystemExit(str(exc))
@@ -1048,6 +1099,22 @@ def main():
           f"{ks['sample_type'] + ' ' if ks['sample_type'] else ''}"
           f"neighbors with measured Ksat"
           f"{', matched on bulk density' if ref.use_bd else ''})")
+    # Agreement is judged on the matched value, so a constant offset alone
+    # does not count as disagreement.
+    phys, matched = ks["physical_cmh"], ks["physical_matched_cmh"]
+    tail = (f"Marshall 1958 capillary bundle, pores capped at "
+            f"{ks_physical.AIR_ENTRY_CM:g} cm suction; matched is raw / "
+            f"{ks_physical.MATCHING_FACTOR:g}")
+    if np.isfinite(ks["median_cmh"]):
+        gap = abs(np.log10(matched / ks["median_cmh"]))
+        print(f"  physical second opinion "
+              f"{'agrees' if gap <= 1.0 else 'DISAGREES'}: {matched:.3g} cm/h "
+              f"matched ({10 ** gap:.1f}x "
+              f"{'above' if matched > ks['median_cmh'] else 'below'}), "
+              f"{phys:.3g} raw ({tail})")
+    else:
+        print(f"  physical estimate: {matched:.3g} cm/h matched, "
+              f"{phys:.3g} raw ({tail})")
 
     if args.json:
         with open(args.json, "w") as f:
