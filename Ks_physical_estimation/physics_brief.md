@@ -74,10 +74,43 @@ With the cap, the theory's level is nearly right with no scaling at all.
 
 ### Alternative tested: Peters et al. (2023)
 
-Peters et al. write the bundle in closed form so that no matching factor is
+Peters et al. write the capillary bundle in closed form so that no matching factor is
 needed: Ks = β τs (θs − θr)² α², with β = 3.04 × 10⁻⁴ m³/s and τs = 0.062
 for the constrained vG curve. It is implemented as `peters_ks`, and it
 scored worse than capped Marshall (Section 3).
+
+### Classical form tested: Brutsaert (1967), Brooks–Corey curve
+
+Brakensiek et al. (1981, eq. 5) compute Ks from fitted Brooks and Corey
+(1964) parameters with Brutsaert's (1967) equation:
+
+   Ks = 270 φe² λ² / (ψb² (λ + 1)(λ + 2))   (cm/s; ψb in cm; φe = φ − θr)
+
+It is not a separate theory: it is the same Childs–Collis-George/Marshall
+capillary bundle, evaluated in closed form for the Brooks–Corey curve.
+- **The constant 270:** it is σ²/(2μρg) for water at 20 °C in cgs units
+  (72.8² / (2 × 0.01 × 1 × 981) = 270 cm³/s). Marshall's sum carries the
+  same prefactor once each radius is written as r = 2σ/(ρgh).
+- **The rest:** in the limit of many increments, Marshall's pairing sum
+  becomes ∫₀¹ 2(1 − S) / h(S)² dS. With h = ψb S^(−1/λ) this integrates
+  exactly to λ² / (ψb² (λ + 1)(λ + 2)).
+
+The one real difference from our van Genuchten form is the curve. The
+Brooks–Corey curve is flat above its bubbling pressure ψb, so no pore wider
+than r(ψb) exists: an air-entry cap built into the curve, where van Genuchten
+with n < 2 needs one imposed (Correction 1).
+
+Brakensiek et al. then halve Ks for the Green–Ampt conductivity, following
+Bouwer's (1966) re-wet conductivity. That halving is for infiltration
+modelling, not a correction to Ks.
+
+Tested by fitting Brooks–Corey to the same curves (`brutsaert_ks` in
+`verify_ks_physical.py`, not used by the tool). The fitted ψb have a median
+of about 13 cm, so Eq. 5 behaves like the van Genuchten capillary bundle with a cap of
+a few centimetres. It is better than the uncapped form but short of the
+50 cm cap, source-blocked and on the New Jersey intact cores alike
+(Section 3). It is therefore not adopted, but it gives the cap a classical
+anchor.
 
 ## 3. Validation
 
@@ -95,6 +128,9 @@ parameters and refitted, and the factor was refitted without the source.
 | Physics, no cap, raw | 1.00 | 16 % / 50 % | +0.76 | 0.44 |
 | Physics, no cap, matched | 0.78 | 21 % / 59 % | +0.16 | 0.43 |
 | Peters et al. 2023 | 0.91 | 18 % / 54 % | +0.40 | 0.39 |
+| Brutsaert 1967 (Brooks–Corey), raw | 0.76 | 23 % / 61 % | +0.26 | 0.46 |
+| Brutsaert 1967, matched (factor 1.50) | 0.73 | 24 % / 62 % | +0.08 | 0.45 |
+| Brutsaert 1967, halved (Bouwer re-wet K) | 0.72 | 24 % / 63 % | −0.04 | 0.46 |
 
 The ρ column is the Spearman rank correlation with the measured Ks.
 
@@ -120,7 +156,7 @@ reference):
 | Laikipia (field permeameter Ks) | 84 | ×11.5 | ×10.2 | ×11.6 |
 | New Jersey, SSIR 26 (intact-core Ks) | 236 | ×1.84 | ×2.22 (ρ 0.80) | ×4.99 |
 
-The New Jersey Ks played no part in choosing the cap or the factor: uncapped and raw, the physics would be ×16.9 there. Boorowa has no measured Ks. Laikipia's Ks is a field measurement that no
+The New Jersey Ks played no part in choosing the cap or the factor: uncapped and raw, the physics would be ×16.9 there. Brutsaert's Eq. 5, with Brooks–Corey fitted to each horizon's measured points (median ψb 12.7 cm), gives ×5.3 there (ρ 0.63), and ×2.8 halved. Boorowa has no measured Ks. Laikipia's Ks is a field measurement that no
 lab-based estimate reproduces, so it cannot separate the methods.
 
 **A range for the physics was tested and rejected.** The spread across the
@@ -142,11 +178,11 @@ Predicted Ks: 2.01 cm/h  [5-95 %: 8.33e-05 - 34.7]   (from the kNN; ~12 of 30 un
   "Agrees" means within a factor of 10 of the kNN, judged on the matched
   value.
 - **Not adopted:** the physics median with the kNN band, blending, a
-  variant range, and the Peters form.
+  variant range, the Peters form, and Brutsaert's Brooks–Corey form.
 
 ## 5. Texture from the pore sizes (tested, not adopted)
 
-The bundle can also be run toward texture: invert Arya and Paris (1981),
+The capillary bundle can also be run toward texture: invert Arya and Paris (1981),
 pore radius → particle radius with their scaling exponent α = 1.38, then
 cumulative particle-size distribution → USDA fractions and class. There is
 no fitting. It was tested paired against the tool on 1,733 balanced,
@@ -183,18 +219,36 @@ sand-heavy natural class mix and was withdrawn.
 
 ## 7. Reproduce
 
+From the repository root, with one thread per numerical library (the
+runs are single-threaded by design) and `caffeinate -i` so that macOS does
+not sleep through them:
+
 ```bash
-.venv/bin/python verify_ks_physical.py                 # ~10 min: all tables above
-.venv/bin/python figures/make_external_report.py babaeian_zanjanrood   # fig6, ks_variants.csv
+export OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 VECLIB_MAXIMUM_THREADS=1 MKL_NUM_THREADS=1
+caffeinate -i .venv/bin/python verify_ks_physical.py > ks_physical.log 2>&1              # ~10 min: Section 3's source-blocked tables
+caffeinate -i .venv/bin/python verify_external.py nj_ssir26 > nj_external.log 2>&1        # the New Jersey test set, all three designs
+caffeinate -i .venv/bin/python figures/make_external_report.py nj_ssir26                  # its fig6 and ks_variants.csv
+caffeinate -i .venv/bin/python figures/make_external_report.py babaeian_zanjanrood        # the same for Zanjanrood
 ```
 
-Wrap long runs in `caffeinate -i`, with OMP/OPENBLAS/VECLIB/MKL_NUM_THREADS=1.
+The per-soil reports go to `figures/external/<set>/`. `caffeinate` is
+macOS only; elsewhere, drop it.
 
 ## References
 
 - Arya, L.M. and Paris, J.F. (1981). A physicoempirical model to predict the
   soil moisture characteristic from particle-size distribution and bulk
   density data. *Soil Science Society of America Journal* 45:1023–1030.
+- Bouwer, H. (1966). Rapid field measurement of air entry value and
+  hydraulic conductivity of soil as significant parameters in flow system
+  analysis. *Water Resources Research* 2:729–738.
+- Brakensiek, D.L., Engleman, R.L. and Rawls, W.J. (1981). Variation within
+  texture classes of soil water parameters. *Transactions of the ASAE*
+  24:335–339.
+- Brooks, R.H. and Corey, A.T. (1964). *Hydraulic properties of porous
+  media*. Hydrology Paper 3, Colorado State University, Fort Collins.
+- Brutsaert, W. (1967). Some methods of calculating unsaturated
+  permeability. *Transactions of the ASAE* 10:400–404.
 - Childs, E.C. and Collis-George, N. (1950). The permeability of porous
   materials. *Proceedings of the Royal Society of London A* 201:392–405.
 - Greenland, D.J. (1977). Soil damage by intensive arable cultivation:

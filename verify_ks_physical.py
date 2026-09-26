@@ -29,7 +29,8 @@ that never looked at the reference. It answers three questions:
      prints the whole-reference value to check the constant.
   4. Would blending them beat the kNN? (And, last table, do other forms of
      the physics do better: the widest pore capped at an air-entry suction,
-     or Peters et al. 2023, each matched and blended the same way?) The weights are fitted on the sources
+     or Peters et al. 2023, or Brutsaert's (1967) Brooks-Corey form, each
+     matched and blended the same way?) The weights are fitted on the sources
      outside the scored fold, never on the fold itself, so the answer is what
      a user would get and not what the grid could be made to show. Blending
      is geometric: log K = (1-w) log K_knn + w log K_physical.
@@ -45,6 +46,7 @@ import sys
 
 import numpy as np
 import pandas as pd
+from scipy.optimize import curve_fit
 from scipy.stats import spearmanr, wilcoxon
 
 import ks_physical
@@ -73,6 +75,38 @@ def predict(ref, clf, targets, blocked, n_mc):
                      for c in ("thetar", "thetas", "alpha_kpa", "n")})
     return (np.array(knn, float), np.array(lo, float), np.array(hi, float),
             np.array(phys, float), np.array(cls), pd.DataFrame(fits))
+
+
+def _bc(h_cm, thr, ths, log_psib, lam):
+    psib = 10.0 ** log_psib
+    se = np.where(h_cm > psib, (psib / np.maximum(h_cm, 1e-9)) ** lam, 1.0)
+    return thr + (ths - thr) * se
+
+
+def brutsaert_ks(thr, ths, alpha_kpa, n):
+    """Ks (cm/h) by Brutsaert's (1967) closed form of the same capillary
+    bundle for a Brooks and Corey (1964) curve, as Brakensiek et al. (1981,
+    eq. 5) use it: Ks = 270 phi_e^2 lambda^2 / (psi_b^2 (lambda+1)(lambda+2))
+    cm/s, psi_b in cm, 270 = sigma^2 / (2 mu rho g) for water at 20 C. The
+    Brooks-Corey curve is fitted to the same van Genuchten curve the other
+    forms use (H, 0-150 kPa), so only the curve shape differs: its bubbling
+    pressure is a built-in air-entry cap. Not used by the tool."""
+    out = np.full(len(np.atleast_1d(thr)), np.nan)
+    h_cm = H / 0.0980665
+    for i, (a, b, c, d) in enumerate(zip(np.atleast_1d(thr), np.atleast_1d(ths),
+                                         np.atleast_1d(alpha_kpa), np.atleast_1d(n))):
+        th = st.vg_theta(H, a, b, c, d)
+        try:
+            p, _ = curve_fit(_bc, h_cm, th, p0=[th.min() * 0.5, th.max(), 1.3, 0.3],
+                             bounds=([0.0, th.max() * 0.9, -1.0, 0.02],
+                                     [max(th.min(), 1e-6), th.max() * 1.1, 3.5, 3.0]),
+                             maxfev=20000)
+        except Exception:
+            continue
+        r, s_, lp, lam = p
+        out[i] = (270.0 * (s_ - r) ** 2 / (10.0 ** lp) ** 2
+                  * lam ** 2 / ((lam + 1) * (lam + 2)) * 3600.0)
+    return out
 
 
 def blend(knn, phys, w):
@@ -285,6 +319,7 @@ def main():
             lambda tr, ts, a, n_, cap=cap:
             ks_physical.marshall_ks(tr, ts, a, n_, h_min_cm=cap))
     forms["Peters et al. 2023"] = lambda tr, ts, a, n_: ks_physical.peters_ks(tr, ts, a)
+    forms["Brutsaert 1967 (Brooks-Corey)"] = brutsaert_ks
     fit = [d[f"fit_{c}"].to_numpy(float)
            for c in ("thetar", "thetas", "alpha_kpa", "n")]
     print(f"\nPHYSICAL VARIANTS (m = 1-1/n on the refitted curve; matched = "
@@ -294,13 +329,16 @@ def main():
     print("-" * 94)
 
     def row(label, pred, factor=""):
-        e = logerr(pred, obs)
-        b = np.mean(np.log10(pred) - np.log10(obs))
+        ok = np.isfinite(pred) & (pred > 0)     # a form may fail on a curve
+        if not ok.all():
+            label = f"{label} (n={ok.sum()})"
+        e, ek = logerr(pred[ok], obs[ok]), e_knn[ok]
+        b = np.mean(np.log10(pred[ok]) - np.log10(obs[ok]))
         print(f"{label:<34s} {factor:>7s} {np.median(e):8.2f} "
               f"{np.mean(e <= np.log10(2))*100:4.0f}% {np.mean(e <= 1)*100:4.0f}% "
-              f"{b:+6.2f} {spearmanr(pred, obs).statistic:5.2f} "
-              f"{np.median(e) - np.median(e_knn):+7.2f} "
-              f"{wilcoxon(e, e_knn).pvalue if label != 'kNN (the tool)' else np.nan:8.1e}")
+              f"{b:+6.2f} {spearmanr(pred[ok], obs[ok]).statistic:5.2f} "
+              f"{np.median(e) - np.median(ek):+7.2f} "
+              f"{wilcoxon(e, ek).pvalue if not label.startswith('kNN') else np.nan:8.1e}")
     row("kNN (the tool)", knn)
     for name, fn in forms.items():
         raw = fn(*fit)
@@ -309,6 +347,9 @@ def main():
         row(f"{name}, raw", raw)
         row(f"{name}, matched", mat, f)
         row(f"  half kNN, half matched", blend(knn, mat, 0.5))
+    # Brakensiek et al. (1981) halve it for Green and Ampt, after Bouwer
+    # (1966): the re-wet conductivity. A constant, so matching undoes it.
+    row("Brutsaert, halved (Bouwer re-wet)", brutsaert_ks(*fit) / 2)
 
     # The cap itself chosen out of fold: for each scored source, the cap
     # whose matched physics has the lowest median error on the other
