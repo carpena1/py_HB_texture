@@ -1,6 +1,6 @@
 # Physics-based estimates from the retention curve: brief
 
-Status on 2026-09-23, commit `1e01b5e`. Code: `ks_physical.py` (the
+Status on 2026-09-23, commit `1e01b5e`; Section 5 (texture) updated 2026-10-01. Code: `ks_physical.py` (the
 calculation), `verify_ks_physical.py` (the tests),
 `figures/make_external_report.py` (fig6 and `ks_variants.csv` per external
 set).
@@ -182,23 +182,92 @@ Predicted Ks: 2.01 cm/h  [5-95 %: 8.33e-05 - 34.7]   (from the kNN; ~12 of 30 un
 
 ## 5. Texture from the pore sizes (tested, not adopted)
 
-The capillary bundle can also be run toward texture: invert Arya and Paris (1981),
-pore radius → particle radius with their scaling exponent α = 1.38, then
-cumulative particle-size distribution → USDA fractions and class. There is
-no fitting. It was tested paired against the tool on 1,733 balanced,
-source-blocked targets:
+Four ways of reading texture off the retention curve without any reference
+data were tested as a physical second opinion on the class and fractions:
+
+- **Inverse Arya–Paris.** The capillary bundle run toward texture: invert
+  Arya and Paris (1981), pore radius → particle radius with their scaling
+  exponent α = 1.38, then cumulative particle-size distribution → USDA
+  fractions and class. There is no fitting.
+- **Inverse Saxton et al. (1986).** The retention equations Pan et al.
+  (2010) invert. Pan et al. estimate a field's mean and spread of sand,
+  clay and rock from the spatial mean and spread of measured soil moisture,
+  which needs many locations and gives no texture for one sample. What
+  carries over to a single curve is the forward model: the (sand, clay)
+  whose Saxton curve best matches the measured one, on a 1 % grid within
+  the equations' stated range (sand 5–95 %, clay 5–60 %). Saxton's
+  equations are a regression on measured soils, not physics.
+- **Fredlund grain-size back-analysis, as read from the paper.** Nguyen and
+  Elwood (2025) adjust a Fredlund et al. (2000) unimodal grain-size curve
+  and a packing porosity until the Fredlund (2000) physico-empirical
+  retention curve matches the measured one. In this reading each uniform
+  grain fraction gets its own Fredlund and Xing (1994) curve, with the air
+  entry from Sakaki et al. (2014) and the shape from Fredlund's
+  effective-diameter correlation, and the fractions fill the porosity from
+  the finest up.
+- **Fredlund grain-size back-analysis, the authors' code.** Their Python
+  listing, ported with the fewest repairs needed to run (indentation,
+  undefined names, a model returning the curve at the measured suctions,
+  the sample's own bulk density, porosity and saturated water content in
+  place of the values of the listing's test soil, Clavet sand) and its algorithm unchanged: one air entry for
+  the whole soil from D30, the curve's shape from the whole soil's
+  effective diameter, the curve fit adjusting only two grain-size
+  parameters for each random draw of the other four, and every solution
+  with R² > 0.98 kept (scored here on the best one; 100 draws per soil
+  against the listing's 1,500). Run with the listing's silty-sand
+  parameter ranges and with the paper's fine-grained ranges added.
+
+All were scored paired against the tool on 1,733 balanced targets (150 per
+class, every silt) with each target's whole source held out from the tool
+(the physics needs nothing held out; 2026-10, the 21,298-layer default
+reference):
 
 | | Exact | Group | Macro-F1 | Fraction error (points) |
 |---|---|---|---|---|
-| Tool (classifier) | 31.2 % | 57.9 % | 29.9 | 13.3 |
-| Neighbour vote | 28.2 % | 55.5 % | 27.9 | – |
-| Inverse Arya–Paris | 21.2 % | 45.0 % | 17.1 | 18.2 |
+| Tool (classifier) | 30.8 % | 57.3 % | 28.7 | 13.5 |
+| Neighbour vote | 29.2 % | 54.7 % | 28.6 | – |
+| Inverse Saxton et al. (1986) | 24.9 % | 54.4 % | 21.6 | 17.9 |
+| Fredlund back-analysis, read from the paper | 21.8 % | 51.1 % | 17.9 | 16.0 |
+| Inverse Arya–Paris | 21.6 % | 44.6 % | 17.3 | 18.2 |
+| Fredlund back-analysis, authors' code (fine ranges added) | 11.7 % | 25.4 % | 6.5 | 31.0 |
+| Fredlund back-analysis, authors' code (silty-sand ranges) | 10.3 % | 22.2 % | 3.9 | 30.8 |
 
-It is −10.0 pp against the tool (p = 2 × 10⁻¹⁶). It nearly matches the tool
-on sandy soils (58 % vs 61 %) and collapses on clays (10 % vs 27 %; clay
-content error 15.9 vs 8.5 points), where aggregation and film flow break the
-capillary assumption. An earlier figure of 35.1 % came from the reference's
-sand-heavy natural class mix and was withdrawn.
+Every one is significantly worse than the tool on the class (Saxton −5.9 pp,
+p = 4 × 10⁻⁶; the others −9 to −21 pp). Each fails somewhere different:
+
+- Arya–Paris nearly matches the tool on sandy soils (58 % vs 65 %) and
+  collapses on silty and clayey ones (10 % vs 25–30 %; clay error 15.9 vs
+  8.6 points), where aggregation and film flow break the capillary
+  assumption.
+- Saxton holds up on clayey soils (28 % vs 30 %) but loses on sandy ones
+  (45 % vs 65 %).
+- The paper-based Fredlund reading gives the best physical fractions: its
+  clay ranks soils as well as the tool's (Spearman 0.75) and its sand
+  slightly better (0.67 vs 0.63), and it beats the tool on loamy (26 % vs
+  18 %) and clayey soils (31 % vs 30 %). It fails sandy (20 %) and silty
+  soils (5 %), and for 20 % of soils near-equally good fits differ by more
+  than 10 points of clay.
+- The authors' code reads about 80 % of all soils as sand or loamy sand;
+  its median clay is 0 % against 24 % measured, and clayey soils score 0–1 %.
+  The curve's shape depends only on D30 and on the whole soil's effective
+  diameter, so it carries almost nothing about the fines, and R² (a
+  correlation) is met by many distributions: for a third to a half of the
+  soils the solutions kept differ by more than 20 points of sand. This is
+  the non-uniqueness, and the limitation to sand and silt, that the authors
+  report.
+
+Nor do they help in combination. Averaging any of them 50/50 with the tool's
+fractions raises the error (to 13.6–18.5 points), and the class read from
+the averaged fractions is lower than the tool's (25.7–28.7 % for Arya–Paris,
+Saxton and the paper-based reading). As an
+agreement check, Arya–Paris remains the most telling: where the tool and its
+neighbour vote agree, the tool is right 57 % of the time when Arya–Paris also
+agrees and 27 % when it does not (Saxton 47 vs 30 %, the paper-based Fredlund
+48 vs 33 %). The authors' code splits more sharply (79 vs 31 %, silty-sand
+ranges) but agrees with the tool on only 10 % of the soils, so it rarely
+says anything. An earlier
+Arya–Paris figure of 35.1 % came from the reference's sand-heavy natural class
+mix and was withdrawn.
 
 ## 6. Caveats
 
@@ -251,6 +320,14 @@ macOS only; elsewhere, drop it.
   permeability. *Transactions of the ASAE* 10:400–404.
 - Childs, E.C. and Collis-George, N. (1950). The permeability of porous
   materials. *Proceedings of the Royal Society of London A* 201:392–405.
+- Fredlund, D.G. and Xing, A. (1994). Equations for the soil-water
+  characteristic curve. *Canadian Geotechnical Journal* 31:521–532.
+- Fredlund, M.D. (2000). *The role of unsaturated soil property functions in
+  the practice of unsaturated soil mechanics*. PhD thesis, University of
+  Saskatchewan, Saskatoon.
+- Fredlund, M.D., Fredlund, D.G. and Wilson, G.W. (2000). An equation to
+  represent grain-size distribution. *Canadian Geotechnical Journal*
+  37:817–827.
 - Greenland, D.J. (1977). Soil damage by intensive arable cultivation:
   temporary or permanent? *Philosophical Transactions of the Royal Society
   of London B* 281:193–208.
@@ -263,10 +340,23 @@ macOS only; elsewhere, drop it.
   Science Society of America Proceedings* 36:380–382.
 - Marshall, T.J. (1958). A relation between permeability and size
   distribution of pores. *Journal of Soil Science* 9:1–8.
+- Nguyen, M. and Elwood, D. (2025). An iterative program to back-analyze
+  grain-size distribution from a predetermined soil–water characteristic
+  curve. *Transportation Geotechnics* 51:101485.
+- Pan, F., Peters-Lidard, C.D. and King, A.W. (2010). Inverse method for
+  estimating the spatial variability of soil particle size distribution
+  from observed soil moisture. *Journal of Hydrologic Engineering*
+  15:931–938.
 - Peters, A., Hohenbrink, T.L., Iden, S.C., van Genuchten, M.Th. and
   Durner, W. (2023). Prediction of the absolute hydraulic conductivity
   function from soil water retention data. *Hydrology and Earth System
   Sciences* 27:1565–1582.
+- Sakaki, T., Komatsu, M. and Takahashi, M. (2014). Rules-of-thumb for
+  predicting air-entry value of disturbed sands from particle size. *Soil
+  Science Society of America Journal* 78:454–464.
+- Saxton, K.E., Rawls, W.J., Romberger, J.S. and Papendick, R.I. (1986).
+  Estimating generalized soil-water characteristics from texture. *Soil
+  Science Society of America Journal* 50:1031–1036.
 - van Genuchten, M.Th. (1980). A closed-form equation for predicting the
   hydraulic conductivity of unsaturated soils. *Soil Science Society of
   America Journal* 44:892–898.
