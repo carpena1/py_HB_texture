@@ -492,10 +492,10 @@ The **Andalusian soils** measured by K. Vanderlinden (IFAPA;
   with depth and bulk density) against 65.9 % for always answering sandy
   loam, 54.5 % texture group and macro-F1 41 against 40; fractions are
   within 9.8 (sand), 6.8 (silt) and 5.8 (clay) points. The misses follow
-  soil structure, not texture: none of the 5 cm rings under the canopy is
-  read correctly and 82 % of them read as loamy sand (loose surface soil,
-  bulk density 1.37, Ks 23 cm/h), while the compacted inter-row rings at 15
-  cm are right 64 % of the time. With its own sites held out of an expanded
+  soil structure, not texture: under the tree canopy only 14 % of rings are
+  read correctly and 59 % read as loamy sand (loose soil, bulk density
+  1.37–1.48, median Ks 5–23 cm/h), while the compacted inter-row rings
+  (bulk density 1.65, Ks 0.7–0.8 cm/h) are right 50 % of the time. With its own sites held out of an expanded
   reference, the set gains (47.7 % exact with depth and bulk density; Ks
   ranking ρ 0.40 → 0.65, 93 % within a factor of 10), and adding it leaves
   the rest of the reference unchanged (−0.1 pp exact for a new site, −0.5 pp
