@@ -125,3 +125,13 @@ data/hohenbrink_points.csv
 
 # The original problem description, kept locally only.
 Problem_description.docx
+# K. Vanderlinden's Andalusian curves (Setenil, Tomejil, Donana): distribution
+# agreed by K. Vanderlinden, awaiting J.V. Giraldez, so raw files, derived
+# tables and reports stay local for now.
+data/andalusia_raw/
+data/setenil_reference.csv
+data/tomejil_reference.csv
+data/donana_reference.csv
+figures/external/setenil/
+figures/external/tomejil/
+figures/external/donana/

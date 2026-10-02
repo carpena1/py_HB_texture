@@ -73,11 +73,17 @@ KS_TRUTH = {"willard": ("ksat_mpd_cmh",
 LABELS = {"babaeian_az": "Arizona soils", "willard": "Laikipia soils",
           "boorowa": "Boorowa Farm soils (CSIRO, NSW)",
           "babaeian_zanjanrood": "Zanjanrood watershed soils (Iran)",
-          "nj_ssir26": "New Jersey Coastal Plain soils (SSIR 26)"}
+          "nj_ssir26": "New Jersey Coastal Plain soils (SSIR 26)",
+          "setenil": "Setenil olive-grove soils (Andalusia)",
+          "tomejil": "Tomejil vertisol (Andalusia)",
+          "donana": "Donana sands (Andalusia)"}
 CURVE_NOTE = {"willard": "the original laboratory values, pF 0-4.2, rescaled per sample so that pF 0 sits at 95 % of porosity",
               "boorowa": "10 cm to 15 bar: suction tables and pressure plates",
               "babaeian_zanjanrood": "0-100 cm on intact cores (hanging column), 330-15,000 cm on disturbed samples (sand box and pressure plates)",
-              "nj_ssir26": "saturation and 0.02-1 bar on intact cores, 2-15 bar on crushed samples; Ks on the cores"}
+              "nj_ssir26": "saturation and 0.02-1 bar on intact cores, 2-15 bar on crushed samples; Ks on the cores",
+              "setenil": "0-500 cm on suction tables and WP4 readings to 1500 kPa (6 of 44 rings) on intact rings; Ks on the rings",
+              "tomejil": "1-500 cm on sand boxes, 1,000-3,000 cm pressure plate and WP4 readings to 1500 kPa on intact rings; bulk density a treatment mean",
+              "donana": "volumetric, 0.1-50 kPa on sand boxes (+ WP4 to 1500 kPa at El Acebuche), mean of 2-3 rings per depth; bulk density the 47-ring mean"}
 MATCH_COLOR = {"exact": "#2a78d6", "same group": "#e8a33d",
                "wrong group": "#d6452a"}
 
@@ -344,9 +350,13 @@ def fig_triangle(tg, pf, soils, out, frac_arm, cls_arm, label):
     for _, r in tg.iterrows():
         s = r.layer_id.split("_", 1)[1]
         f = pf.loc[r.layer_id]
-        x0, y0 = tern(r.clay, r.silt, r.sand)
         x1, y1 = tern(f.pred_clay, f.pred_silt, f.pred_sand)
         col = MATCH_COLOR[match[s]]
+        if not np.isfinite([r.sand, r.silt, r.clay]).all():
+            # fractions not reported (tomejil): the prediction alone
+            ax.plot(x1, y1, "o", ms=6, mfc=vp.SURFACE, mec=col, mew=1.2, zorder=3)
+            continue
+        x0, y0 = tern(r.clay, r.silt, r.sand)
         ax.annotate("", xy=(x1, y1), xytext=(x0, y0), zorder=2,
                     arrowprops=dict(arrowstyle="-|>", color=col, lw=0.9,
                                     shrinkA=3, shrinkB=3, mutation_scale=8))
@@ -417,9 +427,14 @@ def fig_fractions(tg, pf, out, frac_arm, label):
     fig.subplots_adjust(top=0.78, bottom=0.14, left=0.06, right=0.98, wspace=0.28)
     for ax, c in zip(axes, ("sand", "silt", "clay")):
         f = pf.loc[tg.layer_id]
-        x, y = tg[c].to_numpy(), f[f"pred_{c}"].to_numpy()
+        x, y = tg[c].to_numpy(float), f[f"pred_{c}"].to_numpy()
         lo, hi = f[f"pred_{c}_p5"].to_numpy(), f[f"pred_{c}_p95"].to_numpy()
         ax.plot([0, 100], [0, 100], color=vp.INK2, lw=1, zorder=1)
+        if not np.isfinite(x).any():
+            ax.text(0.5, 0.5, f"{c} not reported", transform=ax.transAxes,
+                    ha="center", color=vp.MUTED)
+            ax.set_xlabel(f"reported {c} (%)"); ax.set_ylabel(f"predicted {c} (%)")
+            continue
         ax.errorbar(x, y, yerr=[y - lo, hi - y], fmt="o", ms=5, color=vp.S1,
                     ecolor="#9ec5f4", elinewidth=1.2, zorder=2)
         err = y - x

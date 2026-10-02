@@ -3,7 +3,7 @@
     python figures/make_class_distribution.py
 
 Each class bar is split into the distributed tables and the restricted ones
-(EU-HYDI, Laikipia), as the coverage map splits them by location. Only class
+(EU-HYDI, Laikipia, Setenil, Tomejil), as the coverage map splits them by location. Only class
 counts are drawn, so the figure can be shared even when a table is
 restricted. Writes figures/fig5_texture_classes.png/.svg and prints the counts.
 """
@@ -84,7 +84,7 @@ def main():
                 transform=ax.get_yaxis_transform(), color=vp.AXIS, lw=1,
                 clip_on=False)
     hd = [Rectangle((0, 0), 1, 1, color=c) for c in (vp.S1, vp.S2)]
-    ax.legend(hd, ["distributed tables", "restricted tables (EU-HYDI, Laikipia)"],
+    ax.legend(hd, ["distributed tables", "restricted tables (EU-HYDI, Laikipia, Andalusia)"],
               loc="upper center", bbox_to_anchor=(0.5, -0.1), ncol=2, fontsize=9)
     big, small = t.total.idxmax(), t.total.idxmin()
     vp.title(fig, "Texture classes in the default reference",

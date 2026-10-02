@@ -38,7 +38,8 @@ LAT_N, LAT_S = 84.0, -58.0
 W, PAD_X, PAD_TOP = 1040.0, 14.0, 44.0
 LABEL = {"euhydi": "EU-HYDI", "hohenbrink": "Hohenbrink", "kssl": "KSSL",
          "gshp": "GSHP", "merged": "Default reference",
-         "public": "Public reference", "willard": "Laikipia"}
+         "public": "Public reference", "willard": "Laikipia",
+         "setenil": "Setenil", "tomejil": "Tomejil"}
 BAKE = {"var(--accent)": "#0E6E73", "var(--add)": "#B8471E",
         "var(--muted)": "#5C6A70", "var(--sunken)": "#EAEEEC",
         "currentColor": "#141A1D"}

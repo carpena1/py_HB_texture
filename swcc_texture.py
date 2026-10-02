@@ -55,7 +55,8 @@ REFERENCE_SETS = {
                "hohenbrink_reference.csv", "babaeian_zanjanrood_reference.csv",
                "euhydi_reference.csv", "willard_reference.csv",
                "babaeian_az_reference.csv", "armas_reference.csv",
-               "tong_reference.csv", "local_reference.csv"],
+               "tong_reference.csv", "setenil_reference.csv",
+               "tomejil_reference.csv", "local_reference.csv"],
     # The distributed tables: what a fresh clone has.
     "public": ["gshp_reference.csv", "kssl_reference.csv",
                "hohenbrink_reference.csv", "babaeian_zanjanrood_reference.csv",
@@ -89,11 +90,26 @@ REFERENCE_SETS = {
     # (1974; prepare_nj_ssir26.py): intact-core Ks, the Arya-Paris test set;
     # under test with verify_external.py.
     "nj_ssir26": ["nj_ssir26_reference.csv"],
+    # Andalusia, Spain (K. Vanderlinden, IFAPA; prepare_andalusia.py), one
+    # table per site, restricted until distribution is agreed; under test
+    # with verify_external.py. Setenil (olive-grove sandy loams, laboratory
+    # Ks on the rings) is in the default since 2026-10: neutral for the rest
+    # of the reference, Ks slightly better for a new source, and its own
+    # sites gain (+7 pp exact, Ks rho 0.40 -> 0.65). Tomejil (a vertisol, no
+    # Ks; fractions and bulk density are treatment means) is in the default
+    # since 2026-10 (project decision): neutral for the rest (+0.9 pp new
+    # site, 0.0 new source; +2 pp European, p~0.1), its own sites +5.6 pp.
+    "setenil": ["setenil_reference.csv"],
+    "tomejil": ["tomejil_reference.csv"],
+    # Donana sands (El Abalario, El Acebuche); no particle-size analysis, so a
+    # test set only.
+    "donana": ["donana_reference.csv"],
     "all": ["gshp_reference.csv", "kssl_reference.csv",
             "hohenbrink_reference.csv", "babaeian_zanjanrood_reference.csv",
             "euhydi_reference.csv", "willard_reference.csv",
             "babaeian_az_reference.csv", "armas_reference.csv",
-            "tong_reference.csv", "unsoda_reference.csv", "sdb_reference.csv",
+            "tong_reference.csv", "setenil_reference.csv",
+            "tomejil_reference.csv", "unsoda_reference.csv", "sdb_reference.csv",
             "local_reference.csv"],
 }
 DEFAULT_REFERENCE = "merged"
@@ -104,7 +120,8 @@ DEFAULT_REFERENCE = "merged"
 # note on stderr -- so a fresh clone of the public repository runs. A set made
 # only of restricted tables cannot load at all.
 RESTRICTED_TABLES = {"euhydi_reference.csv", "willard_reference.csv",
-                     "boorowa_reference.csv"}
+                     "boorowa_reference.csv", "setenil_reference.csv",
+                     "tomejil_reference.csv", "donana_reference.csv"}
 _noted_missing = set()
 
 # A user's own lab-verified curves, written by add_local_data.py. Joins the

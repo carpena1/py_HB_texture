@@ -61,11 +61,13 @@ Calling `.venv/bin/python` directly (as below) runs inside the virtual
 environment without activating it.
 
 The reference tables are committed, so **the tool runs out of the box with no
-downloads.** Two tables are exceptions: EU-HYDI, which is restricted to its
-consortium, and the Laikipia soils, which are unpublished. Their tables
-(`data/euhydi_reference.csv`, `data/willard_reference.csv`) are built locally
-with `prepare_euhydi.py` and `prepare_willard.py` by those who hold the data
-and are never distributed. A fresh clone runs on the other seven databases
+downloads.** Four tables are exceptions: EU-HYDI, which is restricted to its
+consortium, the Laikipia soils, which are unpublished, and the Setenil and
+Tomejil soils (Andalusia), whose distribution is not yet agreed. Their
+tables (`data/euhydi_reference.csv`, `data/willard_reference.csv`,
+`data/setenil_reference.csv`, `data/tomejil_reference.csv`) are built
+locally with `prepare_euhydi.py`, `prepare_willard.py` and
+`prepare_andalusia.py` by those who hold the data and are not distributed. A fresh clone runs on the other seven databases
 (14,372 layers) and prints a note saying so.
 
 ## Usage
@@ -315,7 +317,9 @@ every other number identical.
 | Yellow River Basin, China (Tong et al. 2024) | 1,030 | 1,015 | undisturbed | committed |
 | EU-HYDI (Weynants et al. 2013), 21 laboratories, 16 countries | 6,797 | 2,704 | per sample | **restricted, never distributed** |
 | Laikipia, central Kenya (Willard et al., under review) | 86 | 0 | undisturbed | **unpublished, never distributed** |
-| **default reference** | **21,255** | **11,017** | | |
+| Setenil, Andalusia, Spain (K. Vanderlinden, IFAPA) | 44 | 44 | undisturbed | **not distributed (pending agreement)** |
+| Tomejil vertisol, Andalusia, Spain (Vanderlinden et al. 2021) | 54 | 0 | undisturbed | **not distributed (pending agreement)** |
+| **default reference** | **21,353** | **11,061** | | |
 
 Each source gets its own `prepare_*.py`, because each ships something
 different, and each needed a correction before its curves were comparable:
@@ -378,6 +382,19 @@ different, and each needed a correction before its curves were comparable:
   curves look coarser than they are. Added to the reference it does no harm
   to the other soils (+1.3 pp exact, p=0.15) and helps silt loam (+6 pp,
   p=0.08).
+- **Setenil** (olive groves in the Setenil de las Bodegas catchment, Cádiz;
+  sandy loams and sandy clay loams) has 44 intact rings: 11 locations, under
+  the tree canopy and in the inter-row, at 5 and 15 cm. Water content is
+  gravimetric (suction tables to 500 cm, WP4 dew-point readings beyond) and
+  is made volumetric with the bulk density of each 100 cm³ ring; a second
+  density column in the workbook, 1.087 times larger for every ring (most
+  likely from a comparison with 250 cm³ rings), would put saturation at 1.25
+  times the porosity. Texture is the regional laboratory's analysis, most
+  likely by hydrometer with USDA limits and carbonates removed. As for
+  Arizona, only points to 1500 kPa are fitted; only 6 rings have a WP4
+  reading below that (the WP4 readings were selected by eye). Ks was
+  measured on the same rings with a laboratory permeameter (median 4.2
+  cm/h).
 
 **Sample type** (`sample_type`, with its evidence in `sample_type_source`) is
 set by how the wet end of each curve was measured: an intact core for the wet
@@ -388,12 +405,12 @@ table per sample, the KSSL method codes and the Hohenbrink data description.
 Florida's soils (5,735 layers), which GSHP lists as unknown, are undisturbed:
 one of the dataset's authors recalls the rings for conductivity and water
 release being taken in the field for each horizon, without repacking. In the
-default reference: 18,453 undisturbed, 1,581 disturbed, 1,221 unknown. Of
-the 11,017 layers with a measured Ks, 10,951 are undisturbed and only 45
+default reference: 18,551 undisturbed, 1,581 disturbed, 1,221 unknown. Of
+the 11,061 layers with a measured Ks, 10,995 are undisturbed and only 45
 disturbed.
 
-**Coverage.** 20,598 layers carry coordinates (`figures/fig2_coverage_map.png`).
-North America holds 9,256, Europe 7,740 (38 %), Asia 2,653 (1,030 of them in
+**Coverage.** 20,696 layers carry coordinates (`figures/fig2_coverage_map.png`).
+North America holds 9,256, Europe 7,838 (38 %), Asia 2,653 (1,030 of them in
 the Yellow River Basin), South America 639, Africa 750 (with the Canary
 Islands) and Australasia 111; Florida alone supplies 28 %. Southern Europe and the Balkans remain thin.
 
@@ -406,26 +423,26 @@ Ks is measured for 80 % of sandy soils but for about a third of silty ones.
 
 | group | class | layers | share | with Ks | distributed | restricted |
 |---|---|---|---|---|---|---|
-| Sandy | sand | 4,620 | 21.7 % | 4,020 | 4,051 | 569 |
+| Sandy | sand | 4,620 | 21.6 % | 4,020 | 4,051 | 569 |
 | | loamy sand | 1,467 | 6.9 % | 856 | 1,000 | 467 |
-| Loamy | sandy loam | 3,788 | 17.8 % | 1,726 | 2,306 | 1,482 |
-| | loam | 1,882 | 8.9 % | 516 | 1,162 | 720 |
-| | sandy clay loam | 1,323 | 6.2 % | 779 | 1,101 | 222 |
+| Loamy | sandy loam | 3,817 | 17.9 % | 1,755 | 2,306 | 1,511 |
+| | loam | 1,882 | 8.8 % | 516 | 1,162 | 720 |
+| | sandy clay loam | 1,338 | 6.3 % | 794 | 1,101 | 237 |
 | | clay loam | 1,007 | 4.7 % | 370 | 632 | 375 |
 | Silty | silt | 83 | 0.4 % | 48 | 69 | 14 |
-| | silt loam | 3,328 | 15.7 % | 1,331 | 1,989 | 1,339 |
+| | silt loam | 3,328 | 15.6 % | 1,331 | 1,989 | 1,339 |
 | | silty clay loam | 1,326 | 6.2 % | 327 | 721 | 605 |
 | Clayey | sandy clay | 185 | 0.9 % | 112 | 172 | 13 |
 | | silty clay | 627 | 2.9 % | 182 | 270 | 357 |
-| | clay | 1,619 | 7.6 % | 750 | 899 | 720 |
+| | clay | 1,673 | 7.8 % | 750 | 899 | 774 |
 
 | texture group | layers | share | with Ks | distributed | restricted |
 |---|---|---|---|---|---|
-| Sandy | 6,087 | 28.6 % | 4,876 (80 %) | 5,051 | 1,036 |
-| Loamy | 8,000 | 37.6 % | 3,391 (42 %) | 5,201 | 2,799 |
-| Silty | 4,737 | 22.3 % | 1,706 (36 %) | 2,779 | 1,958 |
-| Clayey | 2,431 | 11.4 % | 1,044 (43 %) | 1,341 | 1,090 |
-| **total** | **21,255** | | **11,017** | **14,372** | **6,883** |
+| Sandy | 6,087 | 28.5 % | 4,876 (80 %) | 5,051 | 1,036 |
+| Loamy | 8,044 | 37.7 % | 3,435 (43 %) | 5,201 | 2,843 |
+| Silty | 4,737 | 22.2 % | 1,706 (36 %) | 2,779 | 1,958 |
+| Clayey | 2,485 | 11.6 % | 1,044 (42 %) | 1,341 | 1,144 |
+| **total** | **21,353** | | **11,061** | **14,372** | **6,981** |
 
 The neighbour vote weights each class by the inverse of its count and the
 classifier uses balanced class weights, so neither favours sand for being
@@ -465,6 +482,61 @@ parameters by 14 points of exact class. Ks is within ×1.8 for the kNN
 (ρ = 0.75, 93 % within 10×) and ×2.2 for the capillary bundle (ρ = 0.80,
 91 %); uncapped, the bundle would be ×17 (`verify_external.py nj_ssir26`;
 `figures/make_external_report.py nj_ssir26`).
+
+The **Andalusian soils** measured by K. Vanderlinden (IFAPA;
+`prepare_andalusia.py`, one table per site) were tested with
+`verify_external.py` before any joined.
+
+- **Setenil** (44 rings, 29 sandy loams and 15 sandy clay loams) joined the
+  default in 2026-10. As a new source it reads 31.8 % exact class (38.6 %
+  with depth and bulk density) against 65.9 % for always answering sandy
+  loam, 54.5 % texture group and macro-F1 41 against 40; fractions are
+  within 9.8 (sand), 6.8 (silt) and 5.8 (clay) points. The misses follow
+  soil structure, not texture: none of the 5 cm rings under the canopy is
+  read correctly and 82 % of them read as loamy sand (loose surface soil,
+  bulk density 1.37, Ks 23 cm/h), while the compacted inter-row rings at 15
+  cm are right 64 % of the time. With its own sites held out of an expanded
+  reference, the set gains (47.7 % exact with depth and bulk density; Ks
+  ranking ρ 0.40 → 0.65, 93 % within a factor of 10), and adding it leaves
+  the rest of the reference unchanged (−0.1 pp exact for a new site, −0.5 pp
+  for a new source, both n.s.; Ks for a new source 0.954 → 0.940 dex,
+  p=0.04). Ks as a new source: the kNN is within ×3.8 (ρ = 0.40), the
+  capillary bundle ×3.5 (ρ = 0.74).
+- **Tomejil** (54 rings, 0–5 cm, a Chromic Haploxerert under direct drill
+  and conventional tillage near Carmona; Vanderlinden et al. 2017, 2021)
+  joined the default in 2026-10. Its curves are gravimetric: the soil is rich in smectite and
+  its bulk density runs from about 1.0 wet to 1.6 dry, which is why its
+  authors work in gravimetric water, and no ring has its own density. They
+  are made volumetric with each treatment's mean (Ordóñez Fernández et al.
+  2007). Texture is known per treatment only (G. Martínez's thesis, 0–20 cm:
+  sand 8.0–8.3 %, clay 55.2–56.0 %, so clay), and there is no Ks. Fitted to
+  1500 kPa the vertisol reads as clay for 88.9 % of rings (100 % with bulk
+  density, though that is a treatment mean), with too much sand (+18
+  points) and too little clay (40 % against 56 %); fitted to its whole WP4
+  dry end, every ring reads silty clay loam. With its own sites held out of
+  an expanded reference it reads 94.4 % (+5.6 pp, p=0.25), and adding it is
+  neutral for the rest (+0.9 pp exact for a new site, 0.0 for a new source;
+  +2 pp for European soils, p≈0.1). Its 54 rings come from one field and
+  share two sets of fractions, so vertisol-like curves may find most of
+  their neighbours in it and get narrower fraction ranges than the
+  measurements justify. It
+  also bears on Laikipia: both lose water steeply just below saturation
+  (water held at 330 cm suction is 64 % of that at saturation for Tomejil
+  and 62 % for Laikipia, against 81 % for the reference clays; at 1000 cm
+  55 %, 55–57 % and 73 %), so Laikipia's wet end matches a documented
+  vertisol. Their dry ends differ: water at 1500 kPa per unit of clay is
+  0.31–0.36 for Tomejil and 0.48 for Laikipia.
+- **Doñana** (El Abalario and El Acebuche, aeolian sands under scrub; 17
+  curves at 11 and 6 depths to over 2 m, each the mean of 2–3 rings, sand
+  boxes to 50 kPa, bulk density 1.70) is a test set: it has no
+  particle-size analysis, only "practically all sand". Read as a new source,
+  12 of the 17 curves are sand and 5 loamy sand (texture group 100 %). Its
+  Ks was measured in the field with a Philip–Dunne infiltrometer at 5–10 cm,
+  at points other than the retention samples, so it can only be compared
+  site by site: at El Acebuche the surface curve gives 20 cm/h (kNN) and 19
+  (capillary bundle) against a field median of 27 (20–38); at El Abalario
+  the 20 cm curve gives 19 and 19 against 70 (36–271), above the kNN's
+  5–95 % band.
 
 **Volcanic parent material and andic properties** (`volcanic`, `andic`,
 joined from `data/volcanic_flags.csv` by `prepare_volcanic.py`) are two
@@ -592,7 +664,7 @@ density (`--bulk-density`) tightens the first row to 0.35 dex (×2.2), with
 
 An undisturbed sample takes Ks only from undisturbed neighbours. That follows
 soil physics — intact soil keeps its macropores — but changes little in
-practice, since 10,951 of the 11,017 reference layers with a measured Ks are
+practice, since 10,995 of the 11,061 reference layers with a measured Ks are
 undisturbed: the paired error is much the same either way (0.80 against 0.81
 dex for a new source, p=0.078; 0.53 against 0.53 with the source in the
 reference, p=0.91). Telling the classifier the type barely moves texture for
@@ -649,7 +721,8 @@ and it ranks soils far better (ρ = 0.51 against 0.29). The external sets
 agree (`figures/make_external_report.py`, fig6): Zanjanrood ×1.95 against
 the kNN's ×2.35, Arizona ×2.0 against ×2.0, and on the New Jersey soils'
 intact-core Ks, which played no part in choosing the cap or the factor,
-×2.2 against ×1.8 with the better ranking (ρ 0.80 against 0.75). The kNN keeps two advantages:
+×2.2 against ×1.8 with the better ranking (ρ 0.80 against 0.75); on the
+Setenil rings (Andalusia) ×3.5 against ×3.8, ρ 0.74 against 0.40. The kNN keeps two advantages:
 its 5–95 % band, which the physics has not got, and its gain when the
 user's own laboratory is in the reference — 0.53 dex for a new site from a
 source the reference holds, 0.40 for a new depth (table above) — which the
@@ -806,7 +879,7 @@ target's laboratory in the reference is worth +5 points, which is what
 **Building the reference** — each script documents where to obtain its raw
 input: `prepare_gshp.py`, `prepare_kssl.py`, `prepare_hohenbrink.py`,
 `prepare_babaeian_zanjanrood.py`, `prepare_babaeian_az.py`,
-`prepare_armas.py`, `prepare_tong.py`, `prepare_boorowa.py`, `prepare_nj_ssir26.py`, `prepare_euhydi.py`, `prepare_willard.py`,
+`prepare_armas.py`, `prepare_tong.py`, `prepare_boorowa.py`, `prepare_nj_ssir26.py`, `prepare_andalusia.py`, `prepare_euhydi.py`, `prepare_willard.py`,
 `prepare_unsoda.py`, `prepare_sdb.py`; `prepare_volcanic.py` (the volcanic and andic fields);
 `free_m.py` (an unconstrained companion fit written alongside the Mualem
 one).
@@ -876,12 +949,19 @@ prediction is made, what the validation proves) with its SVGs, and
   Science Society of America Proceedings* 36:380–382.
 - Marshall, T.J. (1958). A relation between permeability and size
   distribution of pores. *Journal of Soil Science* 9:1–8.
+- Martínez, G., Vanderlinden, K., Giráldez, J.V., Espejo, A.J. and Muriel,
+  J.L. (2010). Field-scale soil moisture pattern mapping using
+  electromagnetic induction. *Vadose Zone Journal* 9:871–881.
 - Nemes, A., Schaap, M.G., Leij, F.J. and Wösten, J.H.M. (2001). Description of
   the unsaturated soil hydraulic database UNSODA version 2.0. *Journal of
   Hydrology* 251:151–162.
 - Leenaars, J.G.B., van Oostrum, A.J.M. and Ruiperez Gonzalez, M. (2014).
   Africa Soil Profiles Database, version 1.2. ISRIC Report 2014/01,
   ISRIC – World Soil Information, Wageningen.
+- Ordóñez Fernández, R., González Fernández, P., Giráldez Cervera, J.V. and
+  Perea Torres, F. (2007). Soil properties and crop yields after 21 years of
+  direct drilling trials in southern Spain. *Soil & Tillage Research*
+  94:47–54.
 - Peters, A., Hohenbrink, T.L., Iden, S.C., van Genuchten, M.Th. and
   Durner, W. (2023). Prediction of the absolute hydraulic conductivity
   function from soil water retention data. *Hydrology and Earth System
@@ -908,6 +988,14 @@ prediction is made, what the validation proves) with its SVGs, and
   Li, Z. and Lauerwald, R. (2024). Dataset of soil hydraulic parameters in
   the Yellow River Basin [dataset]. PANGAEA, doi:10.1594/PANGAEA.965004
   (CC BY 4.0).
+- Vanderlinden, K., Pachepsky, Y.A., Pedrera-Parrilla, A., Martínez, G.,
+  Espejo-Pérez, A.J., Perea, F. and Giráldez, J.V. (2017). Water retention
+  and preferential states of soil moisture in a cultivated vertisol. *Soil
+  Science Society of America Journal* 81:1–9.
+- Vanderlinden, K., Pachepsky, Y., Pedrera-Parrilla, A., Martínez, G.,
+  Espejo-Pérez, A., Perea, F. and Giráldez, J.V. (2021). Water retention and
+  field soil water states in a vertisol under long-term direct drill and
+  conventional tillage. *European Journal of Soil Science* 72:667–678.
 - Vereecken, H., Van Looy, K., Weynants, M. and Javaux, M. (2017). Soil
   retention and conductivity curve data base sDB. PANGAEA,
   doi:10.1594/PANGAEA.879233 (CC-BY-3.0).
@@ -940,4 +1028,8 @@ New Jersey table (`data/nj_ssir26_reference.csv`) is transcribed from US
 government publications (USDA-SCS 1974; Arya et al. 1982), which are in the
 public domain. EU-HYDI data and anything derived
 from it at sample level are not part of this repository, nor are the
-unpublished Laikipia data.
+unpublished Laikipia data or the Andalusian data (Setenil, Tomejil,
+Doñana): their owner agrees to their distribution, pending the opinion of
+a co-author. When they are used, cite Vanderlinden et al. (2017, 2021) for
+Tomejil and acknowledge projects RTA2006-00058-C03-02, AGL2009-12936-C03-03,
+AGL2012-40128-C03-03 and AGL2015-65036-C3-3-R for the rest.
