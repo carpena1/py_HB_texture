@@ -504,28 +504,31 @@ The **Andalusian soils** measured by K. Vanderlinden (IFAPA;
   capillary bundle ×3.5 (ρ = 0.74).
 - **Tomejil** (54 rings, 0–5 cm, a Chromic Haploxerert under direct drill
   and conventional tillage near Carmona; Vanderlinden et al. 2017, 2021)
-  joined the default in 2026-10. Its curves are gravimetric: the soil is rich in smectite and
-  its bulk density runs from about 1.0 wet to 1.6 dry, which is why its
-  authors work in gravimetric water, and no ring has its own density. They
-  are made volumetric with each treatment's mean (Ordóñez Fernández et al.
-  2007). Texture is known per treatment only (G. Martínez's thesis, 0–20 cm:
-  sand 8.0–8.3 %, clay 55.2–56.0 %, so clay), and there is no Ks. Fitted to
-  1500 kPa the vertisol reads as clay for 88.9 % of rings (100 % with bulk
-  density, though that is a treatment mean), with too much sand (+18
-  points) and too little clay (40 % against 56 %); fitted to its whole WP4
-  dry end, every ring reads silty clay loam. With its own sites held out of
-  an expanded reference it reads 94.4 % (+5.6 pp, p=0.25), and adding it is
-  neutral for the rest (+0.9 pp exact for a new site, 0.0 for a new source;
-  +2 pp for European soils, p≈0.1). Its 54 rings come from one field and
-  share two sets of fractions, so vertisol-like curves may find most of
-  their neighbours in it and get narrower fraction ranges than the
-  measurements justify. It
-  also bears on Laikipia: both lose water steeply just below saturation
-  (water held at 330 cm suction is 64 % of that at saturation for Tomejil
-  and 62 % for Laikipia, against 81 % for the reference clays; at 1000 cm
-  55 %, 55–57 % and 73 %), so Laikipia's wet end matches a documented
-  vertisol. Their dry ends differ: water at 1500 kPa per unit of clay is
-  0.31–0.36 for Tomejil and 0.48 for Laikipia.
+  joined the default in 2026-10. Its curves are gravimetric: the soil is rich
+  in smectite and its bulk density runs from about 1.0 wet to 1.6 dry, which
+  is why its authors work in gravimetric water, and no ring has its own
+  density. Water is made volumetric with a density that follows the water
+  content by normal shrinkage (specific volume 1/2.65 + w, capped at 1.6
+  g/cm³), a model rather than a measured shrinkage curve. Texture is known
+  per treatment only (G. Martínez's thesis, 0–20 cm: sand 8.0–8.3 %, clay
+  55.2–56.0 %, so clay), and there is no Ks. As a new source every ring reads
+  as clay, with 54 % clay predicted against 56 % measured (sand within 9.6
+  points). With one density per treatment instead (Ordóñez Fernández et al.
+  2007), 87–89 % of rings read as clay with only 40 % clay predicted: the
+  single density understates the water held at the dry end, where the soil
+  is densest (0.21 against 0.30 at 1500 kPa). Fitted to its whole WP4 dry end
+  every ring reads silty clay loam, so points stop at 1500 kPa. Adding the set
+  is neutral for the rest of the reference (+0.9 pp exact for a new site,
+  −0.5 pp for a new source, both n.s.). Its 54 rings come from one field and
+  share two sets of fractions, so vertisol-like curves may find most of their
+  neighbours in it and get narrower fraction ranges than the measurements
+  justify. The same conversion helps the **Laikipia** clays, also vertic:
+  as a new source 97 % of them read as clay (81 % with one density per
+  sample) and their mean predicted clay is 51 % against 52 % measured (43 %
+  with one density). Converted with one density, both vertisols seem to lose
+  water steeply just below saturation (at 330 cm they hold 64–65 % of their
+  water at saturation, against 82 % for the reference clays); with the
+  shrinking density they hold 80–81 %, like the other clays.
 - **Doñana** (El Abalario and El Acebuche, aeolian sands under scrub; 17
   curves at 11 and 6 depths to over 2 m, each the mean of 2–3 rings, sand
   boxes to 50 kPa, bulk density 1.70) is a test set: it has no

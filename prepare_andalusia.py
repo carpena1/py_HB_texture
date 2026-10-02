@@ -42,14 +42,20 @@ Tomejil (Tomejil/SWRCdata Tomejil.xls; Vanderlinden et al. 2021, EJSS):
     location, so profile_id = location. No Ks.
   * Gravimetric water content at 1-500 cm (sand and sand-kaolin boxes),
     1,000 and 3,000 cm (pressure plate) and WP4-TE readings to ~3e6 cm.
-  * No per-ring bulk density or texture. Bulk density is the 0-0.13 m
-    treatment mean of Ordonez Fernandez et al. (2007, Table 1; 1990 and
-    2001 samplings): DD 1.125, CT 1.085 g/cm3. With it the wettest point is
-    0.95 (DD) and 0.90 (CT) times the porosity (median), in line with the
-    0.946 the reference shows. The soil is rich in smectite and its density
+  * No per-ring bulk density. The soil is rich in smectite and its density
     runs from about 1.0 (wet) to 1.6 g/cm3 (dry), which is why the authors
-    work in gravimetric water content; a single density per treatment is an
-    approximation, like the one-density conversion of KSSL's vertisols.
+    work in gravimetric water content (K. Vanderlinden). Water is made
+    volumetric with a density that follows the water content, by normal
+    shrinkage (the soil loses volume as it loses water): specific volume
+    1/2.65 + w, density its inverse, capped at 1.6 g/cm3 (the shrinkage
+    limit, w ~ 0.25); theta = w * density. Saturation then sits at density
+    ~1.16 and the dry end at 1.6. This is a model, not a measured shrinkage
+    curve. Tested as a new source (2026-10-02, K. Vanderlinden's question):
+    a single treatment density (1.085 CT / 1.125 DD, Ordonez Fernandez et al.
+    2007) reads 87 % of rings as clay with 40 % clay predicted; the
+    shrinkage density reads all of them as clay with 53 % (measured 56 %).
+    The bulk-density column is the density at 33 kPa, as KSSL reports its
+    vertisols' density at 1/3 bar.
   * Texture: treatment means for 0-0.20 m from G. Martinez's thesis (Table
     2.2, Textura tomejil.xlsx; LT = CT, SD = DD): sand 8.30 / 8.01 %, clay
     55.20 / 55.99 %, silt by difference -> clay (sand quartiles 6.2-9.2 %,
@@ -116,7 +122,7 @@ OM_PER_OC = 1.724
 MIN_POINTS = 5
 MAX_RMSE = 0.03
 MAX_KPA = 1500.0
-TOMEJIL_BD = {"DD": 1.125, "CT": 1.085}
+TOMEJIL_BD_MAX = 1.6           # g/cm3, dry end of the soil's range
 TOMEJIL_SAND = {"DD": 8.01, "CT": 8.30}
 TOMEJIL_CLAY = {"DD": 55.99, "CT": 55.20}
 TOMEJIL_OC = {"DD": 1.1, "CT": 0.9}
@@ -175,6 +181,12 @@ def _tomejil_curves():
             keep = (h <= 500.0) | (w <= w500)
             out[name] = (treat, num, h[keep], w[keep], int((~keep).sum()))
     return out
+
+
+def shrinkage_bd(w, bd_max=TOMEJIL_BD_MAX, rho_s=2.65):
+    """Bulk density at gravimetric water content w under normal shrinkage,
+    capped at bd_max (the shrinkage limit)."""
+    return np.minimum(bd_max, 1.0 / (1.0 / rho_s + np.asarray(w, float)))
 
 
 def _donana_curves():
@@ -239,7 +251,7 @@ def measured_points(site, max_kpa=MAX_KPA):
             out[f"SET_R{ring:02d}"] = (h * CM_TO_KPA, w * rings.bd[ring])
     elif site == "tomejil":
         for name, (treat, _, h, w, _) in _tomejil_curves().items():
-            out[f"TOM_{name}"] = (h * CM_TO_KPA, w * TOMEJIL_BD[treat])
+            out[f"TOM_{name}"] = (h * CM_TO_KPA, w * shrinkage_bd(w))
     elif site == "donana":
         for (s_, key), (_, h, th) in _donana_curves().items():
             out[f"DON_{s_}_{key}"] = (h, th)
@@ -311,9 +323,10 @@ def build_tomejil():
     lat, lon = _utm30_ed50(xy.iloc[:, 1], xy.iloc[:, 2])
     where = dict(zip(xy.iloc[:, 0].astype(int), zip(lat, lon)))
     rows, skip = [], dict(points=0, fit=0, rmse=0)
-    for name, (treat, num, _, _, dropped) in curves.items():
+    for name, (treat, num, h_cm, w, dropped) in curves.items():
         lid = f"TOM_{name}"
         h, theta = pts[lid]
+        w33 = np.interp(np.log10(330.0), np.log10(np.maximum(h_cm, 1e-3)), w)
         if len(h) < MIN_POINTS:
             skip["points"] += 1
             continue
@@ -326,7 +339,7 @@ def build_tomejil():
             skip["rmse"] += 1
             continue
         la, lo = where[num]
-        bd, oc = TOMEJIL_BD[treat], TOMEJIL_OC[treat]
+        bd, oc = float(shrinkage_bd(w33)), TOMEJIL_OC[treat]
         sand, clay = TOMEJIL_SAND[treat], TOMEJIL_CLAY[treat]
         rows.append(dict(
             layer_id=lid, profile_id=f"TOM_L{num:02d}",
