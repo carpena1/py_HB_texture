@@ -19,22 +19,22 @@ measurement signature about as strong as the texture signal:
 
 | | new data source | your source already in the reference | chance |
 |---|---|---|---|
-| exact USDA class (12 classes) | **29 %** (best possible* 42 %) | **37 %** (best possible 53 %) | 8 % |
-| … with depth and bulk density | 29 % | 43 % | |
-| texture group (4 groups) | **56 %** (68 %) | **63 %** (73 %) | 25 % |
-| … with depth and bulk density | 57 % | 67 % | |
-| Ks, typical error | factor of 8 | factor of 3 | — |
-| … with bulk density | factor of 7 | factor of 2.6 | — |
-| Ks within a factor of 10 | 53 % | 76 % | — |
+| exact USDA class (12 classes) | **31 %** (best possible* 46 %) | **39 %** (best possible 54 %) | 8 % |
+| … with depth and bulk density | 31 % | 45 % | |
+| texture group (4 groups) | **58 %** (68 %) | **62 %** (74 %) | 25 % |
+| … with depth and bulk density | 58 % | 67 % | |
+| Ks, typical error | factor of 4 | factor of 3 | — |
+| … with bulk density | factor of 4 | factor of 2.6 | — |
+| Ks within a factor of 10 | 68 % | 75 % | — |
 
 \* The Cover & Hart (1967) bound for *any* method that uses the four van
 Genuchten parameters (see "Validation"). All rows are the same 1,733 test
-soils (`verify_holdout.py`); the "with" rows use the 1,681 of them that carry
+soils (`verify_holdout.py`); the "with" rows use the 1,683 of them that carry
 depth and bulk density, compared with the curve alone on those soils.
 
 A new depth at a site whose other horizons are already in the reference does
-a little better than a new site (39.5 % against 37.2 %, p=0.012). Depth and
-bulk density add about 5 points of exact class at both (p<0.001), and
+a little better than a new site (41.2 % against 38.9 %, p=0.014). Depth and
+bulk density add about 6 points of exact class at both (p<0.001), and
 nothing for a new source.
 
 **You can move from the first column to the second.** Adding lab-verified
@@ -49,7 +49,7 @@ produce nearly identical curves, and the laboratory that measured a curve
 leaves a mark on it that is as large as the texture signal. The tool therefore
 reports ranked class probabilities, fraction ranges and a Ks band rather than
 a single answer, plus a second opinion whose agreement is a useful confidence
-flag (right 36 % of the time when the two agree, 24 % when they do not, for a
+flag (right 35 % of the time when the two agree, 26 % when they do not, for a
 new source). Treat Ks as an order-of-magnitude estimate.
 
 ## Setup
@@ -128,42 +128,42 @@ default reference (it is in `data/unsoda_reference.csv`, which only
       thetar = 0.0672  thetas = 0.3990  alpha = 0.0400  n = 1.649  m = 0.394  (RMSE 0.0074)
 
     Predicted USDA texture class: SILT LOAM   (from the gradient-boosted classifier)
-      silt loam         52.4 %
-      loam              13.8 %
-      sandy loam        12.4 %
-      sandy clay loam    5.6 %
-      silt               5.4 %
-      kNN second opinion agrees: silt loam (57.0 %)
+      silt loam         55.9 %
+      loam              13.7 %
+      sandy loam        12.5 %
+      sandy clay loam    6.0 %
+      silt               3.7 %
+      kNN second opinion agrees: silt loam (57.1 %)
 
     Particle fractions, mean [5-95 %]  (from the kNN; mean plots as: silt loam):
-      sand   30.4 %  [  7.5 -  62.0]
-      silt   51.9 %  [ 19.5 -  74.6]
+      sand   30.3 %  [  7.5 -  62.0]
+      silt   52.0 %  [ 19.5 -  74.6]
       clay   17.7 %  [  9.0 -  33.0]
 
-    Predicted Ks: 2.01 cm/h  [5-95 %: 8.33e-05 - 34.7]   (from the kNN; ~12 of 30 undisturbed neighbors with measured Ksat)
-      physical second opinion agrees: 0.42 cm/h, 4.8x below  (0.458 raw; Marshall 1958 capillary bundle, pores capped at 50 cm suction, matched = raw / 1.09)
+    Predicted Ks: 2.16 cm/h  [5-95 %: 0.00433 - 41.7]   (from the kNN: the 150 nearest undisturbed neighbors with a measured Ksat)
+      physical second opinion agrees: 0.42 cm/h, 5.2x below  (0.458 raw; Marshall 1958 capillary bundle, pores capped at 50 cm suction, matched = raw / 1.09)
 
 - **A clear answer.** The classifier puts more than half its probability on
-  the true class, nearly four times the next one, and the neighbour vote
+  the true class, four times the next one, and the neighbour vote
   agrees — the combination to trust most, though not blindly: when the two
   agree the class is right about half the time (see "What to expect").
 - **Fractions close to the laboratory's** (35 / 55 / 10 % sand / silt /
-  clay): within 5 points for sand, 4 for silt and 8 for clay, all inside
+  clay): within 5 points for sand, 3 for silt and 8 for clay, all inside
   their ranges.
-- **Ks within a factor of two** (2.01 against 1.21 cm/h measured), taken
+- **Ks within a factor of two** (2.16 against 1.21 cm/h measured), taken
   from undisturbed neighbours only because the wet end was measured on an
   intact core. The band is wide at the low end — a few neighbours are
   nearly impermeable — so read the median, not the band.
 - **The physical estimate agrees**, from the other side: 0.42 cm/h, 2.9
-  times below the measurement and 4.8 times below the kNN, which counts as
+  times below the measurement and 5.2 times below the kNN, which counts as
   agreement (within a factor of 10). It uses no neighbours, so the two
   errors are independent.
 
 The next two curves are generated from the Carsel & Parrish (1988)
 class-typical parameters: class averages rather than real samples, so they
 are run with `--sample-type unknown` (real sensor data should keep the
-default). They show what the tool does when a curve is ambiguous, and when
-the two opinions on the class split.
+default). They show what the tool does when the two opinions on the class
+split, and when they agree on the wrong answer.
 
 **2. Sandy clay loam — a disagreement that points to the right answer**
 (`Testing/7_SCL_CnP.csv`):
@@ -174,64 +174,71 @@ the two opinions on the class split.
       thetar = 0.1000  thetas = 0.3900  alpha = 0.5900  n = 1.480  m = 0.324  (RMSE 0.0000)
 
     Predicted USDA texture class: SANDY LOAM   (from the gradient-boosted classifier)
-      sandy loam        46.8 %
-      loam              19.4 %
-      sandy clay loam   17.5 %
-      loamy sand         4.6 %
-      sandy clay         2.8 %
-      kNN second opinion DISAGREES: sandy clay loam (38.1 %)
+      sandy loam        49.1 %
+      loam              15.6 %
+      sandy clay loam   15.4 %
+      loamy sand         7.1 %
+      sandy clay         5.3 %
+      kNN second opinion DISAGREES: sandy clay loam (37.9 %)
 
     Particle fractions, mean [5-95 %]  (from the kNN; mean plots as: sandy clay loam):
-      sand   66.3 %  [ 49.0 -  84.0]
+      sand   66.2 %  [ 49.0 -  84.0]
       silt   10.6 %  [  5.3 -  25.9]
       clay   23.1 %  [  6.0 -  41.0]
 
-    Predicted Ks: 4.82 cm/h  [5-95 %: 0.64 - 21.2]   (from the kNN; ~17 of 30 neighbors with measured Ksat)
-      physical second opinion agrees: 8.79 cm/h, 1.8x above  (9.58 raw; Marshall 1958 capillary bundle, pores capped at 50 cm suction, matched = raw / 1.09)
+    Predicted Ks: 4.71 cm/h  [5-95 %: 0.0278 - 21.2]   (from the kNN: the 150 nearest neighbors with a measured Ksat)
+      physical second opinion agrees: 8.79 cm/h, 1.9x above  (9.58 raw; Marshall 1958 capillary bundle, pores capped at 50 cm suction, matched = raw / 1.09)
 
 - **A preference for the wrong class.** The classifier gives sandy loam
-  46.8 %; the true class, sandy clay loam, is third (17.5 %).
+  49.1 %; the true class, sandy clay loam, is third (15.4 %).
 - **The second opinion disagrees, and it is right.** The neighbour vote names
-  sandy clay loam with 38.1 %, and the fraction mean plots there too. When
+  sandy clay loam with 37.9 %, and the fraction mean plots there too. When
   the two disagree, the classifier's answer is right only about one time in
-  five for a new source: read a disagreement as "one of these two, check
+  four for a new source: read a disagreement as "one of these two, check
   both".
-- **Ks is inside its band but 3.7 times too high** (4.82 against 1.31 cm/h).
+- **Ks is inside its band but 3.6 times too high** (4.71 against 1.31 cm/h).
   The physics is higher still (6.7 times): this curve is a class average
   with an unusually large alpha, and capillary theory reads a large alpha as
   wide pores — the 50 cm cap limits that, it does not remove it. The two
   agree, and both are high, for different reasons.
 
-**3. Loam — the classifier right, the neighbours not**
+**3. Loam — both opinions agree, and both are wrong**
 (`Testing/4_L_CnP.csv`):
 
     $ .venv/bin/python swcc_texture.py Testing/4_L_CnP.csv --sample-type unknown
 
-    Predicted USDA texture class: LOAM   (from the gradient-boosted classifier)
-      loam              43.9 %
-      sandy loam        27.6 %
-      loamy sand        12.6 %
-      sandy clay loam    5.7 %
-      sand               5.3 %
-      kNN second opinion DISAGREES: sandy loam (45.1 %)
+    Predicted USDA texture class: SANDY LOAM   (from the gradient-boosted classifier)
+      sandy loam        34.0 %
+      loam              30.3 %
+      loamy sand        19.5 %
+      sandy clay loam    6.4 %
+      sand               5.5 %
+      kNN second opinion agrees: sandy loam (44.9 %)
 
     Particle fractions, mean [5-95 %]  (from the kNN; mean plots as: sandy loam):
       sand   73.4 %  [ 14.6 -  89.7]
       silt   19.7 %  [  4.0 -  68.6]
       clay    7.0 %  [  1.5 -  16.8]
 
-    Predicted Ks: 7.65 cm/h  [5-95 %: 0.026 - 30.2]   (from the kNN; ~23 of 30 neighbors with measured Ksat)
-      physical second opinion agrees: 10.5 cm/h, 1.4x above  (11.4 raw; Marshall 1958 capillary bundle, pores capped at 50 cm suction, matched = raw / 1.09)
+    Predicted Ks: 7.89 cm/h  [5-95 %: 0.026 - 30.2]   (from the kNN: the 150 nearest neighbors with a measured Ksat)
+      physical second opinion agrees: 10.5 cm/h, 1.3x above  (11.4 raw; Marshall 1958 capillary bundle, pores capped at 50 cm suction, matched = raw / 1.09)
 
-- **The same split, the other way round.** The classifier names the true
-  class, loam (43.9 %); the neighbour vote says sandy loam. The Carsel &
-  Parrish loam sits where the reference holds sandy loams and loamy sands
-  (the class-mean benchmarks below explain why), and the neighbours follow
-  the reference; the classifier's boundaries do not.
+- **Agreement is not proof.** The classifier and the neighbour vote both
+  say sandy loam; the true class is loam. When the two agree the answer is
+  right about half the time with your source in the reference and a third of
+  the time for a new one (see "What to expect"), and here the Carsel
+  & Parrish loam sits where the reference holds sandy loams and loamy sands
+  (the class-mean benchmarks below explain why), so both follow the
+  reference to the same wrong place.
+- **A flat answer is the warning.** The classifier's top class has only
+  34.0 %, barely ahead of loam (30.3 %), with loamy sand close behind
+  (19.5 %). Compare example 1, where the winner held more than half and four
+  times the runner-up. When the top two are this close, read the answer as
+  "one of these two" whatever the neighbours say.
 - **The fractions come from the neighbours**, so they carry their error:
   the mean (73 / 20 / 7 % sand / silt / clay, against the class centroid's
   41 / 40 / 18) plots as sandy loam, and the silt range runs from 4 to 69 %.
-- **Ks is 7 times too high** (7.65 against 1.04 cm/h measured, inside the
+- **Ks is 8 times too high** (7.89 against 1.04 cm/h measured, inside the
   band only because the band spans three orders of magnitude): a wrong
   texture neighbourhood gives a wrong Ks. The physics agrees with it and is
   also too high (10 times), for its own reason, so agreement raises
@@ -291,7 +298,8 @@ worth more than many of one.
    you supply it) vote, weighted by 1/d² and
    by inverse class frequency. They supply the particle fractions and their
    ranges, the list of matched soils, and the second-opinion class. **Ks** comes
-   from the neighbours that carry a measured Ks; for an undisturbed sample,
+   from a search of its own: the 150 nearest layers that carry a measured Ks
+   (`KS_K`, chosen out of fold; see *Ks* below); for an undisturbed sample,
    only from *undisturbed* neighbours, because near saturation an intact core
    keeps the large pores that repacking destroys. Disturbed and unknown
    samples use all soils, since the reference holds only 45 disturbed layers
@@ -479,7 +487,7 @@ loamy sands. As a new source they read 56.4 % exact class (46.2 % for always
 answering sandy loam), 78.8 % texture group and macro-F1 46 against 9, with
 clay over-predicted (17 % against 11 %). Here the fixed heads beat the vG
 parameters by 14 points of exact class. Ks is within ×1.8 for the kNN
-(ρ = 0.75, 93 % within 10×) and ×2.2 for the capillary bundle (ρ = 0.80,
+(ρ = 0.76, 95 % within 10×) and ×2.2 for the capillary bundle (ρ = 0.80,
 91 %); uncapped, the bundle would be ×17 (`verify_external.py nj_ssir26`;
 `figures/make_external_report.py nj_ssir26`).
 
@@ -500,7 +508,8 @@ The **Andalusian soils** measured by K. Vanderlinden (IFAPA;
   ranking ρ 0.40 → 0.65, 93 % within a factor of 10), and adding it leaves
   the rest of the reference unchanged (−0.1 pp exact for a new site, −0.5 pp
   for a new source, both n.s.; Ks for a new source 0.954 → 0.940 dex,
-  p=0.04). Ks as a new source: the kNN is within ×3.8 (ρ = 0.40), the
+  p=0.04; both measured with the 30-neighbour Ks lookup in use before
+  2026-10). Ks as a new source: the kNN is within ×3.2 (ρ = 0.64), the
   capillary bundle ×3.5 (ρ = 0.74).
 - **Tomejil** (54 rings, 0–5 cm, a Chromic Haploxerert under direct drill
   and conventional tillage near Carmona; Vanderlinden et al. 2017, 2021)
@@ -571,26 +580,29 @@ targets, with the classifier and the neighbours both blind to the target.
 The same 1,733 targets (150 per class, every silt) under each hold-out, with
 the shipped tool (`verify_holdout.py`, `figures/validation/v6_holdout_levels.png`).
 The last two columns run it as with `--depth` and `--bulk-density`, on the
-1,682 targets that carry both:
+1,683 targets that carry both:
 
 | hidden along with the test soil | real-life situation | exact class | texture group | exact, + depth & BD | group, + depth & BD |
 |---|---|---|---|---|---|
-| nothing else | a new depth at a site already in the reference | 41.7 % | 64.1 % | 47.8 % (+6.4, p<0.001) | 69.8 % (+5.5, p<0.001) |
-| its profile | a new site, from a source already in the reference | 39.6 % | 63.2 % | 45.1 % (+5.6, p<0.001) | 68.1 % (+4.8, p<0.001) |
-| its whole source | a new site, from a new source | **31.0 %** | **58.6 %** | 31.0 % (+0.4, p=0.72) | 57.8 % (−0.8, p=0.43) |
-| best possible (ceiling) | | 53 % / 45 % | 73 % / 68 % | | |
+| nothing else | a new depth at a site already in the reference | 41.2 % | 63.8 % | 46.6 % (+5.9, p<0.001) | 68.6 % (+4.8, p<0.001) |
+| its profile | a new site, from a source already in the reference | 38.9 % | 62.4 % | 44.5 % (+5.9, p<0.001) | 67.2 % (+4.6, p<0.001) |
+| its whole source | a new site, from a new source | **30.5 %** | **57.6 %** | 31.1 % (+1.1, p=0.25) | 57.9 % (+0.4, p=0.70) |
+| best possible (ceiling) | | 54 % / 46 % | 74 % / 68 % | | |
 
-(The gains in brackets are paired against the curve alone on the same 1,682
-soils, where it scores 41.4, 39.4 and 30.6 % exact.)
+(The gains in brackets are paired against the curve alone on the same 1,683
+soils, where it scores 40.8, 38.6 and 29.9 % exact.)
 
 **Fixed heads against the van Genuchten parameters.** Until September 2026
 the tool matched on the four fitted vG parameters. On the same targets those
-score 40.1, 37.6 and 29.2 % exact (64.1, 61.8 and 56.8 % group), and 45.0,
-43.0 and 30.3 % with depth and bulk density: the fixed heads gain 1.6 to 2.8
-points at every level, and most with the covariates. They also lower the Ks
-error for a new source (0.84 against 0.91 dex), lift the rarest class, silt,
-from 15 to 30 % found (`verify_hybrid.py`), and predict better on four of
-the six outside sets (see *Reference data*). What they lose is the andic
+score 41.3, 38.1 and 30.5 % exact (63.9, 62.7 and 58.2 % group), and 45.0,
+42.1 and 31.1 % with depth and bulk density (`SWCC_FEATURE_MODE=vg`). On the
+current reference the fixed heads are level on the curve alone (−0.1 to
++0.8 points; they led by 1.6 to 2.8 points when adopted) and ahead with the
+covariates (+1.6 and +2.4 points with the source in the reference). They
+also lower the Ks error for a new source (0.62 against 0.74 dex), lifted the
+rarest class, silt, from 15 to 30 % found when they were adopted
+(`verify_hybrid.py`), and predict better on four of the six outside sets
+(see *Reference data*). What they lose is the andic
 flag, so a soil stated andic is still matched on the vG parameters (see
 *Volcanic and andic soils*).
 
@@ -604,28 +616,29 @@ the reference is the Yellow River soils' own signature (deep loess cores); on
 the previous draw it is +3.1 pp for a new site (p=0.003).
 
 Keeping the target's other horizons in the reference helps a little
-(+2.1 pp, p=0.015). 1,132 of the targets have a horizon of the same class in
-their profile (46.7 % with it in the reference against 44.0 % without);
-siblings of a different class neither help nor mislead (31.5 % against
-31.3 %) — eluviation makes the horizons of one profile genuinely different
-samples. What matters is the data source: hiding it costs 8.6 points
-(p<0.0001).
+(+2.3 pp, p=0.014). 1,140 of the targets have a horizon of the same class in
+their profile (45.1 % with it in the reference against 42.7 % without);
+siblings of a different class barely matter (32.5 % against 31.0 %) —
+eluviation makes the horizons of one profile genuinely different samples.
+What matters is the data source: hiding it costs 8.4 points (p<0.0001).
 
 **The ceiling.** Cover & Hart (1967) bound the Bayes error by the
 nearest-neighbour error, giving a model-free limit for any classifier on the
 fitted curve (`verify_ceiling.py`, computed on the four vG parameters): 1NN
-accuracy 30.0 % gives a bracket of [30.0 %, 52.9 %] in-distribution and
-[22.8 %, 44.7 %] with the laboratory held out. The fixed heads re-encode the
+accuracy 31.1 % gives a bracket of [31.1 %, 54.0 %] in-distribution and
+[23.5 %, 45.7 %] with the laboratory held out (texture group: [56.7 %,
+73.7 %] and [49.7 %, 68.1 %]). The fixed heads re-encode the
 same fitted curve, and their bracket lies within about three points of it.
 It is a property of the inputs, not of the database — more reference data
 does not raise it, only more informative inputs can.
 
 **Classifier vs neighbour vote.** The gradient-boosted classifier is about
-two points ahead of the neighbour vote (40.0 % against 38.0 % for a new site,
-p=0.065, macro-F1 39.7 against 38.0, `verify_hybrid.py`; 31.0 % against
-28.3 % for a new source, `verify_holdout.py`), and the neighbour vote
-supplies the second opinion. Its weak classes are silt (30 % found against
-the neighbours' 43 %) and sandy clay (23 % against 35 %).
+a point ahead of the neighbour vote for a new site (39.9 % against 38.9 %,
+p=0.35, macro-F1 39.4 against 38.8) and four points ahead for a new source
+(30.5 % against 26.6 %, p<0.001; `verify_hybrid.py`, with `--blocked`), and
+the neighbour vote supplies the second opinion. Its weak classes are silt
+(22 % found against the neighbours' 43 %) and sandy clay (25 % against
+36 %).
 
 **Benchmarks** — synthetic curves from class-typical parameters, and real
 GSHP soils held out one at a time (`verify_carsel_parrish.py`,
@@ -633,12 +646,12 @@ GSHP soils held out one at a time (`verify_carsel_parrish.py`,
 
 | benchmark | exact class | true class in top 2 | texture group | Ks inside 5-95 % band | typical Ks error |
 |---|---|---|---|---|---|
-| Carsel & Parrish (1988) class means | 3/12 | 6/12 | 8/12 | 7/12 | ×6.3 |
-| ROSETTA (Schaap et al. 2001) class means | 6/12 | 7/12 | 10/12 | 8/12 | ×2.8 |
-| GSHP soils, leave-one-out | 6/12 | 8/12 | 8/12 | 10/12 | ×3.8 |
+| Carsel & Parrish (1988) class means | 3/12 | 4/12 | 9/12 | 10/12 | ×6.1 |
+| ROSETTA (Schaap et al. 2001) class means | 7/12 | 7/12 | 9/12 | 11/12 | ×3.6 |
+| GSHP soils, leave-one-out | 5/12 | 8/12 | 7/12 | 11/12 | ×2.0 |
 
-(On the vG parameters: exact 1, 5 and 4 of 12, group 5, 8 and 7, typical Ks
-error ×4.4, ×4.1 and ×2.6.)
+(On the vG parameters: exact 1, 4 and 5 of 12, group 4, 7 and 8, typical Ks
+error ×6.8, ×3.4 and ×2.7.)
 
 Twelve soils per benchmark is small; a one-soil change is noise. The class-mean
 benchmarks score low partly because the databases disagree on where each class
@@ -651,26 +664,45 @@ laboratory stays in the reference.
 
 Ks is harder than texture, because near saturation it depends on structure —
 macropores and aggregation — that a texture-matched lookup cannot see. Ks
-error for undisturbed soils (leave-one-soil-out: 578 soils,
-`figures/make_validation_figures.py`; the other two rows: 480 soils from 21
+error for undisturbed soils (leave-one-soil-out: 575 soils,
+`figures/make_validation_figures.py`; the other two rows: 480 soils from 22
 laboratories, `verify_sample_type.py`):
 
 | | median error | within 5× / 10× | 5–95 % band contains it | rank correlation ρ |
 |---|---|---|---|---|
-| new depth, other horizons in the reference | 0.40 dex (×2.5) | 67 % / 77 % | 81 % | 0.70 |
-| new site, source in the reference | 0.53 dex (×3.4) | 60 % / 72 % | 79 % | 0.59 |
-| new site, new source | 0.80 dex (×6.3) | 46 % / 58 % | 69 % | 0.35 |
+| new depth, other horizons in the reference | 0.38 dex (×2.4) | 66 % / 78 % | 89 % | 0.71 |
+| new site, source in the reference | 0.44 dex (×2.8) | 63 % / 75 % | 86 % | 0.69 |
+| new site, new source | 0.61 dex (×4.1) | 55 % / 66 % | 81 % | 0.50 |
 
 The band is nominally 90 %; treat it as a minimum range. Supplying bulk
-density (`--bulk-density`) tightens the first row to 0.35 dex (×2.2), with
-81 % within a factor of 10 and ρ = 0.74 (p=0.009).
+density (`--bulk-density`) tightens the first row to 0.36 dex (×2.3), with
+79 % within a factor of 10 and ρ = 0.72 (p=0.042).
+
+**How many neighbours, and which.** Ks is the weighted median of the 150
+nearest reference layers that carry a measured Ks (`swcc_texture.KS_K`).
+Until 2026-10 it came from the 30 nearest layers of any kind, of which only
+those with a Ks voted — about 14, because half the reference (KSSL) has
+none. Searching Ks-bearing layers only, at 30, cut the median error for a
+new source from 0.77 to 0.72 dex (p = 3e-12); 15 such neighbours scored the
+same as the old lookup, so what helps is the number of votes, not their
+closeness. The number was then chosen out of fold, as the air-entry cap
+below was: for each scored source, the value from 10 to 500 with the lowest
+median error over the other sources, averaged over a new source, a new site
+and a new depth (`verify_ks_neighbors.py`, 1,906 targets from 20 sources).
+The folds chose 100, 150 or 200; so chosen, Ks scores 0.70 / 0.60 / 0.58
+dex against the old lookup's 0.77 / 0.61 / 0.59 (17 of the 20 sources
+better for a new source), and the band holds 80–85 % of measurements
+instead of 69–76 %. Past about 200 the new-site and new-depth errors rise
+again: a wide neighbourhood blurs what the soil's own source and sibling
+horizons have to say. Texture, the fractions and the neighbour list are
+unchanged; they still come from the 30 nearest layers of any kind.
 
 An undisturbed sample takes Ks only from undisturbed neighbours. That follows
 soil physics — intact soil keeps its macropores — but changes little in
 practice, since 10,995 of the 11,061 reference layers with a measured Ks are
-undisturbed: the paired error is much the same either way (0.80 against 0.81
-dex for a new source, p=0.078; 0.53 against 0.53 with the source in the
-reference, p=0.91). Telling the classifier the type barely moves texture for
+undisturbed: the paired error is the same either way (0.61 against 0.61
+dex for a new source, p=0.90; 0.44 against 0.44 with the source in the
+reference, p=0.19). Telling the classifier the type barely moves texture for
 undisturbed soils (+0.2 pp, p=1.00, new source). The reference
 holds only 45 disturbed layers with a measured Ks (ETH literature
 compilations, UNSODA and AfSPDB), so a **disturbed** sample takes Ks from all
@@ -696,54 +728,57 @@ counts no pore wider than the one that empties at **50 cm** of suction
 limit of Greenland's (1977) transmission pores. The cap was chosen out of
 fold: for each scored source, the cap from a grid of none, 2, 5, 10, 20, 30,
 50, 100 and 200 cm whose matched physics did best on the other sources, with
-every factor refitted without the scored source. The folds chose 50 cm 13
-times, 100 cm five times and 200 cm once, and scored 0.61 dex against the
-kNN's 0.79 (p < 1e-30). With the cap the level is nearly right without
-scaling: the matching factor, the median over the 23 laboratories with a
+every factor refitted without the scored source. The folds chose 50 cm 17
+times and 100 cm three times, and scored 0.62 dex against the kNN's 0.68
+(p = 1e-7). With the cap the level is nearly right without
+scaling: the matching factor, the median over the 24 laboratories with a
 measured Ks of each one's median ratio of physics to measurement (one vote
 per laboratory), is 1.09 (3.9 without the cap), and the laboratories' own
 ratios run from 0.15 to 200 (0.8 to 8,000 without it).
 
-Scored against the kNN on the same 1,870 targets, each source hidden from the
+Scored against the kNN on the same 1,906 targets, each source hidden from the
 kNN and the classifier, the factor refitted without it (`verify_ks_physical.py`):
 
 | | median error | within 2× / 10× | bias | rank correlation ρ |
 |---|---|---|---|---|
-| kNN (the tool) | 0.79 dex | 23 % / 59 % | +0.09 | 0.29 |
-| capillary bundle, 50 cm cap | 0.62 dex | 28 % / 69 % | +0.07 | 0.51 |
-| capillary bundle, 50 cm cap, matched | 0.61 dex | 28 % / 68 % | +0.04 | 0.51 |
-| capillary bundle, no cap | 1.00 dex | 16 % / 50 % | +0.76 | 0.44 |
-| capillary bundle, no cap, matched | 0.78 dex | 21 % / 59 % | +0.16 | 0.43 |
-| Peters et al. (2023) | 0.91 dex | 18 % / 54 % | +0.40 | 0.39 |
+| kNN (the tool) | 0.68 dex | 25 % / 64 % | +0.15 | 0.37 |
+| capillary bundle, 50 cm cap | 0.62 dex | 28 % / 69 % | +0.08 | 0.51 |
+| capillary bundle, 50 cm cap, matched | 0.61 dex | 28 % / 69 % | +0.04 | 0.51 |
+| capillary bundle, no cap | 0.99 dex | 16 % / 50 % | +0.75 | 0.44 |
+| capillary bundle, no cap, matched | 0.77 dex | 22 % / 60 % | +0.15 | 0.44 |
+| Peters et al. (2023) | 0.90 dex | 18 % / 54 % | +0.39 | 0.39 |
 
 For a source the reference does not hold, the capped physics is the better Ks
-of the two: lower error for 16 of the 19 sources (the exceptions are the
-Yellow River, +0.04 dex, EU-HYDI Romano, +0.02, and EU-HYDI Lilly, +0.36,
-whose saturated water content exceeds the porosity), in every texture group,
-and it ranks soils far better (ρ = 0.51 against 0.29). The external sets
-agree (`figures/make_external_report.py`, fig6): Zanjanrood ×1.95 against
-the kNN's ×2.35, Arizona ×2.0 against ×2.0, and on the New Jersey soils'
+of the two: lower error for 16 of the 20 sources (the exceptions are the
+Yellow River, +0.09 dex, Zanjanrood, +0.05, EU-HYDI Romano, +0.10, and
+EU-HYDI Lilly, +0.54, whose saturated water content exceeds the porosity),
+in every texture group (by 0.01 dex only for the loamy one), and it ranks
+soils better (ρ = 0.51 against 0.37). On the external sets, where each set
+is removed from the reference, the two are now close, the kNN level or a
+little ahead on typical error and the physics ahead on ranking
+(`figures/make_external_report.py`, fig6): Zanjanrood ×1.96 against the
+kNN's ×1.81, Arizona ×2.0 against ×2.05, and on the New Jersey soils'
 intact-core Ks, which played no part in choosing the cap or the factor,
-×2.2 against ×1.8 with the better ranking (ρ 0.80 against 0.75); on the
-Setenil rings (Andalusia) ×3.5 against ×3.8, ρ 0.74 against 0.40. The kNN keeps two advantages:
+×2.2 against ×1.8 with the better ranking (ρ 0.80 against 0.76); on the
+Setenil rings (Andalusia) ×3.5 against ×3.2, ρ 0.74 against 0.64. The kNN keeps two advantages:
 its 5–95 % band, which the physics has not got, and its gain when the
-user's own laboratory is in the reference — 0.53 dex for a new site from a
-source the reference holds, 0.40 for a new depth (table above) — which the
+user's own laboratory is in the reference — 0.44 dex for a new site from a
+source the reference holds, 0.38 for a new depth (table above) — which the
 physics cannot use.
 
 Agreement is a strong confidence signal. The matched value falls within a
-factor of 10 of the kNN for 79 % of soils, and there the kNN's own median
-error is 0.65 dex against 1.68 dex where they disagree (67 % within a factor
-of 10, against 29 %). A gap of orders of magnitude points at the curve, the
+factor of 10 of the kNN for 87 % of soils, and there the kNN's own median
+error is 0.60 dex against 1.49 dex where they disagree (69 % within a factor
+of 10, against 32 %). A gap of orders of magnitude points at the curve, the
 units or a method mismatch — it is how the EU-HYDI Kätterer subset showed a
-systematic offset against the rest of the reference (2.54 dex of kNN error
-there, the worst of the 19 sources, and 2.12 for the physics). The physics
+systematic offset against the rest of the reference (2.52 dex of kNN error
+there, the worst of the 20 sources, and 2.11 for the physics). The physics
 also answers where the kNN cannot: a reference with no measured Ks, such as
 `--reference kssl`.
 
 Blending is not needed: with the weight fitted on the sources outside the
-scored fold, it goes to 0.95 on the physics and scores 0.61 dex, no better
-than the physics alone, while a fixed half-and-half (0.67 dex) is worse. The
+scored fold, it goes to 0.80 on the physics and scores 0.60 dex, level with
+the physics alone (0.61), and a fixed half-and-half scores the same. The
 tool keeps the kNN as its Ks, since only the kNN has a band, and prints the
 physics beside it.
 
@@ -752,24 +787,25 @@ physics beside it.
 A user usually knows the sensor depth and often the bulk density of a core
 from the same spot. Both were tested as extra inputs to the classifier, and
 as extra matching dimensions for the neighbours (`verify_covariates.py`;
-1,181 targets from 36 laboratories, paired against the default):
+1,181 targets from 38 laboratories, paired against the default):
 
 | added input | source already in the reference | new source |
 |---|---|---|
-| depth | +4.1 pp (p=0.001) | +1.4 pp (p=0.16) |
-| bulk density | +3.5 pp (p=0.001) | +1.3 pp (p=0.21) |
-| depth + bulk density | **+6.4 pp (p<0.001)**; European soils +3.5 pp (p=0.11) | +1.0 pp (p=0.40) |
+| depth | +2.7 pp (p=0.029) | +1.4 pp (p=0.22) |
+| bulk density | +2.2 pp (p=0.032) | +0.5 pp (p=0.64) |
+| depth + bulk density | **+3.7 pp (p=0.004)**; European soils +2.1 pp (p=0.38) | +1.2 pp (p=0.32) |
 
 Exact class, as inputs to the classifier. With the source in the reference
-the texture group moves the same way (+4.7 pp with both, p<0.001), and at the
-standard leave-one-soil-out level the pair adds +6.4 pp (p<0.001). **They help
-when the user's data source is in the reference; for a new source the effect
-is small and not stable**: +1.0 pp here, and +0.8, −0.1, +0.9, +2.5 (p=0.032)
-and −1.0 pp (p=0.39) on earlier draws and the vG parameters, and the texture
-group does not move (−1.0 pp, p=0.42). The gain with the source in the
-reference is larger on the fixed heads than it was on the vG parameters
-(+3.8 pp on the same targets), and for European soils it has come and gone
-(+3.5 pp here, −0.5 and +3.8 pp on earlier draws).
+the texture group moves the same way (+3.5 pp with both, p=0.007), and at the
+standard leave-one-soil-out level the pair adds +5.9 pp (p<0.001,
+`verify_holdout.py`). **They help when the user's data source is in the
+reference; for a new source the effect is small and not stable**: +1.2 pp
+here, and +1.0, +0.8, −0.1, +0.9, +2.5 (p=0.032) and −1.0 pp (p=0.39) on
+earlier draws and the vG parameters, and the texture group barely moves
+(+1.6 pp, p=0.21). With the source in the reference the gain on the fixed
+heads is now about what it was on the vG parameters (+3.8 pp on the same
+targets; +6.4 pp on the previous reference), and for European soils it has
+come and gone (+2.1 pp here, +3.5, −0.5 and +3.8 pp on earlier draws).
 They are optional inputs (`--depth`, `--bulk-density`), worth supplying,
 most of all once your own verified data have been added.
 
@@ -784,10 +820,12 @@ classes your verified data rarely contain.
 
 As an extra matching dimension for the neighbours, depth changes neither
 texture nor Ks. Bulk density there lowers the Ks error with the source in
-the reference (0.44 → 0.37 dex, p=0.016) and for a new source (0.78 → 0.72
-dex, p=0.13; 0.96 → 0.83 dex, p=0.004, on the vG parameters).
-The tool therefore matches the neighbours on bulk density whenever you
-supply it; depth reaches the classifier only.
+the reference (0.40 → 0.38 dex, p=0.028), but no longer for a new source
+(0.57 → 0.58 dex, p=0.39): with Ks drawn from 150 neighbours there is less
+noise for it to remove (with the earlier 30-neighbour lookup it gave
+0.44 → 0.37 and 0.78 → 0.72). The tool still matches the neighbours on bulk
+density whenever you supply it, since it helps where it can and costs
+nothing measurable elsewhere; depth reaches the classifier only.
 
 ### Volcanic and andic soils
 
@@ -890,11 +928,12 @@ one).
 **Verification** — `verify_holdout.py` (headline accuracy at each hold-out
 level), `verify_hybrid.py`, `verify_ceiling.py`,
 `verify_source_blocked.py` (per-laboratory leakage), `verify_sample_type.py`,
-`verify_covariates.py`, `verify_external.py` (an outside dataset before it
+`verify_ks_neighbors.py` (how many neighbours Ks comes from), `verify_covariates.py`, `verify_external.py` (an outside dataset before it
 joins the reference), `verify_volcanic.py`, `verify_andic_knn.py` and
 `verify_andic.py` (volcanic and andic soils), the benchmarks `verify_carsel_parrish.py`,
 `verify_rosetta.py`, `verify_gshp.py`, `verify_groups.py`, and the shared
-`ksat_metrics.py` and `verify_common.py`.
+`ksat_metrics.py` and `verify_common.py` (whose `map_folds` runs folds in
+parallel, one process per core).
 
 **Figures** — `figures/workflow.html` (how the reference is built, how a
 prediction is made, what the validation proves) with its SVGs, and

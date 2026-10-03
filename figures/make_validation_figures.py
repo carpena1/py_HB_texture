@@ -1,6 +1,6 @@
 """Figures for the validation results (leave-one-soil-out, the standard).
 
-Step 1 (slow, ~45 min, cached): every target layer is predicted with only
+Step 1 (slow, ~45 min serially, cached; folds run in parallel): every target layer is predicted with only
 itself removed from the reference and from the classifier's training data,
 by each prediction method the project has tried:
 
@@ -38,7 +38,7 @@ sys.path.insert(0, ROOT)
 os.chdir(ROOT)
 
 import swcc_texture as st                      # noqa: E402
-from verify_common import GROUP, ORDER         # noqa: E402
+from verify_common import GROUP, ORDER, map_folds  # noqa: E402
 
 CACHE = os.path.join("figures", "cache", "validation_predictions.csv")
 H = np.concatenate([[0.0], np.logspace(-1, np.log10(1500.0), 25)])
@@ -47,6 +47,72 @@ N_FOLDS, N_PER_CLASS, N_MC = 5, 100, 40
 
 def curve(r):
     return st.vg_theta(H, r.thetar, r.thetas, r.alpha_kpa, r.n)
+
+
+def _fold(held, df, tg):
+    """Predict the targets in `held` with them removed from the
+    reference and the classifiers; returns those rows of tg."""
+    tg = tg.copy()
+    held = set(held)
+    train = df[~df.layer_id.isin(held)].reset_index(drop=True)
+    # The vG arms are pinned: the tool's default is now the fixed heads,
+    # built explicitly below.
+    ref = st.GshpReference(df=train, feature_mode="vg")
+    ref_bd = st.GshpReference(df=train, use_bd=True, feature_mode="vg")
+    base = st.TextureGBM(df=train, fractions=True, feature_mode="vg")
+    cov = st.TextureGBM(df=train, covariates=["depth_cm", "bd"],
+                        fractions=True, feature_mode="vg")
+    ref_h = st.GshpReference(df=train, feature_mode="heads")
+    ref_h_bd = st.GshpReference(df=train, feature_mode="heads",
+                                use_bd=True)
+    base_h = st.TextureGBM(df=train, feature_mode="heads")
+    cov_h = st.TextureGBM(df=train, feature_mode="heads",
+                          covariates=["depth_cm", "bd"])
+    for j in np.where(tg.layer_id.isin(held))[0]:
+        r = tg.iloc[j]
+        kw = dict(n_mc=N_MC, sample_type=r.sample_type)
+        a = st.estimate(H, curve(r), ref=ref, clf=base, **kw)
+        # What the command line does with --depth and --bulk-density.
+        b = st.estimate(H, curve(r), ref=ref_bd, clf=cov,
+                        depth=r.depth_cm, bulk_density=r.bd, **kw)
+        tg.loc[j, ["pred_base", "pred_cov", "pred_knn"]] = [
+            a["texture_class"], b["texture_class"],
+            next(iter(a["knn_class_probabilities"]))]
+        ks = a["ksat"]
+        tg.loc[j, ["ks_med", "ks_p5", "ks_p95"]] = [
+            ks["median_cmh"], ks["p5_cmh"], ks["p95_cmh"]]
+        kb = b["ksat"]
+        tg.loc[j, ["ks_cov_med", "ks_cov_p5", "ks_cov_p95"]] = [
+            kb["median_cmh"], kb["p5_cmh"], kb["p95_cmh"]]
+        # fixed-head predictors, the same two ways
+        ah = st.estimate(H, curve(r), ref=ref_h, clf=base_h, **kw)
+        bh = st.estimate(H, curve(r), ref=ref_h_bd, clf=cov_h,
+                         depth=r.depth_cm, bulk_density=r.bd, **kw)
+        tg.loc[j, ["pred_heads", "pred_heads_cov"]] = [
+            ah["texture_class"], bh["texture_class"]]
+        tg.loc[j, ["ks_heads_med", "ks_heads_cov_med"]] = [
+            ah["ksat"]["median_cmh"], bh["ksat"]["median_cmh"]]
+        tg.loc[j, ["ks_heads_p5", "ks_heads_p95",
+                   "ks_heads_cov_p5", "ks_heads_cov_p95"]] = [
+            ah["ksat"]["p5_cmh"], ah["ksat"]["p95_cmh"],
+            bh["ksat"]["p5_cmh"], bh["ksat"]["p95_cmh"]]
+        # ensemble: geometric mean of the two opinions, as verify_blend.py
+        for col, res in (("pred_ens", a), ("pred_ens_cov", b)):
+            p_gbm = np.array([res["class_probabilities"].get(c, 0.0)
+                              for c in st.USDA_CLASSES])
+            p_knn = np.array([res["knn_class_probabilities"].get(c, 0.0)
+                              for c in st.USDA_CLASSES])
+            tg.loc[j, col] = st.USDA_CLASSES[int(np.argmax(
+                np.sqrt(np.clip(p_gbm, 0, None)
+                        * np.clip(p_knn, 0, None))))]
+        # fractions: the neighbour mean the tool reports, and the
+        # regressors, with and without the covariates
+        for pre, res in (("fknn", a), ("fgbm", a), ("fgbm_cov", b)):
+            key = "fractions" if pre == "fknn" else "fractions_gbm"
+            tg.loc[j, [f"{pre}_{c}" for c in ("sand", "silt", "clay")]] = [
+                res[key][c] for c in ("sand", "silt", "clay")]
+
+    return tg[tg.layer_id.isin(held)]
 
 
 def compute():
@@ -83,67 +149,11 @@ def compute():
     cols += frac_cols
     for c in cols:
         tg[c] = np.nan if c.startswith(("ks", "f")) else None
-    for k, held in enumerate(np.array_split(lay, N_FOLDS), 1):
-        held = set(held)
-        train = df[~df.layer_id.isin(held)].reset_index(drop=True)
-        # The vG arms are pinned: the tool's default is now the fixed heads,
-        # built explicitly below.
-        ref = st.GshpReference(df=train, feature_mode="vg")
-        ref_bd = st.GshpReference(df=train, use_bd=True, feature_mode="vg")
-        base = st.TextureGBM(df=train, fractions=True, feature_mode="vg")
-        cov = st.TextureGBM(df=train, covariates=["depth_cm", "bd"],
-                            fractions=True, feature_mode="vg")
-        ref_h = st.GshpReference(df=train, feature_mode="heads")
-        ref_h_bd = st.GshpReference(df=train, feature_mode="heads",
-                                    use_bd=True)
-        base_h = st.TextureGBM(df=train, feature_mode="heads")
-        cov_h = st.TextureGBM(df=train, feature_mode="heads",
-                              covariates=["depth_cm", "bd"])
-        for j in np.where(tg.layer_id.isin(held))[0]:
-            r = tg.iloc[j]
-            kw = dict(n_mc=N_MC, sample_type=r.sample_type)
-            a = st.estimate(H, curve(r), ref=ref, clf=base, **kw)
-            # What the command line does with --depth and --bulk-density.
-            b = st.estimate(H, curve(r), ref=ref_bd, clf=cov,
-                            depth=r.depth_cm, bulk_density=r.bd, **kw)
-            tg.loc[j, ["pred_base", "pred_cov", "pred_knn"]] = [
-                a["texture_class"], b["texture_class"],
-                next(iter(a["knn_class_probabilities"]))]
-            ks = a["ksat"]
-            tg.loc[j, ["ks_med", "ks_p5", "ks_p95"]] = [
-                ks["median_cmh"], ks["p5_cmh"], ks["p95_cmh"]]
-            kb = b["ksat"]
-            tg.loc[j, ["ks_cov_med", "ks_cov_p5", "ks_cov_p95"]] = [
-                kb["median_cmh"], kb["p5_cmh"], kb["p95_cmh"]]
-            # fixed-head predictors, the same two ways
-            ah = st.estimate(H, curve(r), ref=ref_h, clf=base_h, **kw)
-            bh = st.estimate(H, curve(r), ref=ref_h_bd, clf=cov_h,
-                             depth=r.depth_cm, bulk_density=r.bd, **kw)
-            tg.loc[j, ["pred_heads", "pred_heads_cov"]] = [
-                ah["texture_class"], bh["texture_class"]]
-            tg.loc[j, ["ks_heads_med", "ks_heads_cov_med"]] = [
-                ah["ksat"]["median_cmh"], bh["ksat"]["median_cmh"]]
-            tg.loc[j, ["ks_heads_p5", "ks_heads_p95",
-                       "ks_heads_cov_p5", "ks_heads_cov_p95"]] = [
-                ah["ksat"]["p5_cmh"], ah["ksat"]["p95_cmh"],
-                bh["ksat"]["p5_cmh"], bh["ksat"]["p95_cmh"]]
-            # ensemble: geometric mean of the two opinions, as verify_blend.py
-            for col, res in (("pred_ens", a), ("pred_ens_cov", b)):
-                p_gbm = np.array([res["class_probabilities"].get(c, 0.0)
-                                  for c in st.USDA_CLASSES])
-                p_knn = np.array([res["knn_class_probabilities"].get(c, 0.0)
-                                  for c in st.USDA_CLASSES])
-                tg.loc[j, col] = st.USDA_CLASSES[int(np.argmax(
-                    np.sqrt(np.clip(p_gbm, 0, None)
-                            * np.clip(p_knn, 0, None))))]
-            # fractions: the neighbour mean the tool reports, and the
-            # regressors, with and without the covariates
-            for pre, res in (("fknn", a), ("fgbm", a), ("fgbm_cov", b)):
-                key = "fractions" if pre == "fknn" else "fractions_gbm"
-                tg.loc[j, [f"{pre}_{c}" for c in ("sand", "silt", "clay")]] = [
-                    res[key][c] for c in ("sand", "silt", "clay")]
-        print(f"  fold {k}/{N_FOLDS} done", flush=True)
-
+    # Folds run side by side, one process each (verify_common.map_folds),
+    # with the cores left over shared out as threads.
+    parts = map_folds(_fold, np.array_split(lay, N_FOLDS), df, tg,
+                      threads=max(1, os.cpu_count() // N_FOLDS))
+    tg = pd.concat(parts).sort_index()
     keep = ["layer_id", "source_db", "sample_type", "texture_class",
             "sand", "silt", "clay", "ksat_cmh", "nn_class"] + cols
     os.makedirs(os.path.dirname(CACHE), exist_ok=True)

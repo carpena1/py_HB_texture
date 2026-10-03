@@ -4,6 +4,7 @@ Collected here so the current verification scripts do not depend on the
 development-history scripts archived in dev/.
 """
 
+import os
 from math import comb
 
 import numpy as np
@@ -29,6 +30,30 @@ GROUP_ORDER = ["Sandy", "Loamy", "Silty", "Clayey"]
 
 # Bounding box used for "European" soils.
 EU_BBOX = dict(lat=(34, 72), lon=(-25, 45))
+
+
+def n_jobs():
+    """Worker processes for map_folds: every core, unless SWCC_JOBS says."""
+    return int(os.environ.get("SWCC_JOBS", os.cpu_count()))
+
+
+def map_folds(fn, folds, *args, threads=1, jobs=None):
+    """[fn(fold, *args) for fold in folds], one worker process per fold.
+
+    Folds are independent, so running them side by side uses every core far
+    better than threading one model at a time: a gradient-boosted model on a
+    few features keeps 16 threads only partly busy. Each worker is limited to
+    `threads` BLAS/OpenMP threads so the workers do not oversubscribe the
+    CPU. Pass large arrays through `args` rather than a closure: joblib
+    memory-maps big numpy arguments instead of copying them to every worker.
+    Results come back in fold order. SWCC_JOBS=1 runs serially, for debugging.
+    """
+    from joblib import Parallel, delayed, parallel_config
+    jobs = jobs or n_jobs()
+    if jobs == 1:
+        return [fn(f, *args) for f in folds]
+    with parallel_config(backend="loky", inner_max_num_threads=threads):
+        return Parallel(n_jobs=jobs)(delayed(fn)(f, *args) for f in folds)
 
 
 def europe_mask(df):

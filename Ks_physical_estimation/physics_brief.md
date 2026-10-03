@@ -1,14 +1,15 @@
 # Physics-based estimates from the retention curve: brief
 
-Status on 2026-09-23, commit `1e01b5e`; Section 5 (texture) updated 2026-10-01. Code: `ks_physical.py` (the
+Status on 2026-09-23, commit `1e01b5e`; Section 5 (texture) updated 2026-10-01; kNN Ks figures updated 2026-10-03 for the new Ks lookup (150 Ks-bearing neighbours, `verify_ks_neighbors.py`). Code: `ks_physical.py` (the
 calculation), `verify_ks_physical.py` (the tests),
 `figures/make_external_report.py` (fig6 and `ks_variants.csv` per external
 set).
 
 ## 1. What it is for
 
-The tool's Ks comes from a lookup, the ~30 nearest reference soils that carry
-a measured Ks. The physics gives a second estimate from the curve alone, by
+The tool's Ks comes from a lookup, the 150 nearest reference soils that
+carry a measured Ks (`swcc_texture.KS_K`; until 2026-10, the 30 nearest
+soils of any kind, of which only those with a Ks voted). The physics gives a second estimate from the curve alone, by
 capillary theory, with no neighbours behind it. Its errors are independent
 of the reference's, so it serves both as a cross-check and as an answer
 where the reference has no Ks (for example `--reference kssl`).
@@ -44,13 +45,15 @@ example, the widest increment has r ≈ 3.6 mm. This is the known near-
 saturation defect of the vG form (Vogel et al. 2001; Ippisch et al. 2006).
 
 The fix is to count no pore wider than the one that empties at h_min:
-h ← max(h, h_min). The cap was **chosen out of fold**. For each of the 19
+h ← max(h, h_min). The cap was **chosen out of fold**. For each of the 20
 scored sources, it was picked from a grid (none, 2, 5, 10, 20, 30, 50, 100
 and 200 cm) as the value whose matched physics did best on the other
 sources, with every factor refitted without the scored source:
 
-- The folds chose 50 cm in 13 cases, 100 cm in 5 and 200 cm in 1.
-- The nested score was 0.61 dex against the kNN's 0.79 (p < 10⁻³⁰).
+- The folds chose 50 cm in 17 cases and 100 cm in 3 (13, 5 and 1 at
+  200 cm when first chosen, on 19 sources).
+- The nested score was 0.62 dex against the kNN's 0.68 (p = 10⁻⁷); against
+  the earlier 30-neighbour kNN it was 0.61 against 0.79 (p < 10⁻³⁰).
 - **Shipped: h_min = 50 cm** (`AIR_ENTRY_CM`). That is a pore of radius
   30 µm, about 60 µm across, close to the 50 µm lower limit of Greenland's
   (1977) transmission pores.
@@ -114,47 +117,50 @@ anchor.
 
 ## 3. Validation
 
-**Source-blocked.** These are 1,870 targets from the 19 sources with at
+**Source-blocked.** These are 1,906 targets from the 20 sources with at
 least 40 measured-Ks layers, stratified by class. Each source was hidden from
 the kNN and the classifier, curves were regenerated from the stored vG
 parameters and refitted, and the factor was refitted without the source.
 
 | Ks estimate | Median error | Within 2× / 10× | Bias | ρ |
 |---|---|---|---|---|
-| kNN (the tool's Ks) | 0.79 dex | 23 % / 59 % | +0.09 | 0.29 |
-| Physics, 50 cm cap, raw | 0.62 | 28 % / 69 % | +0.07 | 0.51 |
-| **Physics, 50 cm cap, matched (shipped)** | **0.61** | 28 % / 68 % | +0.04 | 0.51 |
-| Physics, 10 cm cap, matched | 0.68 | 25 % / 65 % | +0.07 | 0.47 |
-| Physics, no cap, raw | 1.00 | 16 % / 50 % | +0.76 | 0.44 |
-| Physics, no cap, matched | 0.78 | 21 % / 59 % | +0.16 | 0.43 |
-| Peters et al. 2023 | 0.91 | 18 % / 54 % | +0.40 | 0.39 |
-| Brutsaert 1967 (Brooks–Corey), raw | 0.76 | 23 % / 61 % | +0.26 | 0.46 |
-| Brutsaert 1967, matched (factor 1.50) | 0.73 | 24 % / 62 % | +0.08 | 0.45 |
-| Brutsaert 1967, halved (Bouwer re-wet K) | 0.72 | 24 % / 63 % | −0.04 | 0.46 |
+| kNN (the tool's Ks) | 0.68 dex | 25 % / 64 % | +0.15 | 0.37 |
+| Physics, 50 cm cap, raw | 0.62 | 28 % / 69 % | +0.08 | 0.51 |
+| **Physics, 50 cm cap, matched (shipped)** | **0.61** | 28 % / 69 % | +0.04 | 0.51 |
+| Physics, 10 cm cap, matched | 0.68 | 25 % / 66 % | +0.04 | 0.48 |
+| Physics, no cap, raw | 0.99 | 16 % / 50 % | +0.75 | 0.44 |
+| Physics, no cap, matched | 0.77 | 22 % / 60 % | +0.15 | 0.44 |
+| Peters et al. 2023 | 0.90 | 18 % / 54 % | +0.39 | 0.39 |
+| Brutsaert 1967 (Brooks–Corey), raw | 0.75 | 23 % / 61 % | +0.26 | 0.46 |
+| Brutsaert 1967, matched (factor 1.57) | 0.72 | 24 % / 63 % | +0.07 | 0.46 |
+| Brutsaert 1967, halved (Bouwer re-wet K) | 0.71 | 25 % / 63 % | −0.04 | 0.46 |
 
 The ρ column is the Spearman rank correlation with the measured Ks.
 
-- **By source:** the shipped physics beats the kNN in 16 of the 19 sources.
-  The exceptions are the Yellow River (+0.04 dex), EU-HYDI Romano (+0.02) and
-  EU-HYDI Lilly (+0.36; its θ(0) is 1.07 × porosity).
-- **By texture group** (kNN → physics, dex): sandy 0.45 → 0.34, loamy
-  0.75 → 0.63, silty 1.09 → 0.80, clayey 0.98 → 0.68.
+- **By source:** the shipped physics beats the kNN in 16 of the 20 sources.
+  The exceptions are the Yellow River (+0.09 dex), Zanjanrood (+0.05),
+  EU-HYDI Romano (+0.10) and EU-HYDI Lilly (+0.54; its θ(0) is 1.07 ×
+  porosity).
+- **By texture group** (kNN → physics, dex): sandy 0.42 → 0.34, loamy
+  0.64 → 0.62, silty 0.89 → 0.79, clayey 0.91 → 0.68.
 - **Agreement as a confidence signal.** The matched physics falls within 10×
-  of the kNN for 79 % of soils. There the kNN's median error is 0.65 dex,
-  against 1.68 where they disagree (67 % vs 29 % within 10×).
-- **Blending** adds nothing. With the weight fitted on the other sources it
-  goes to 0.95 on the physics and scores 0.61 dex, and a fixed half-and-half
-  is worse (0.67).
+  of the kNN for 87 % of soils. There the kNN's median error is 0.60 dex,
+  against 1.49 where they disagree (69 % vs 32 % within 10×).
+- **Blending** adds nothing that matters. With the weight fitted on the
+  other sources it goes to 0.80 on the physics and scores 0.60 dex, level
+  with the physics alone (0.61), and a fixed half-and-half scores the same.
 
 **External sets** (typical error factor; the set is removed from the
 reference):
 
 | Set | n | kNN | Physics, shipped | Physics, no cap, matched |
 |---|---|---|---|---|
-| Zanjanrood (Iran) | 169 | ×2.35 | **×1.95** | ×16.8 |
-| Arizona | 21 | ×2.0 | ×2.0 | ×2.5 |
-| Laikipia (field permeameter Ks) | 84 | ×11.5 | ×10.2 | ×11.6 |
-| New Jersey, SSIR 26 (intact-core Ks) | 236 | ×1.84 | ×2.22 (ρ 0.80) | ×4.99 |
+| Zanjanrood (Iran) | 169 | **×1.81** | ×1.96 | ×16.7 |
+| Arizona | 21 | ×2.05 | ×1.98 | ×2.6 |
+| Laikipia (field permeameter Ks)* | 84 | ×11.5 | ×10.2 | ×11.6 |
+| New Jersey, SSIR 26 (intact-core Ks) | 236 | ×1.83 | ×2.22 (ρ 0.80) | ×4.83 |
+
+\* Laikipia: measured with the earlier 30-neighbour kNN and not re-run, because its table is being revised.
 
 The New Jersey Ks played no part in choosing the cap or the factor: uncapped and raw, the physics would be ×16.9 there. Brutsaert's Eq. 5, with Brooks–Corey fitted to each horizon's measured points (median ψb 12.7 cm), gives ×5.3 there (ρ 0.63), and ×2.8 halved. Boorowa has no measured Ks. Laikipia's Ks is a field measurement that no
 lab-based estimate reproduces, so it cannot separate the methods.
@@ -166,13 +172,13 @@ empirical 5–95 % range is 3.7 dex wide (×/÷ 70) and the same for every soil.
 ## 4. How the tool reports it (user decisions, 2026-09-23)
 
 ```
-Predicted Ks: 2.01 cm/h  [5-95 %: 8.33e-05 - 34.7]   (from the kNN; ~12 of 30 undisturbed neighbors with measured Ksat)
-  physical second opinion agrees: 0.42 cm/h, 4.8x below  (0.458 raw; Marshall 1958 capillary bundle, pores capped at 50 cm suction, matched = raw / 1.09)
+Predicted Ks: 2.16 cm/h  [5-95 %: 0.00433 - 41.7]   (from the kNN: the 150 nearest undisturbed neighbors with a measured Ksat)
+  physical second opinion agrees: 0.42 cm/h, 5.2x below  (0.458 raw; Marshall 1958 capillary bundle, pores capped at 50 cm suction, matched = raw / 1.09)
 ```
 
 - **The kNN stays the Ks, with its 5–95 % band.** It is the only estimate
   with a band, and it improves when the user's own laboratory is in the
-  reference (0.53 dex for a new site from a known source, 0.40 for a new
+  reference (0.44 dex for a new site from a known source, 0.38 for a new
   depth). The physics cannot use that.
 - **The physics is printed beside it, raw and matched, with no band.**
   "Agrees" means within a factor of 10 of the kNN, judged on the matched
@@ -280,7 +286,7 @@ mix and was withdrawn.
   undisturbed clay loams), and the curves are spliced from two samples at
   100/330 cm.
 - **EU-HYDI Kätterer** is offset from every other source for both
-  estimates (kNN 2.54 dex, physics 2.12). That looks like a method or unit
+  estimates (kNN 2.52 dex, physics 2.11). That looks like a method or unit
   difference in the source.
 - **The theory is weakest in fine soils, and so is the kNN.** Capillary
   flow ignores aggregation, film flow and tortuosity differences, but with

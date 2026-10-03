@@ -148,6 +148,22 @@ VOLCANIC_TABLES = ("volcanic_flags.csv", "volcanic_flags_restricted.csv")
 ANDIC_CODE = {"yes": 1.0, "likely": 1.0, "no": 0.0}
 ANDIC_LAMBDA = 1.5
 
+# Ks is the weighted median of the KS_K nearest reference layers that carry a
+# measured Ks (2026-10). Before, it came from the k = 30 nearest layers of any
+# kind, of which only those with a Ks voted: about 14 for a new source, since
+# half the reference (KSSL) has none. Searching Ks-bearing layers only at
+# k = 30 lowered the median error for a new source from 0.77 to 0.72 dex
+# (p = 3e-12), and 15 such neighbours scored the same as the old lookup, so
+# the gain is the number of votes, not their closeness. k was then chosen out
+# of fold: for each scored source, the k from 10-500 with the lowest median
+# error over the other sources, averaged over a new source, a new site and a
+# new depth. The folds chose 100, 150 or 200; so chosen, Ks scores 0.70 /
+# 0.60 / 0.58 dex against the old 0.77 / 0.61 / 0.59 (17 of 20 sources
+# better for a new source), and the 5-95 % band holds 80-85 % of measurements
+# instead of 69-76 %. Past ~200 the new-site and new-depth errors rise again
+# (verify_ks_neighbors.py).
+KS_K = 150
+
 # How the wet end of a sample's retention curve was measured: on an intact
 # core or on repacked material (see the prepare_*.py scripts). Encoded for the
 # GBM; "unknown" and missing become NaN, which the GBM handles natively.
@@ -453,6 +469,7 @@ class GshpReference:
             self.row_weight = 1.0 / (1.0 + ra ** 2 + rn ** 2)
         self.fractions = df[["sand", "silt", "clay"]].to_numpy()
         self.ksat = df["ksat_cmh"].to_numpy()
+        self.has_ksat = np.isfinite(self.ksat) & (self.ksat > 0)
         self.sample_type = (df["sample_type"].fillna("unknown").to_numpy()
                             if "sample_type" in df.columns else None)
         self.andic = (df["andic"].isin(["yes", "likely"]).to_numpy(float)
@@ -514,11 +531,13 @@ class GshpReference:
         self._excluded = (self.profile_id == profile_id)
 
     def neighbors(self, thetar, thetas, alpha, n, k, depth=None, om=None,
-                  m=None, sample_type=None, bd=None, andic=None):
+                  m=None, sample_type=None, bd=None, andic=None,
+                  require_ksat=False):
         """k nearest reference rows and their normalised 1/d^2 weights.
-        With sample_type, only rows of that type are eligible. With andic
-        (1.0 or 0.0), rows that differ from it are ANDIC_LAMBDA standard
-        units further away."""
+        With sample_type, only rows of that type are eligible; with
+        require_ksat, only rows with a measured Ks. With andic (1.0 or 0.0),
+        rows that differ from it are ANDIC_LAMBDA standard units further
+        away. Fewer than k rows come back when fewer are eligible."""
         if self.feature_mode in ("curve", "curve_white", "heads"):
             f = list(_head_features(
                 thetar, thetas, alpha, n,
@@ -557,7 +576,13 @@ class GshpReference:
             d = np.where(excluded, np.inf, d)
         if sample_type is not None:
             d = np.where(self.sample_type == sample_type, d, np.inf)
-        idx = np.argpartition(d, k)[:k]
+        if require_ksat:
+            d = np.where(self.has_ksat, d, np.inf)
+            k = min(k, int(np.isfinite(d).sum()))
+            if k == 0:
+                return np.array([], dtype=int), np.array([])
+        idx = (np.argpartition(d, k)[:k] if k < len(d)
+               else np.argsort(d)[:k])
         w = 1.0 / (d[idx] ** 2 + 1e-6)
         return idx, w / w.sum()
 
@@ -751,13 +776,16 @@ class FractionGBM:
 
 def estimate(h, theta, ref=None, n_mc=300, k=30, seed=0, depth=None,
              om=None, clf=None, sample_type=None, bulk_density=None,
-             andic=None, clf_frac=None):
+             andic=None, clf_frac=None, k_ks=KS_K):
     """Full pipeline: fit vG, then kNN inference with MC uncertainty.
 
     Returns a dict with fitted parameters, class probabilities, particle
     fractions and Ks with 5-95 % ranges, plus a reference-free capillary-bundle
     Ks ("physical_cmh") as an independent second opinion, and the same divided
     by ks_physical.MATCHING_FACTOR ("physical_matched_cmh").
+
+    k neighbours vote on the class and give the fractions; Ks comes from the
+    k_ks nearest layers that carry a measured Ks (KS_K).
 
     sample_type ("undisturbed" or "disturbed") is how the target's curve was
     measured. The GBM receives it as a feature, and for "undisturbed" Ks comes
@@ -831,17 +859,18 @@ def estimate(h, theta, ref=None, n_mc=300, k=30, seed=0, depth=None,
         for i, wi in zip(idx, w):
             votes[ref.classes[i]] += wi
             frac_vals.append(ref.fractions[i]); frac_w.append(wi)
-        if ks_type is not None or andic_code is not None:
-            idx, w = ref.neighbors(tr, ts, 10.0 ** la_i, 1.0 + 10.0 ** ln1_i,
-                                   k, depth=depth, om=om, bd=bulk_density,
-                                   m=row[4] if free_m else None,
-                                   sample_type=ks_type)
+        # Ks from its own search: the k_ks nearest layers with a measured Ks
+        # (see KS_K), undisturbed ones only for an undisturbed sample, not
+        # matched on andic.
+        idx, w = ref.neighbors(tr, ts, 10.0 ** la_i, 1.0 + 10.0 ** ln1_i,
+                               k_ks, depth=depth, om=om, bd=bulk_density,
+                               m=row[4] if free_m else None,
+                               sample_type=ks_type, require_ksat=True)
+        ks_neighbor_counts.append(len(idx))
+        if len(idx):
             w = w * ref.class_weight[idx] * ref.row_weight[idx]
             w = w / w.sum()
-        ks_neighbor_counts.append(int(np.isfinite(ref.ksat[idx]).sum()))
-        for i, wi in zip(idx, w):
-            if np.isfinite(ref.ksat[i]):
-                ks_vals.append(ref.ksat[i]); ks_w.append(wi)
+            ks_vals.extend(ref.ksat[idx]); ks_w.extend(w)
 
     total = sum(votes.values())
     knn_probs = {c: v / total for c, v in sorted(votes.items(),
@@ -878,17 +907,17 @@ def estimate(h, theta, ref=None, n_mc=300, k=30, seed=0, depth=None,
     mean_frac = frac_mean
 
     ks_vals = np.array(ks_vals); ks_w = np.array(ks_w)
-    ks = {"n_neighbors_with_ksat": float(np.mean(ks_neighbor_counts)), "k": k,
+    ks = {"n_neighbors_with_ksat": float(np.mean(ks_neighbor_counts)), "k": k_ks,
           "sample_type": ks_type,
           # A second opinion on Ks, the way the kNN vote is one on the class:
           # capillary theory applied to the fitted curve, with no neighbours
           # behind it (ks_physical.py; pores capped at AIR_ENTRY_CM). For a
           # source the reference does not hold it is the better of the two
-          # (0.61 against 0.79 dex source-blocked, rank correlation 0.51
-          # against 0.29), but it has no band and cannot gain from the
+          # (0.61 against 0.68 dex source-blocked, rank correlation 0.51
+          # against 0.37), but it has no band and cannot gain from the
           # user's own data joining the reference, so the kNN stays the Ks.
           # Where the matched value and the kNN agree within a factor of 10
-          # -- 79 % of soils -- the kNN's own error is 0.65 dex against 1.68
+          # -- 87 % of soils -- the kNN's own error is 0.60 dex against 1.49
           # where they disagree, so agreement is a confidence signal and a
           # gap of orders of magnitude warns about the curve, the units or
           # the method (verify_ks_physical.py).
@@ -1121,9 +1150,9 @@ def main():
     if np.isfinite(ks["median_cmh"]):
         print(f"\nPredicted Ks: {ks['median_cmh']:.3g} cm/h  "
               f"[5-95 %: {ks['p5_cmh']:.3g} - {ks['p95_cmh']:.3g}]   "
-              f"(from the kNN; ~{ks['n_neighbors_with_ksat']:.0f} of {ks['k']} "
+              f"(from the kNN: the {ks['n_neighbors_with_ksat']:.0f} nearest "
               f"{ks['sample_type'] + ' ' if ks['sample_type'] else ''}"
-              f"neighbors with measured Ksat"
+              f"neighbors with a measured Ksat"
               f"{', matched on bulk density' if ref.use_bd else ''})")
         # Agreement is judged on the matched value, so a constant offset
         # alone does not count as disagreement.

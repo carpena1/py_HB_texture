@@ -113,8 +113,8 @@ def main():
     n = len(names)
     print(f"\nReference database (curated): {int(n_ref.sum())} layers for "
           f"texture/fractions, {int(n_ks.sum())} with measured Ksat.")
-    print(f"('nb' = mean number of the k=30 nearest neighbors that carried a "
-          f"measured Ksat, i.e. the support behind each Ks estimate.)")
+    print(f"('nb' = mean number of neighbours with a measured Ksat behind "
+          f"each Ks estimate, {st.KS_K} unless fewer are eligible.)")
     print(f"\nSummary over {n} classes:")
     print(f"  exact class match:            {n_top1}/{n}")
     print(f"  true class in top 2:          {n_top2}/{n}")

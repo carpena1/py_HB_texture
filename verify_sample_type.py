@@ -105,7 +105,7 @@ def report(title, tg, out):
           for a in ("kNN", "kNN same type")]
     km.report(f"KSAT -- {title}", ks)
     for a in ("kNN", "kNN same type"):
-        print(f"  {a}: mean Ks-bearing neighbours of k=30: "
+        print(f"  {a}: mean Ks-bearing neighbours (KS_K={st.KS_K}): "
               f"{np.nanmean(out['ks'][a][:, 3]):.1f}")
     ea = np.abs(np.log10(out["ks"]["kNN"][:, 0]) - np.log10(obs))
     eb = np.abs(np.log10(out["ks"]["kNN same type"][:, 0]) - np.log10(obs))
