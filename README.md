@@ -42,7 +42,9 @@ curves from your own sites (see "Adding your own verified data") is the most
 effective improvement measured: with a source's own soils in the reference,
 texture gains 5 points and Ks ranking goes from nearly useless (ρ = 0.11) to
 modest (ρ = 0.36). With those in, supplying depth and bulk density together
-adds about 4 points more.
+adds about 4 points more. It takes quantity: among 21,000 reference soils a
+handful of your own changes nothing, about 20 begin to help and 50 clearly
+do (see "Is it predictive?").
 
 A retention curve does not pin texture down: soils of neighbouring classes
 produce nearly identical curves, and the laboratory that measured a curve
@@ -51,6 +53,100 @@ reports ranked class probabilities, fraction ranges and a Ks band rather than
 a single answer, plus a second opinion whose agreement is a useful confidence
 flag (right 35 % of the time when the two agree, 26 % when they do not, for a
 new source). Treat Ks as an order-of-magnitude estimate.
+
+## Is it predictive? What a new sensor network can expect
+
+The question behind the tool: a network of in-situ sensors delivers retention
+curves, and depth and bulk density are known from sampling at installation.
+Can texture and Ks be inferred, and how accurately? The tests below simulate
+it (`verify_predictive.py`, `verify_network.py`):
+
+- **A new network** brings a measurement protocol the reference has never
+  seen — every reference curve is a laboratory curve — so each test soil is
+  predicted with its whole study or laboratory hidden. A "study" is one
+  contributing entity, not a database: compilations are split into their
+  studies wherever the metadata allow (ETH literature by reference, UNSODA by
+  method, EU-HYDI contributors by data provider, AfSPDB by country and survey,
+  KSSL by its two 33 kPa method eras), 125 units in all; WOSIS, HYBRAS and
+  Russia carry no finer identifier and stay whole, which errs on the safe
+  side (splitting the others changed exact class by +1.7 points).
+- **An established network** has its own lab-verified sites in the reference
+  in quantity: only the test soil's profile is hidden.
+
+Every measure is compared, paired on the same soils, with what a user knows
+without the curve — depth and bulk density alone (a gradient-boosted model on
+those two) — and with chance; 95 % intervals come from a bootstrap over
+studies, the study being the independent unit. 1,731 soils (842 with a
+measured Ks) from 76 studies, all with depth and bulk density supplied:
+
+| | new network | established network | depth + bulk density alone (new network) | chance / best possible |
+|---|---|---|---|---|
+| exact class (12) | **31 %** [26–36] | **43 %** [36–49] | 13 % | 8 % |
+| true class in the top two | 51 % [44–57] | 65 % [58–71] | — | 17 % |
+| texture group (4) | **58 %** [50–64] | **66 %** [60–71] | 32 % | 25 % |
+| Ks within ×10, physical / neighbours | **76 %** [52–87] / 69 % [45–80] | 76 % / **77 %** [54–87] | 52 % | 93 %* |
+| Ks within ×2, physical / neighbours | 36 % / 26 % | 36 % / 41 % | 19 % | 42 %* |
+| Ks typical error, physical / neighbours | ×2.9 / ×4.1 | ×2.9 / ×2.5 | ×9.2 | ×2.3* |
+
+\* Best possible for Ks: replicate cores of the same soil in the reference
+(129 groups) differ by a median factor of 3.3, so a single measured core
+sits about a factor of 2.3 from its soil's true value, and even a perfect
+predictor would put only 42 % of cores within a factor of 2.
+
+![Predictive skill against depth and bulk density alone](figures/predictive/p1_skill.png)
+
+**The curve is what predicts.** For a new network it adds 18 points of exact
+class (95 % interval +13 to +22) and 25 of texture group (+18 to +31) to what
+depth and bulk density give, and 23 points of Ks within a factor of 10 for
+the physical estimate (+5 to +33; +17, from +3 to +25, for the neighbours),
+whose rank correlation with the measured Ks rises from −0.05 to 0.66. The
+physical estimate is the better Ks for a new network (×2.9 against ×4.1);
+once the network's own verified sites are in, the neighbour estimate reaches
+×2.5, close to the replicate floor, and its 5–95 % band holds 89 % of the
+measurements against a nominal 90 %.
+
+![Share of measured cores within each factor of the prediction](figures/predictive/p2_ks_accuracy.png)
+
+**Accuracy varies by network.** Across the 20 studies with at least 20 test
+soils, a new network's exact class runs from 10 to 42 % (10th to 90th
+percentile, median 28 %), its texture group from 45 to 70 %, and Ks within a
+factor of 10 from 43 to 91 %.
+
+**The tool says which answers to trust.** For a new network, when the
+classifier gives its top class at least 0.7 (9 % of soils) the class is right
+72 % of the time and the group 86 %; below 0.3 (22 % of soils), 18 % and 47 %.
+When the neighbour vote agrees with the classifier the class is right 40 % of
+the time, 22 % when it does not; when the neighbour and physical Ks fall
+within a factor of 10 of each other (84 % of soils), 76 % of them are within
+a factor of 10 of the core, 33 % otherwise.
+
+![Accuracy by the tool's own confidence signals](figures/predictive/p4_confidence.png)
+
+**Ground truth turns a new network into an established one — in quantity.**
+Each installation's core, analysed for texture and Ks, can join the
+reference (see "Adding your own verified data"). Added unweighted, a handful
+changes nothing: 20 verified sites add 3 points of exact class and 50 add
+6.5, while all of a laboratory's profiles (median 111) add 12 points and 7 of
+Ks within ×10 (`verify_network.py` b; 25 laboratories, 40 fixed test
+profiles each). Making the network's own sites count brings the gain in
+much sooner — counted 20 times in the classifier, 10 verified sites add 6.8
+points of exact class and 50 add 14.4; preferred by the neighbours, Ks within
+×10 gains 5.7 points from the first core and 13 with 20 (`verify_network.py`
+d). That weighting has been tested and not yet built into the tool.
+
+![Gain with a network's own verified sites](figures/predictive/p3_verified_sites.png)
+
+**Caveats.** No in-situ curve is in the reference yet: the new-network
+figures are what a new laboratory protocol gets, and in-situ curves differ
+from laboratory ones (hysteresis, entrapped air, sensor calibration, often
+a shorter dry range), so they are an expectation to verify with a network's
+first cored installations, not a proof for sensors. The test soils are
+balanced across the 12 classes, so a network's own class mix will move its
+pooled figures. A few studies with unusual Ks (EU-HYDI Kätterer, 12 % within
+a factor of 10) widen the Ks intervals. Reference soils close to the target
+from other laboratories may help Ks (80 % within ×10 within 50 km against
+59 % at 200–1,000 km) but the trend is not significant once the laboratory
+is accounted for (`figures/predictive/p5_proximity.png`).
 
 ## Setup
 
@@ -278,7 +374,9 @@ RMSE ≤ 0.03) and written to `data/local_reference.csv`, which the default
 reference picks up automatically; adding a `sample_id` again replaces it. The
 file is git-ignored, so your data stays private. The more of your texture
 range the verified sites cover, the better — a few sites per soil type are
-worth more than many of one.
+worth more than many of one. Expect a measurable gain from about 20 verified
+sites and a clear one from 50 (see "Is it predictive?"): with the default
+reference, a handful is outvoted by the 21,000 soils around it.
 
 ## How it works
 
@@ -928,7 +1026,9 @@ one).
 **Verification** — `verify_holdout.py` (headline accuracy at each hold-out
 level), `verify_hybrid.py`, `verify_ceiling.py`,
 `verify_source_blocked.py` (per-laboratory leakage), `verify_sample_type.py`,
-`verify_ks_neighbors.py` (how many neighbours Ks comes from), `verify_covariates.py`, `verify_external.py` (an outside dataset before it
+`verify_ks_neighbors.py` (how many neighbours Ks comes from), `verify_predictive.py`
+and `verify_network.py` (what a new sensor network can expect; proximity, verified
+sites, study units, own-site weighting), `verify_covariates.py`, `verify_external.py` (an outside dataset before it
 joins the reference), `verify_volcanic.py`, `verify_andic_knn.py` and
 `verify_andic.py` (volcanic and andic soils), the benchmarks `verify_carsel_parrish.py`,
 `verify_rosetta.py`, `verify_gshp.py`, `verify_groups.py`, and the shared
@@ -937,7 +1037,8 @@ parallel, one process per core).
 
 **Figures** — `figures/workflow.html` (how the reference is built, how a
 prediction is made, what the validation proves) with its SVGs, and
-`figures/make_coverage_map.py` and `figures/make_class_distribution.py`.
+`figures/make_coverage_map.py`, `figures/make_class_distribution.py` and
+`figures/make_predictive_figures.py` (the figures of "Is it predictive?").
 
 **`dev/`** — superseded experiments, kept for the record (see `dev/README.md`).
 
