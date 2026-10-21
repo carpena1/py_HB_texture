@@ -3,6 +3,8 @@
     .venv/bin/python figures/make_coverage_map.py                 # default reference
     .venv/bin/python figures/make_coverage_map.py public euhydi   # base + addition
     .venv/bin/python figures/make_coverage_map.py public euhydi+willard
+    .venv/bin/python figures/make_coverage_map.py public euhydi+willard+setenil+tomejil+lebrija+donana
+                                                   # the README / workflow.html map
 
 With two arguments the base set is drawn in the accent colour and the added
 set underneath it in a second colour, so what the addition contributes is
@@ -39,7 +41,9 @@ W, PAD_X, PAD_TOP = 1040.0, 14.0, 44.0
 LABEL = {"euhydi": "EU-HYDI", "hohenbrink": "Hohenbrink", "kssl": "KSSL",
          "gshp": "GSHP", "merged": "Default reference",
          "public": "Public reference", "willard": "Laikipia",
-         "setenil": "Setenil", "tomejil": "Tomejil"}
+         "setenil": "Setenil", "tomejil": "Tomejil", "lebrija": "Lebrija",
+         "donana": "Do\u00f1ana",
+         "euhydi+willard+setenil+tomejil+lebrija+donana": "EU-HYDI, Laikipia, Andalusia"}
 BAKE = {"var(--accent)": "#0E6E73", "var(--add)": "#B8471E",
         "var(--muted)": "#5C6A70", "var(--sunken)": "#EAEEEC",
         "currentColor": "#141A1D"}

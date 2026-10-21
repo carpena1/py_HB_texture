@@ -40,8 +40,8 @@ both (p<0.001), and nothing significant for a new source (+1.2, p=0.22).
 **You can move from the first column to the second.** Adding lab-verified
 curves from your own sites (see "Adding your own verified data") is the most
 effective improvement measured: with a source's own soils in the reference,
-texture gains 5 points and Ks ranking goes from nearly useless (ρ = 0.11) to
-modest (ρ = 0.36). With those in, supplying depth and bulk density together
+texture gains 5 points and Ks ranking goes from nearly useless (ρ = 0.10) to
+modest (ρ = 0.30). With those in, supplying depth and bulk density together
 adds about 4 points more. It takes quantity: among 21,000 reference soils a
 handful of your own changes nothing, about 20 begin to help and 50 clearly
 do (see "Is it predictive?").
@@ -555,9 +555,9 @@ default reference: 18,551 undisturbed, 1,581 disturbed, 1,221 unknown. Of
 the 11,061 layers with a measured Ks, 10,995 are undisturbed and only 45
 disturbed.
 
-**Coverage.** 20,696 layers carry coordinates (`figures/fig2_coverage_map.png`).
-North America holds 9,256, Europe 7,838 (38 %), Asia 2,653 (1,030 of them in
-the Yellow River Basin), South America 639, Africa 750 (with the Canary
+**Coverage.** 20,712 layers carry coordinates (`figures/fig2_coverage_map.png`).
+North America holds 9,256, Europe 7,862 (38 %), Asia 2,653 (1,030 of them in
+the Yellow River Basin), South America 639, Africa 742 (with the Canary
 Islands) and Australasia 111; Florida alone supplies 28 %. Southern Europe and the Balkans remain thin.
 
 **Texture classes.** The classes are far from balanced
@@ -1079,7 +1079,7 @@ Each was tested with paired designs; the scripts are in `dev/`.
 | Free m from n (five parameters) | −3.0 pp kNN (p=0.007) | a fifth axis thins the neighbourhood |
 | Temper the class prior | +0.7 pp (p=0.33) | not significant; the uniform prior is kept |
 | Weight neighbours by fit quality | +0.0 pp | GSHP fits are mostly well constrained |
-| More European data (EU-HYDI) for an unseen European laboratory | +2.6 pp (p=0.19) | kept for coverage; the gap is laboratory protocol, not geography |
+| More European data (EU-HYDI) for an unseen European laboratory | +3.2 pp kNN (p=0.02), +1.3 pp classifier (p=0.52) | kept: it helps a little, but the laboratory's own soils help more (+5.4 pp) |
 | Volcanic parent material as a classifier feature | +7 to +11 pp with the source in the reference; texture group −7 to −35 pp for non-andic volcanic soils from a new source | acts as a source label; the andic flag carries the useful part |
 | Andic properties in the Ks neighbour search | one unit: −0.05 dex (p=0.25) for a new source; stronger: Campania −1.1 dex, Canary Islands +0.9 to +1.0 dex | the two andic sources with Ks mislead each other |
 | Stronger andic matching (2 units, or andic-only neighbours) | fractions −2 to −3 points for andic soils, but Canary exact −14 pp (p=0.012) | 1.5 units keeps the gain without it |
