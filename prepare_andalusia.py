@@ -7,6 +7,8 @@ table per site:
   data/setenil_reference.csv   Setenil de las Bodegas (Cadiz), olive grove
   data/tomejil_reference.csv   Finca Tomejil, Carmona (Seville), vertisol
   data/donana_reference.csv    El Abalario and El Acebuche (Donana), sands
+  data/lebrija_reference.csv   Sector B-XII, Lebrija (Seville), reclaimed
+                               marsh clay
 
 Answers to the project's questions are from K. Vanderlinden (email,
 2026-10-02).
@@ -47,13 +49,21 @@ Tomejil (Tomejil/SWRCdata Tomejil.xls; Vanderlinden et al. 2021, EJSS):
     work in gravimetric water content (K. Vanderlinden). Water is made
     volumetric with a density that follows the water content, by normal
     shrinkage (the soil loses volume as it loses water): specific volume
-    1/2.65 + w, density its inverse, capped at 1.6 g/cm3 (the shrinkage
-    limit, w ~ 0.25); theta = w * density. Saturation then sits at density
-    ~1.16 and the dry end at 1.6. This is a model, not a measured shrinkage
+    1/2.65 + w, density its inverse, capped at 1.75 g/cm3 (the shrinkage
+    limit, w ~ 0.19); theta = w * density. Saturation then sits at density
+    ~1.16 and the dry end at 1.75. This is a model, not a measured shrinkage
     curve. Tested as a new source (2026-10-02, K. Vanderlinden's question):
     a single treatment density (1.085 CT / 1.125 DD, Ordonez Fernandez et al.
     2007) reads 87 % of rings as clay with 40 % clay predicted; the
-    shrinkage density reads all of them as clay with 53 % (measured 56 %).
+    shrinkage density reads all of them as clay with 53.6 % (measured 55.6 %).
+    The cap (2026-10-12) is the median oven-dry clod density of KSSL
+    Vertisols with 45-65 % clay and a 33 kPa clod density below 1.25 g/cm3
+    (828 horizons, 324 pedons; 10-90 %: 1.54-1.90), the density at which
+    such clods stop shrinking. It replaces 1.6, the dry end the authors
+    report for Tomejil, which gives the same texture (100 % clay, 53.6 %)
+    and lower dry-end water; Lebrija's measured shrinkage curve reaches 1.95.
+    The same cap converts the Laikipia vertic clays (prepare_willard.py);
+    Vertisol_shrinkage/ has the memo and the cap test.
     The bulk-density column is the density at 33 kPa, as KSSL reports its
     vertisols' density at 1/3 bar.
   * Texture: treatment means for 0-0.20 m from G. Martinez's thesis (Table
@@ -79,15 +89,53 @@ in LOCALIZACION Y DESCRIPCION PUNTOS.docx):
     (5-10 cm, depth 7.5). profile_id is the site.
   * Bulk density of the 47 rings averages 1.70 g/cm3 (1.59-1.80); the
     rings are not mapped to depths, so every layer carries 1.70.
-  * No particle-size analysis: "practically all sand" (K. Vanderlinden;
-    IGME's sand-fraction analysis is not available). texture_class is
-    "sand"; sand, silt and clay stay empty.
+  * Particle size (GRANULOMETRIA ABALARIO-ACEBUCHE.xls, IGME Sevilla 2010;
+    K. Vanderlinden, email 2026-10-21): cumulative % passing, sieves to
+    0.063 mm and sedimentation below, at the same depths as the curves
+    (El Abalario 20-200 cm and > 200 cm, El Acebuche 20-100 cm). USDA
+    fractions: sand = 100 - passing 0.05 mm, clay = passing 0.002 mm. The
+    El Acebuche surface curve (5-10 cm) has no analysis; it keeps
+    texture_class "sand" ("practically all sand", K. Vanderlinden) with
+    the fractions empty.
   * Ks: Philip-Dunne infiltrometer in the field at 5-10 cm, repeated at
     different points, not on the retention samples (El Abalario 7 readings,
     El Acebuche 4). Kept as each site's median in ksat_pd_site_cmh for
     information; ksat_cmh stays empty.
   * Coordinates: UTM zone 29, taken as ED50 (X_29, Y_29 in the site notes).
   * No organic matter data.
+
+Lebrija (Lebrija/CR_Lebrija 1054A_RAfa.xlsx; K. Vanderlinden, email
+2026-10-09):
+  * 8 sampling points in one field of Sector B-XII, lower Guadalquivir
+    (Marisma recuperada, clay). One curve per point, so profile_id is the
+    point; 12-14 readings each, -1 to -2.5e6 cm.
+  * Gravimetric water content (theta_g) plus the volumetric water content
+    (theta_v) the author derived with a shrinkage curve (Cornelis et al.
+    2006) fitted to field void ratios from Andreu Caceres (1992, PhD thesis,
+    Univ. Cordoba, Fig. 21; K. Vanderlinden, email 2026-10-21). theta_v is used as
+    given; the bulk density it implies, theta_v/theta_g, runs 1.02 (wet) to
+    1.95 g/cm3 and is capped at 1.951 at the dry end in every point, i.e.
+    the fitted shrinkage limit. Unlike Tomejil, this is a measured
+    shrinkage curve rather than the normal-shrinkage model: its specific
+    volume sits 4-32 % above the normal-shrinkage line 1/2.65 + w, so
+    structural and residual shrinkage are included. The bulk-density column
+    is that implied density at 33 kPa, as for Tomejil.
+  * Not a check: the wettest theta_v is 0.94 times the porosity of its own
+    implied wet density in every point, but only because the fit, which
+    stops at about 0.38 g/g, is extended along a normal-shrinkage line that
+    holds saturation at 0.94 (data/andalusia_raw/Lebrija/NOTES.md).
+  * Against the thesis (pressure plates, 15-60 cm): water near 33 kPa agrees
+    (about 0.33 g/g in both); at 1500 kPa the thesis has about 0.32 g/g
+    against 0.16-0.18 here (WP4C dew point). The gap is in gravimetric
+    water, so not a matter of density. The thesis Ks, 0.46 cm/h on
+    undisturbed columns at 5-40 cm, is not in the table.
+  * Texture, organic matter, CEC, pH and saturation-extract EC per point
+    from "Datos analiticos" (0-30 cm). Clay 56.7-68.8 %, sand 6.5-9.9 % ->
+    clay in all of them. Point 5 was not analysed, so it is kept out of the
+    table; its curve is still read by measured_points for prediction.
+  * depth_cm 15, the midpoint of the 0-30 cm sampled layer.
+  * No Ks. Coordinates: one pair for the field, UTM zone 29, taken as ED50
+    as for Donana (36.98 N, 6.04 W).
 
 Curves are fitted with the tool's own routine on the points up to 1500 kPa,
 as for Arizona (prepare_babaeian_az.py); measured_points(site, None) keeps
@@ -113,16 +161,19 @@ SETENIL_XY = os.path.join(RAW, "Setenil", "Puntos muestreo suelo_X_C.xls")
 TOMEJIL_XLS = os.path.join(RAW, "Tomejil", "SWRCdata Tomejil.xls")
 TOMEJIL_XY = os.path.join(RAW, "Tomejil", "coordenadas.xlsx")
 DONANA_XLSX = os.path.join(RAW, "Do\u00f1ana", "RetencionAbalarioAcebuche+Ks Philip-Dunne.xlsx")
+DONANA_PSD = os.path.join(RAW, "Do\u00f1ana", "GRANULOMETR\u00cdA ABALARIO-ACEBUCHE.xls")
+LEBRIJA_XLSX = os.path.join(RAW, "Lebrija", "CR_Lebrija 1054A_RAfa.xlsx")
 OUT = {"setenil": os.path.join("data", "setenil_reference.csv"),
        "tomejil": os.path.join("data", "tomejil_reference.csv"),
-       "donana": os.path.join("data", "donana_reference.csv")}
+       "donana": os.path.join("data", "donana_reference.csv"),
+       "lebrija": os.path.join("data", "lebrija_reference.csv")}
 MBAR_TO_KPA = 0.1
 CM_TO_KPA = 0.0980665
 OM_PER_OC = 1.724
 MIN_POINTS = 5
 MAX_RMSE = 0.03
 MAX_KPA = 1500.0
-TOMEJIL_BD_MAX = 1.6           # g/cm3, dry end of the soil's range
+TOMEJIL_BD_MAX = 1.75          # g/cm3, median oven-dry clod density of KSSL Vertisols (see Tomejil notes)
 TOMEJIL_SAND = {"DD": 8.01, "CT": 8.30}
 TOMEJIL_CLAY = {"DD": 55.99, "CT": 55.20}
 TOMEJIL_OC = {"DD": 1.1, "CT": 0.9}
@@ -133,6 +184,8 @@ TOMEJIL_COPIES = {("DD10", 4700.0), ("CT3", 4700.0)}
 DONANA_BD = 1.70
 DONANA_SITES = {"AB": ("El Abalario", 705321, 4109711),
                 "AC": ("El Acebuche", 716291, 4102657)}
+LEBRIJA_XY = (763950, 4097476)   # UTM zone 29, one pair for the field
+LEBRIJA_DEPTH = 15.0             # midpoint of the sampled 0-30 cm layer
 
 
 def _setenil_curves():
@@ -223,6 +276,21 @@ def _donana_curves():
     return out
 
 
+def _donana_psd():
+    """{(site, key): (sand, silt, clay)} in %, USDA limits."""
+    sh = pd.read_excel(DONANA_PSD, header=None)
+    sizes = pd.to_numeric(sh.iloc[1:18, 0], errors="coerce").to_numpy(float)
+    out = {}
+    for site, cols in (("AC", range(1, 6)), ("AB", range(8, 19))):
+        for c in cols:
+            lab = str(sh.iloc[0, c]).strip()
+            key = "FONDO" if lab.startswith(">") else f"{int(lab.split()[0]):03d}"
+            passing = dict(zip(sizes, pd.to_numeric(sh.iloc[1:18, c]).to_numpy(float)))
+            clay, fine = passing[0.002], passing[0.05]
+            out[(site, key)] = (round(100.0 - fine, 2), round(fine - clay, 2), clay)
+    return out
+
+
 def _donana_ks():
     """Each site's Philip-Dunne readings, cm/h."""
     x = pd.ExcelFile(DONANA_XLSX)
@@ -233,6 +301,30 @@ def _donana_ks():
         v = pd.to_numeric(d.iloc[list(rows), 1], errors="coerce").to_numpy(float)
         ks[site] = v[np.isfinite(v)] * 3.6e5          # m/s -> cm/h
     return ks
+
+
+def _lebrija_curves():
+    """{point: (h cm, theta_g, theta_v)}; three columns per point."""
+    d = pd.read_excel(LEBRIJA_XLSX, sheet_name="CR", header=None)
+    out = {}
+    for p in range(1, 9):
+        c = 3 * (p - 1)
+        assert str(d.iloc[1, c]) == f"h (cm){p}"
+        v = [pd.to_numeric(d.iloc[2:, c + i], errors="coerce").to_numpy(float)
+             for i in range(3)]
+        ok = np.isfinite(v[0]) & np.isfinite(v[1]) & np.isfinite(v[2])
+        out[p] = (np.abs(v[0][ok]), v[1][ok], v[2][ok])
+    return out
+
+
+def _lebrija_analysis():
+    """Per point, for the 7 points that were analysed."""
+    d = pd.read_excel(LEBRIJA_XLSX, sheet_name="Datos analíticos")
+    d = d.dropna(subset=["ARCILLA"])
+    return pd.DataFrame({
+        "point": d["Punto"].astype(int), "sand": d["ARENA"].astype(float),
+        "silt": d["LIMO"].astype(float), "clay": d["ARCILLA"].astype(float),
+        "om": d["MO (%)"].astype(float)}).set_index("point")
 
 
 def _utm30_ed50(x, y, zone=30):
@@ -255,6 +347,9 @@ def measured_points(site, max_kpa=MAX_KPA):
     elif site == "donana":
         for (s_, key), (_, h, th) in _donana_curves().items():
             out[f"DON_{s_}_{key}"] = (h, th)
+    elif site == "lebrija":
+        for p, (h, _, tv) in _lebrija_curves().items():
+            out[f"LEB_P{p}"] = (h * CM_TO_KPA, tv)
     else:
         raise ValueError(site)
     if max_kpa is not None:
@@ -359,6 +454,7 @@ def build_donana():
     pts = measured_points("donana")
     curves = _donana_curves()
     ks = _donana_ks()
+    psd = _donana_psd()
     rows, skip = [], dict(points=0, fit=0, rmse=0)
     for (site, key), (depth, _, _) in curves.items():
         lid = f"DON_{site}_{key}"
@@ -376,10 +472,12 @@ def build_donana():
             continue
         name, x, y = DONANA_SITES[site]
         (la,), (lo,) = _utm30_ed50([x], [y], zone=29)
+        sand, silt, clay = psd.get((site, key), (np.nan,) * 3)
         rows.append(dict(
-            layer_id=lid, profile_id=f"DON_{site}", texture_class="sand",
+            layer_id=lid, profile_id=f"DON_{site}",
+            texture_class=st.usda_class(sand, silt, clay) if np.isfinite(sand) else "sand",
             alpha_kpa=alpha, n=n, thetar=tr, thetas=ts,
-            sand=np.nan, silt=np.nan, clay=np.nan, ksat_cmh=np.nan,
+            sand=sand, silt=silt, clay=clay, ksat_cmh=np.nan,
             depth_cm=depth, lat=la, lon=lo, source_db="Vanderlinden_Donana",
             oc=np.nan, om=np.nan, porosity=1 - DONANA_BD / 2.65, bd=DONANA_BD,
             rmse=rmse, n_points=len(h), **fm, sample_type="undisturbed",
@@ -390,13 +488,54 @@ def build_donana():
     return pd.DataFrame(rows), skip
 
 
+def build_lebrija():
+    pts = measured_points("lebrija")
+    curves = _lebrija_curves()
+    analysis = _lebrija_analysis()
+    (la,), (lo,) = _utm30_ed50([LEBRIJA_XY[0]], [LEBRIJA_XY[1]], zone=29)
+    rows, skip = [], dict(points=0, fit=0, rmse=0, texture=0)
+    for p, (h_cm, w, tv) in curves.items():
+        lid = f"LEB_P{p}"
+        h, theta = pts[lid]
+        if p not in analysis.index:
+            skip["texture"] += 1
+            continue
+        if len(h) < MIN_POINTS:
+            skip["points"] += 1
+            continue
+        try:
+            tr, ts, alpha, n, rmse, fm = fit(h, theta)
+        except Exception:
+            skip["fit"] += 1
+            continue
+        if not np.isfinite(rmse) or rmse > MAX_RMSE or n <= 1.0:
+            skip["rmse"] += 1
+            continue
+        # Implied density at 33 kPa, as for Tomejil.
+        bd = float(np.interp(np.log10(330.0),
+                             np.log10(np.maximum(h_cm, 1e-3)), tv / w))
+        a = analysis.loc[p]
+        rows.append(dict(
+            layer_id=lid, profile_id=lid,
+            texture_class=st.usda_class(a.sand, a.silt, a.clay),
+            alpha_kpa=alpha, n=n, thetar=tr, thetas=ts,
+            sand=a.sand, silt=a.silt, clay=a.clay,
+            ksat_cmh=np.nan, depth_cm=LEBRIJA_DEPTH, lat=la, lon=lo,
+            source_db="Vanderlinden_Lebrija", oc=a.om / OM_PER_OC, om=a.om,
+            porosity=1 - bd / 2.65, bd=bd, rmse=rmse, n_points=len(h), **fm,
+            sample_type="undisturbed",
+            sample_type_source="theta_v from a shrinkage curve fitted to "
+                               "void ratios (Andreu Caceres 1992)"))
+    return pd.DataFrame(rows), skip
+
+
 def main():
     if not os.path.isdir(RAW):
         raise SystemExit(f"{RAW} not found")
-    sites = sys.argv[1:] or ["setenil", "tomejil", "donana"]
+    sites = sys.argv[1:] or ["setenil", "tomejil", "donana", "lebrija"]
     for site in sites:
         out, skip = {"setenil": build_setenil, "tomejil": build_tomejil,
-                     "donana": build_donana}[site]()
+                     "donana": build_donana, "lebrija": build_lebrija}[site]()
         out.to_csv(OUT[site], index=False)
         print(f"{site}: {len(out)} layers -> {OUT[site]}   (skipped: {skip})")
         print(f"  median fit RMSE {out.rmse.median():.4f} (max {out.rmse.max():.4f}),"

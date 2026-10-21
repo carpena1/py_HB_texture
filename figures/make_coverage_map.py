@@ -187,6 +187,10 @@ def main():
 
     src = allr.source_db.value_counts()
     fl = int(src.get("Florida_database", 0))
+    # The Andalusian sites sit on top of each other at this scale, so they are
+    # called out as one.
+    and_n = int(sum(src.get(f"Vanderlinden_{s}", 0)
+                    for s in ("Setenil", "Tomejil", "Lebrija", "Donana")))
     callouts = f'''
         <line x1="302" y1="192" x2="302" y2="228" stroke="currentColor" opacity=".55"/>
         <text x="296" y="243" text-anchor="end">Florida &#8212; {fl:,} layers,</text>
@@ -199,6 +203,8 @@ def main():
         <text x="604" y="326">Sub-Saharan Africa {int(src.get("AfSPDB", 0)):,}</text>
         <line x1="469" y1="189" x2="446" y2="206" stroke="currentColor" opacity=".55"/>
         <text x="442" y="210" text-anchor="end">Canary Islands {int(src.get("Armas_Canarias", 0)):,}</text>
+        <line x1="503" y1="158" x2="448" y2="230" stroke="currentColor" opacity=".55"/>
+        <text x="444" y="234" text-anchor="end">Andalusia {and_n:,}</text>
         <line x1="802" y1="162" x2="826" y2="196" stroke="currentColor" opacity=".55"/>
         <text x="830" y="208">Yellow River Basin {int(src.get("Tong_YellowRiver", 0)):,}</text>
         <line x1="279" y1="149" x2="238" y2="120" stroke="currentColor" opacity=".55"/>

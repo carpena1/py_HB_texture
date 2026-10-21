@@ -34,6 +34,14 @@ Choices, each matching an existing preparation script:
     the raw size classes in PSIZE are summed instead, and only when they
     break at exactly 2 and 50 um, so no interpolation of our own is involved.
     Sand then stops at 1 mm rather than 2 mm, which renormalising absorbs.
+    Measured, after A. Nemes raised it (pers. comm., 2026): Poland and
+    Ukraine are the only countries in PSIZE whose largest class is 1000 um
+    (all 447 Polish samples; everyone else, Russia included, reaches 2000),
+    and the Polish classes sum to exactly 100 %, so the fractions are on a
+    <1 mm basis. The 1-2 mm mass is a median 1.4 % of the <2 mm total in the
+    449 samples that measure it explicitly, which would move the Polish rows
+    +0.6 points of sand -- left uncorrected, as that is well inside the
+    tool's own fraction error. See verify_psd_standard.py.
   * Not usable, by construction rather than by filter: Bilas (Greece) and
     Anaya (Spain) report a median of 2 retention points per sample, Hennings
     exactly 4, and Patyka (Ukraine) none -- too few to fit 4 parameters.

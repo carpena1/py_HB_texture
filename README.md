@@ -19,23 +19,23 @@ measurement signature about as strong as the texture signal:
 
 | | new data source | your source already in the reference | chance |
 |---|---|---|---|
-| exact USDA class (12 classes) | **31 %** (best possible* 46 %) | **39 %** (best possible 54 %) | 8 % |
-| … with depth and bulk density | 31 % | 45 % | |
-| texture group (4 groups) | **58 %** (68 %) | **62 %** (74 %) | 25 % |
-| … with depth and bulk density | 58 % | 67 % | |
+| exact USDA class (12 classes) | **31 %** (best possible* 45 %) | **40 %** (best possible 53 %) | 8 % |
+| … with depth and bulk density | 32 % | 45 % | |
+| texture group (4 groups) | **58 %** (68 %) | **64 %** (73 %) | 25 % |
+| … with depth and bulk density | 58 % | 69 % | |
 | Ks, typical error | factor of 4 | factor of 3 | — |
 | … with bulk density | factor of 4 | factor of 2.6 | — |
-| Ks within a factor of 10 | 68 % | 75 % | — |
+| Ks within a factor of 10 | 68 % | 76 % | — |
 
 \* The Cover & Hart (1967) bound for *any* method that uses the four van
 Genuchten parameters (see "Validation"). All rows are the same 1,733 test
-soils (`verify_holdout.py`); the "with" rows use the 1,683 of them that carry
+soils (`verify_holdout.py`); the "with" rows use the 1,688 of them that carry
 depth and bulk density, compared with the curve alone on those soils.
 
 A new depth at a site whose other horizons are already in the reference does
-a little better than a new site (41.2 % against 38.9 %, p=0.014). Depth and
-bulk density add about 6 points of exact class at both (p<0.001), and
-nothing for a new source.
+slightly better than a new site (41.3 % against 39.6 %, p=0.058, not
+significant). Depth and bulk density add 5.5 to 6 points of exact class at
+both (p<0.001), and nothing significant for a new source (+1.2, p=0.22).
 
 **You can move from the first column to the second.** Adding lab-verified
 curves from your own sites (see "Adding your own verified data") is the most
@@ -51,7 +51,7 @@ produce nearly identical curves, and the laboratory that measured a curve
 leaves a mark on it that is as large as the texture signal. The tool therefore
 reports ranked class probabilities, fraction ranges and a Ks band rather than
 a single answer, plus a second opinion whose agreement is a useful confidence
-flag (right 35 % of the time when the two agree, 26 % when they do not, for a
+flag (right 37 % of the time when the two agree, 26 % when they do not, for a
 new source). Treat Ks as an order-of-magnitude estimate.
 
 ## Is it predictive? What a new sensor network can expect
@@ -76,49 +76,49 @@ it (`verify_predictive.py`, `verify_network.py`):
 Every measure is compared, paired on the same soils, with what a user knows
 without the curve — depth and bulk density alone (a gradient-boosted model on
 those two) — and with chance; 95 % intervals come from a bootstrap over
-studies, the study being the independent unit. 1,731 soils (842 with a
+studies, the study being the independent unit. 1,731 soils (851 with a
 measured Ks) from 76 studies, all with depth and bulk density supplied:
 
 | | new network | established network | depth + bulk density alone (new network) | chance / best possible |
 |---|---|---|---|---|
-| exact class (12) | **31 %** [26–36] | **43 %** [36–49] | 13 % | 8 % |
-| true class in the top two | 51 % [44–57] | 65 % [58–71] | — | 17 % |
-| texture group (4) | **58 %** [50–64] | **66 %** [60–71] | 32 % | 25 % |
-| Ks within ×10, physical / neighbours | **76 %** [52–87] / 69 % [45–80] | 76 % / **77 %** [54–87] | 52 % | 93 %* |
-| Ks within ×2, physical / neighbours | 36 % / 26 % | 36 % / 41 % | 19 % | 42 %* |
-| Ks typical error, physical / neighbours | ×2.9 / ×4.1 | ×2.9 / ×2.5 | ×9.2 | ×2.3* |
+| exact class (12) | **32 %** [25–38] | **44 %** [37–49] | 12 % | 8 % |
+| true class in the top two | 52 % [44–57] | 65 % [57–70] | — | 17 % |
+| texture group (4) | **58 %** [50–65] | **67 %** [62–72] | 31 % | 25 % |
+| Ks within ×10, physical / neighbours | **75 %** [51–86] / 69 % [45–79] | 75 % / **78 %** [54–88] | 54 % | 93 %* |
+| Ks within ×2, physical / neighbours | 35 % / 26 % | 35 % / 44 % | 18 % | 42 %* |
+| Ks typical error, physical / neighbours | ×2.9 / ×4.0 | ×2.9 / ×2.5 | ×8.3 | ×2.3* |
 
 \* Best possible for Ks: replicate cores of the same soil in the reference
-(129 groups) differ by a median factor of 3.3, so a single measured core
+(130 groups) differ by a median factor of 3.3, so a single measured core
 sits about a factor of 2.3 from its soil's true value, and even a perfect
 predictor would put only 42 % of cores within a factor of 2.
 
 ![Predictive skill against depth and bulk density alone](figures/predictive/p1_skill.png)
 
-**The curve is what predicts.** For a new network it adds 18 points of exact
-class (95 % interval +13 to +22) and 25 of texture group (+18 to +31) to what
-depth and bulk density give, and 23 points of Ks within a factor of 10 for
-the physical estimate (+5 to +33; +17, from +3 to +25, for the neighbours),
-whose rank correlation with the measured Ks rises from −0.05 to 0.66. The
-physical estimate is the better Ks for a new network (×2.9 against ×4.1);
+**The curve is what predicts.** For a new network it adds 20 points of exact
+class (95 % interval +14 to +24) and 27 of texture group (+18 to +34) to what
+depth and bulk density give, and 22 points of Ks within a factor of 10 for
+the physical estimate (+4 to +31; +15, from +2 to +22, for the neighbours),
+whose rank correlation with the measured Ks rises from −0.05 to 0.64. The
+physical estimate is the better Ks for a new network (×2.9 against ×4.0);
 once the network's own verified sites are in, the neighbour estimate reaches
 ×2.5, close to the replicate floor, and its 5–95 % band holds 89 % of the
 measurements against a nominal 90 %.
 
 ![Share of measured cores within each factor of the prediction](figures/predictive/p2_ks_accuracy.png)
 
-**Accuracy varies by network.** Across the 20 studies with at least 20 test
-soils, a new network's exact class runs from 10 to 42 % (10th to 90th
-percentile, median 28 %), its texture group from 45 to 70 %, and Ks within a
-factor of 10 from 43 to 91 %.
+**Accuracy varies by network.** Across the 19 studies with at least 20 test
+soils, a new network's exact class runs from 15 to 46 % (10th to 90th
+percentile, median 29 %), its texture group from 41 to 67 %, and Ks within a
+factor of 10 from 41 to 87 %.
 
 **The tool says which answers to trust.** For a new network, when the
-classifier gives its top class at least 0.7 (9 % of soils) the class is right
-72 % of the time and the group 86 %; below 0.3 (22 % of soils), 18 % and 47 %.
+classifier gives its top class at least 0.7 (10 % of soils) the class is right
+70 % of the time and the group 88 %; below 0.3 (23 % of soils), 24 % and 50 %.
 When the neighbour vote agrees with the classifier the class is right 40 % of
-the time, 22 % when it does not; when the neighbour and physical Ks fall
-within a factor of 10 of each other (84 % of soils), 76 % of them are within
-a factor of 10 of the core, 33 % otherwise.
+the time, 25 % when it does not; when the neighbour and physical Ks fall
+within a factor of 10 of each other (83 % of soils), 76 % of them are within
+a factor of 10 of the core, 35 % otherwise.
 
 ![Accuracy by the tool's own confidence signals](figures/predictive/p4_confidence.png)
 
@@ -157,11 +157,13 @@ Calling `.venv/bin/python` directly (as below) runs inside the virtual
 environment without activating it.
 
 The reference tables are committed, so **the tool runs out of the box with no
-downloads.** Four tables are exceptions: EU-HYDI, which is restricted to its
-consortium, the Laikipia soils, which are unpublished, and the Setenil and
-Tomejil soils (Andalusia), whose distribution is not yet agreed. Their
-tables (`data/euhydi_reference.csv`, `data/willard_reference.csv`,
-`data/setenil_reference.csv`, `data/tomejil_reference.csv`) are built
+downloads.** Six tables are exceptions: EU-HYDI, which is restricted to its
+consortium, the Laikipia soils, which are unpublished, and the Setenil,
+Tomejil, Lebrija and Doñana soils (Andalusia), whose distribution is not yet
+agreed. Their tables (`data/euhydi_reference.csv`,
+`data/willard_reference.csv`, `data/setenil_reference.csv`,
+`data/tomejil_reference.csv`, `data/lebrija_reference.csv`,
+`data/donana_reference.csv`) are built
 locally with `prepare_euhydi.py`, `prepare_willard.py` and
 `prepare_andalusia.py` by those who hold the data and are not distributed. A fresh clone runs on the other seven databases
 (14,372 layers) and prints a note saying so.
@@ -422,10 +424,12 @@ every other number identical.
 | Canary Islands andic soils (Armas Espinel 2013) | 66 | 62 | undisturbed | committed |
 | Yellow River Basin, China (Tong et al. 2024) | 1,030 | 1,015 | undisturbed | committed |
 | EU-HYDI (Weynants et al. 2013), 21 laboratories, 16 countries | 6,797 | 2,704 | per sample | **restricted, never distributed** |
-| Laikipia, central Kenya (Willard et al., under review) | 86 | 0 | undisturbed | **unpublished, never distributed** |
+| Laikipia, central Kenya (Willard et al., under review) | 70 | 26 | undisturbed | **unpublished, never distributed** |
 | Setenil, Andalusia, Spain (K. Vanderlinden, IFAPA) | 44 | 44 | undisturbed | **not distributed (pending agreement)** |
 | Tomejil vertisol, Andalusia, Spain (Vanderlinden et al. 2021) | 54 | 0 | undisturbed | **not distributed (pending agreement)** |
-| **default reference** | **21,353** | **11,061** | | |
+| Lebrija marsh clay, Andalusia, Spain (K. Vanderlinden, IFAPA) | 7 | 0 | undisturbed | **not distributed (pending agreement)** |
+| Doñana sands, Andalusia, Spain (K. Vanderlinden, IFAPA) | 17 | 0 | undisturbed | **not distributed (pending agreement)** |
+| **default reference** | **21,361** | **11,087** | | |
 
 Each source gets its own `prepare_*.py`, because each ships something
 different, and each needed a correction before its curves were comparable:
@@ -434,6 +438,19 @@ different, and each needed a correction before its curves were comparable:
   a plain fit puts α five to sixteen times too low. One anchor point at
   θ(0) = 0.95 × porosity fixes it (θs sits ~5 % below porosity because of
   entrapped air; median θs/porosity in GSHP is 0.946). KSSL has no Ks.
+  Its `sample_type` is **mixed, and labelled `undisturbed` deliberately**: the
+  method codes put the wet end on natural clods (DbWR1, 4B1c) and the dry end
+  on material sieved to &lt;2 mm (3C1, 3C2), so the 33 and 1500 kPa points —
+  the ones carrying most of the texture signal — are on repacked material
+  (raised by A. Nemes, pers. comm., 2026). The label was left as it is on
+  evidence, not convenience: `verify_kssl_label.py` scores all three
+  labellings on identical folds and finds nothing significant, with the two
+  arms disagreeing in sign (relabelling `disturbed` gives +1.3 pp for other
+  soils, p = 0.42, and −2.9 pp for KSSL's own, p = 0.24). It is not inert —
+  162 of 410 answers change — but it shuffles predictions without improving
+  them, which matches `verify_sample_type.py` scoring the feature at +0.0 pp
+  overall. Ks cannot be affected either way, since no KSSL row carries a
+  measured Ks and the Ks search takes only rows that do.
 - **Hohenbrink** has ~199 HYPROP points on the wet limb against three WP4
   points on the dry one; points are thinned to one median per pF bin so the
   fit is not weighted 98:2 away from the part of the curve that carries
@@ -443,29 +460,52 @@ different, and each needed a correction before its curves were comparable:
   are thinned in pF as for Hohenbrink. Several contributors reported only two
   or four points per sample (Greece, most of Spain), too few to fit a curve.
   Polish fractions are summed from raw size classes breaking at 2 and 50 µm.
+  Those classes stop at 1000 µm, not 2000: Poland and Ukraine are the only
+  countries whose largest class is 1 mm (all 447 Polish samples in `PSIZE`),
+  and the classes sum to exactly 100 %, so the Polish fractions are on a
+  &lt;1 mm basis with sand meaning 50–1000 µm. This is the former Russian
+  school's 1 mm sieving (A. Nemes, pers. comm., 2026); EU-HYDI records it for
+  these samples as "PSD measured up to 1000 microns". Restoring the missing
+  1–2 mm mass would move the 431 Polish rows by about +0.6 points of sand and
+  change the USDA class of 24 of them — that mass is a median 1.4 % of the
+  &lt;2 mm total in the 449 samples that measure it explicitly, and
+  renormalising already sends most of it to sand in soils averaging 60 %
+  sand. It is left uncorrected: the correction is far below the tool's own
+  fraction error (9–13 points) and would import an assumption from other
+  countries' soils. Russian, Hungarian, Czech and Slovak samples all break at
+  2000 µm and are unaffected. `verify_psd_standard.py` looked for the bias in
+  the curves themselves and did not find it, which is what a 0.6-point effect
+  should look like against a between-laboratory spread of 9.6 points.
 - **Zanjanrood** curves combine an intact core for 0–100 cm suction with
   sieved soil for the dry end, and are refitted here; four curves with no
   point wetter than 330 cm are dropped. Ks was measured on repacked samples
   but is used as undisturbed: predicted from the rest of the reference before
   the merge, it came out at the right level (`verify_external.py`).
-- **Laikipia** clays (74 of 86 samples) on the northern slopes of Mount Kenya
+- **Laikipia** clays (66 of 70 samples) on the northern slopes of Mount Kenya
   were measured on a sandbox to 10 kPa and pressure plates beyond. The
-  released data raise the sandbox points by one constant per sample, to 95 %
-  of porosity at saturation, which leaves a step between 10 and 14 kPa
-  holding half of each curve's water loss. The laboratory's original sandbox
-  values run continuously into the pressure plates, but the whole curve reads
-  far too dry for a clay. `prepare_willard.py` takes the original sandbox
-  values and the released pressure-plate values (which carry the laboratory's
-  corrections of eight out-of-sequence readings) and scales each whole curve
-  by one factor, so that saturation sits at 95 % of porosity (median ×1.53).
-  The factor is set by the wet end alone, yet it puts the wilting point at
-  28.3 % water against 28.4 % for the reference clays; flat or tapered
-  corrections of the sandbox alone leave the curves too dry to read as clay.
-  A constant factor fits a volumetric-basis error better than shrinkage,
-  which is a question put to the laboratory. Ks was measured only in
-  the field, in the dry season, when these vertic clays were cracked (median
-  178 cm/h on the drier clay-rich samples), so none of it enters the
-  reference; the field values stay in the table.
+  reference takes the authors' revised curves (L. Willard, 2026-10-16, as
+  the Scientific Data paper publishes them): water from the laboratory's wet
+  masses, made volumetric with a density that follows the water content by
+  normal shrinkage up to 1.6 g/cm³, since these are vertic clays (see
+  *Tomejil* below for the model). The 16 samples the authors flag for
+  dispersion, whose hydrometer clay is underestimated, are left out. The
+  bulk-density column is the density at 33 kPa on that shrinkage curve
+  (median 1.47; the wet core density, 1.08, is kept as `bd_core`). As a new
+  source the tool reads 93 % of the samples to the exact class and 98.5 % of
+  the clays as clay, with 46 % clay predicted against 54 % measured; always
+  answering "clay" scores 94 %, so the set mainly shows that the curves read
+  as clay. With depth and bulk density 89 % (four clays read as loam; n.s.,
+  p=0.38). On the same 70 samples the earlier conversions read 76 % (one
+  density per sample) and 89 % (shrinkage capped at 1.75 on a rescaled
+  curve), and the authors' alternative column `wet_mass_shrink_group95` 47 %.
+  Ks was measured only in the field, in the dry season, when these clays
+  were cracked; the Saturo dual-head infiltrometer value (26 samples, median
+  14 cm/h) is the set's Ks, and the modified Philip–Dunne permeameter (median
+  53 cm/h, dominated by cracks) and mini-disk (3.0 cm/h) values stay in the
+  table outside the reference. As a new source the kNN Ks is low (median
+  1.0 cm/h, within 10× for 54 %), while the capillary-bundle estimate is
+  within 10× for 92 % (median ratio 0.35); with the set's own sites in the
+  reference the kNN reaches ×3.0, 81 % within 10×.
 - **Arizona** curves run from saturation to about 29,000 kPa; only points to
   1500 kPa are fitted, as for the rest of the reference, and a 500 cm reading
   that falls below the 800 cm one in three samples (AZ15, AZ18, AZ19) is
@@ -522,33 +562,33 @@ Islands) and Australasia 111; Florida alone supplies 28 %. Southern Europe and t
 
 **Texture classes.** The classes are far from balanced
 (`figures/fig5_texture_classes.png`): sand outnumbers silt 56 to 1, and
-Florida alone supplies 79 % of the sand (3,657 of 4,620 layers). The
+Florida alone supplies 79 % of the sand (3,657 of 4,637 layers). The
 restricted tables supply most of the silty clay (57 %) and 40 % of the silt
 loam; the Yellow River Basin adds 732 silt loams and 22 of the 83 silts.
 Ks is measured for 80 % of sandy soils but for about a third of silty ones.
 
 | group | class | layers | share | with Ks | distributed | restricted |
 |---|---|---|---|---|---|---|
-| Sandy | sand | 4,620 | 21.6 % | 4,020 | 4,051 | 569 |
+| Sandy | sand | 4,637 | 21.7 % | 4,020 | 4,051 | 586 |
 | | loamy sand | 1,467 | 6.9 % | 856 | 1,000 | 467 |
 | Loamy | sandy loam | 3,817 | 17.9 % | 1,755 | 2,306 | 1,511 |
-| | loam | 1,882 | 8.8 % | 516 | 1,162 | 720 |
-| | sandy clay loam | 1,338 | 6.3 % | 794 | 1,101 | 237 |
-| | clay loam | 1,007 | 4.7 % | 370 | 632 | 375 |
+| | loam | 1,880 | 8.8 % | 516 | 1,162 | 718 |
+| | sandy clay loam | 1,337 | 6.3 % | 794 | 1,101 | 236 |
+| | clay loam | 1,006 | 4.7 % | 371 | 632 | 374 |
 | Silty | silt | 83 | 0.4 % | 48 | 69 | 14 |
 | | silt loam | 3,328 | 15.6 % | 1,331 | 1,989 | 1,339 |
-| | silty clay loam | 1,326 | 6.2 % | 327 | 721 | 605 |
+| | silty clay loam | 1,322 | 6.2 % | 327 | 721 | 601 |
 | Clayey | sandy clay | 185 | 0.9 % | 112 | 172 | 13 |
 | | silty clay | 627 | 2.9 % | 182 | 270 | 357 |
-| | clay | 1,673 | 7.8 % | 750 | 899 | 774 |
+| | clay | 1,672 | 7.8 % | 775 | 899 | 773 |
 
 | texture group | layers | share | with Ks | distributed | restricted |
 |---|---|---|---|---|---|
-| Sandy | 6,087 | 28.5 % | 4,876 (80 %) | 5,051 | 1,036 |
-| Loamy | 8,044 | 37.7 % | 3,435 (43 %) | 5,201 | 2,843 |
-| Silty | 4,737 | 22.2 % | 1,706 (36 %) | 2,779 | 1,958 |
-| Clayey | 2,485 | 11.6 % | 1,044 (42 %) | 1,341 | 1,144 |
-| **total** | **21,353** | | **11,061** | **14,372** | **6,981** |
+| Sandy | 6,104 | 28.6 % | 4,876 (80 %) | 5,051 | 1,053 |
+| Loamy | 8,040 | 37.6 % | 3,436 (43 %) | 5,201 | 2,839 |
+| Silty | 4,733 | 22.2 % | 1,706 (36 %) | 2,779 | 1,954 |
+| Clayey | 2,484 | 11.6 % | 1,069 (43 %) | 1,341 | 1,143 |
+| **total** | **21,361** | | **11,087** | **14,372** | **6,989** |
 
 The neighbour vote weights each class by the inverse of its count and the
 classifier uses balanced class weights, so neither favours sand for being
@@ -615,38 +655,86 @@ The **Andalusian soils** measured by K. Vanderlinden (IFAPA;
   in smectite and its bulk density runs from about 1.0 wet to 1.6 dry, which
   is why its authors work in gravimetric water, and no ring has its own
   density. Water is made volumetric with a density that follows the water
-  content by normal shrinkage (specific volume 1/2.65 + w, capped at 1.6
-  g/cm³), a model rather than a measured shrinkage curve. Texture is known
+  content by normal shrinkage (specific volume 1/2.65 + w), a model rather
+  than a measured shrinkage curve, capped at 1.75 g/cm³: the median oven-dry
+  clod density of KSSL Vertisols with 45–65 % clay and a 33 kPa clod density
+  below 1.25 g/cm³ (828 horizons; 1.54–1.90 for the middle 80 %), the
+  density at which such clods stop shrinking. Tomejil's own dry density,
+  1.6, gives the same texture. Texture is known
   per treatment only (G. Martínez's thesis, 0–20 cm: sand 8.0–8.3 %, clay
   55.2–56.0 %, so clay), and there is no Ks. As a new source every ring reads
-  as clay, with 54 % clay predicted against 56 % measured (sand within 9.6
+  as clay, with 53.2 % clay predicted against 55.6 % measured (sand within 11
   points). With one density per treatment instead (Ordóñez Fernández et al.
-  2007), 87–89 % of rings read as clay with only 40 % clay predicted: the
+  2007), 82 % of rings read as clay with only 40 % clay predicted: the
   single density understates the water held at the dry end, where the soil
-  is densest (0.21 against 0.30 at 1500 kPa). Fitted to its whole WP4 dry end
+  is densest (0.21 against 0.34 at 1500 kPa). Fitted to its whole WP4 dry end
   every ring reads silty clay loam, so points stop at 1500 kPa. Adding the set
   is neutral for the rest of the reference (+0.9 pp exact for a new site,
   −0.5 pp for a new source, both n.s.). Its 54 rings come from one field and
   share two sets of fractions, so vertisol-like curves may find most of their
   neighbours in it and get narrower fraction ranges than the measurements
-  justify. The same conversion helps the **Laikipia** clays, also vertic:
-  as a new source 97 % of them read as clay (81 % with one density per
-  sample) and their mean predicted clay is 51 % against 52 % measured (43 %
-  with one density). Converted with one density, both vertisols seem to lose
-  water steeply just below saturation (at 330 cm they hold 64–65 % of their
-  water at saturation, against 82 % for the reference clays); with the
-  shrinking density they hold 80–81 %, like the other clays.
+  justify. The **Laikipia** clays, also vertic (above), are converted the
+  same way by their authors, with a cap of 1.6. Converted with one density,
+  both vertisols seem to lose water steeply just below saturation (at 330 cm
+  they hold 63–65 % of their water at saturation, against 82 % for the
+  reference clays); with the shrinking density they hold 73 % (Laikipia)
+  and 80 % (Tomejil).
 - **Doñana** (El Abalario and El Acebuche, aeolian sands under scrub; 17
   curves at 11 and 6 depths to over 2 m, each the mean of 2–3 rings, sand
-  boxes to 50 kPa, bulk density 1.70) is a test set: it has no
-  particle-size analysis, only "practically all sand". Read as a new source,
-  12 of the 17 curves are sand and 5 loamy sand (texture group 100 %). Its
+  boxes to 50 kPa, bulk density 1.70, no Ks) joined the default in 2026-10,
+  once its particle size arrived. The analysis (IGME Sevilla, sieves and
+  sedimentation; K. Vanderlinden, 2026-10)
+  covers 16 of the 17 curves, all sand (94–99 % sand, clay 0.1–1.3 %, 5.2 %
+  below 200 cm at El Abalario); the El Acebuche surface curve has none and
+  stays labelled sand. Read as a new source, 12 of the 17 curves are sand
+  and 5 loamy sand (texture group 100 %), with 4.5 % clay predicted against
+  0.8 % measured (mean error 3.8 points). Adding it leaves the rest of the
+  reference alone (`verify_join_effect.py`, 1,733 targets: −0.5 pp exact for
+  a new site, p = 0.55, and for a new source, p = 0.52; texture group −1.0
+  and −0.2, both n.s.; Ks −0.0008 dex, p = 0.19). Its
   Ks was measured in the field with a Philip–Dunne infiltrometer at 5–10 cm,
   at points other than the retention samples, so it can only be compared
   site by site: at El Acebuche the surface curve gives 20 cm/h (kNN) and 19
   (capillary bundle) against a field median of 27 (20–38); at El Abalario
   the 20 cm curve gives 19 and 19 against 70 (36–271), above the kNN's
   5–95 % band.
+- **Lebrija** (Sector B-XII, lower Guadalquivir: 8 points in one
+  reclaimed-marsh clay field, 0–30 cm, 12–14 readings each, no Ks) joined
+  the default in 2026-10. Seven of the eight points were analysed — clay
+  56.7–68.8 %, sand 6.5–9.9 %, clay throughout — and the eighth is kept out
+  of the table for want of fractions. Its volumetric water content arrives
+  already derived from a **shrinkage curve fitted to void ratios** measured
+  in the field (Cornelis et al. 2006 model; the data of Andreu Cáceres's
+  1992 thesis, Fig. 21), rather than from the normal-shrinkage model used at
+  Tomejil: the density it implies runs 1.02 wet to 1.951 dry, reaching that
+  limit at the dry end of all eight points, and its specific volume sits
+  4–32 % above the 1/2.65 + w line, so structural and residual shrinkage are
+  included. The fit stops at about 0.38 g/g, so the wet end is extrapolated
+  along a line of normal shrinkage that holds saturation at 0.94 (the
+  wettest θ<sub>v</sub> is therefore 0.94 × porosity by construction, not a
+  check). The water held matches the thesis's pressure plates in the wet
+  and middle range (about 0.33 g/g near 33 kPa in both) but not at the dry
+  end: 0.16–0.18 g/g at 1500 kPa from Karl Vanderlinden's dew-point (WP4C)
+  readings against about 0.32 in the thesis, a gap in gravimetric water, so
+  not a matter of density; pressure plates tend to overstate water at
+  1500 kPa in fine soils, which equilibrate slowly (Gee et al. 2002;
+  Bittelli and Flury 2009). Against a single density taken at 33 kPa,
+  the fitted shrinkage curve brings predicted clay closer to the measured
+  value at **every one of the seven points** (mean 55.6 % against 50.0 %,
+  measured 63.0 %; mean error 7.4 against 13.0 points), confirming the
+  Tomejil and Laikipia result on individual points rather than treatment
+  means. Exact class is uninformative here, since all seven are clay and
+  always answering "clay" also scores 100 %. Adding it leaves the rest of
+  the reference alone (`verify_join_effect.py`, 1,733 targets: +0.9 pp exact
+  for a new site, p = 0.18; +0.2 pp for a new source, p = 0.84; texture
+  group +1.0 and −0.3, both n.s.) and Ks is untouched in substance — it has
+  no Ks of its own, and the only channel is the inverse-class-frequency
+  weighting, which shifts 107 of 1,660 Ks predictions by a median of
+  +0.0009 dex (p = 0.87). The thesis measured Ks 0.46 cm/h on undisturbed
+  columns at 5–40 cm (Andreu Cáceres 1992); as a new source the tool gives
+  0.24 cm/h from the curve alone but 0.09 with bulk density, and the
+  capillary bundle 4.5, so this soil's Ks is bracketed only to an order of
+  magnitude.
 
 **Volcanic parent material and andic properties** (`volcanic`, `andic`,
 joined from `data/volcanic_flags.csv` by `prepare_volcanic.py`) are two
@@ -678,26 +766,27 @@ targets, with the classifier and the neighbours both blind to the target.
 The same 1,733 targets (150 per class, every silt) under each hold-out, with
 the shipped tool (`verify_holdout.py`, `figures/validation/v6_holdout_levels.png`).
 The last two columns run it as with `--depth` and `--bulk-density`, on the
-1,683 targets that carry both:
+1,688 targets that carry both:
 
 | hidden along with the test soil | real-life situation | exact class | texture group | exact, + depth & BD | group, + depth & BD |
 |---|---|---|---|---|---|
-| nothing else | a new depth at a site already in the reference | 41.2 % | 63.8 % | 46.6 % (+5.9, p<0.001) | 68.6 % (+4.8, p<0.001) |
-| its profile | a new site, from a source already in the reference | 38.9 % | 62.4 % | 44.5 % (+5.9, p<0.001) | 67.2 % (+4.6, p<0.001) |
-| its whole source | a new site, from a new source | **30.5 %** | **57.6 %** | 31.1 % (+1.1, p=0.25) | 57.9 % (+0.4, p=0.70) |
-| best possible (ceiling) | | 54 % / 46 % | 74 % / 68 % | | |
+| nothing else | a new depth at a site already in the reference | 41.3 % | 63.6 % | 46.4 % (+5.5, p<0.001) | 67.6 % (+4.1, p<0.001) |
+| its profile | a new site, from a source already in the reference | 39.6 % | 63.9 % | 45.4 % (+6.0, p<0.001) | 68.5 % (+4.5, p<0.001) |
+| its whole source | a new site, from a new source | **31.4 %** | **58.2 %** | 32.2 % (+1.2, p=0.22) | 57.5 % (−0.7, p=0.54) |
+| best possible (ceiling) | | 53 % / 45 % | 73 % / 68 % | | |
 
-(The gains in brackets are paired against the curve alone on the same 1,683
-soils, where it scores 40.8, 38.6 and 29.9 % exact.)
+(The gains in brackets are paired against the curve alone on the same 1,688
+soils, where it scores 40.9, 39.4 and 30.9 % exact.)
 
 **Fixed heads against the van Genuchten parameters.** Until September 2026
 the tool matched on the four fitted vG parameters. On the same targets those
-score 41.3, 38.1 and 30.5 % exact (63.9, 62.7 and 58.2 % group), and 45.0,
-42.1 and 31.1 % with depth and bulk density (`SWCC_FEATURE_MODE=vg`). On the
-current reference the fixed heads are level on the curve alone (−0.1 to
-+0.8 points; they led by 1.6 to 2.8 points when adopted) and ahead with the
-covariates (+1.6 and +2.4 points with the source in the reference). They
-also lower the Ks error for a new source (0.62 against 0.74 dex), lifted the
+score 40.8, 38.8 and 32.5 % exact (62.8, 62.1 and 58.5 % group), and 45.4,
+42.5 and 32.2 % with depth and bulk density (`SWCC_FEATURE_MODE=vg`). On the
+current reference the fixed heads are level on the curve alone (−1.1 to
++0.8 points; they led by 1.6 to 2.8 when adopted) and ahead with the
+covariates by 1.0 and 2.9 points with the source in the reference (level for
+a new source). They
+also lower the Ks error for a new source (0.65 against 0.73 dex), lifted the
 rarest class, silt, from 15 to 30 % found when they were adopted
 (`verify_hybrid.py`), and predict better on four of the six outside sets
 (see *Reference data*). What they lose is the andic
@@ -714,29 +803,29 @@ the reference is the Yellow River soils' own signature (deep loess cores); on
 the previous draw it is +3.1 pp for a new site (p=0.003).
 
 Keeping the target's other horizons in the reference helps a little
-(+2.3 pp, p=0.014). 1,140 of the targets have a horizon of the same class in
-their profile (45.1 % with it in the reference against 42.7 % without);
-siblings of a different class barely matter (32.5 % against 31.0 %) —
-eluviation makes the horizons of one profile genuinely different samples.
-What matters is the data source: hiding it costs 8.4 points (p<0.0001).
+(+1.7 pp, p=0.058, not significant). 1,126 of the targets have a horizon of
+the same class in their profile (46.6 % with it in the reference against
+43.8 % without); siblings of a different class do not matter (31.4 % against
+31.7 %) — eluviation makes the horizons of one profile genuinely different
+samples. What matters is the data source: hiding it costs 8.2 points
+(p<0.0001).
 
 **The ceiling.** Cover & Hart (1967) bound the Bayes error by the
 nearest-neighbour error, giving a model-free limit for any classifier on the
 fitted curve (`verify_ceiling.py`, computed on the four vG parameters): 1NN
-accuracy 31.1 % gives a bracket of [31.1 %, 54.0 %] in-distribution and
-[23.5 %, 45.7 %] with the laboratory held out (texture group: [56.7 %,
-73.7 %] and [49.7 %, 68.1 %]). The fixed heads re-encode the
+accuracy 29.7 % gives a bracket of [29.7 %, 52.6 %] in-distribution and
+[23.3 %, 45.3 %] with the laboratory held out (texture group: [55.9 %,
+73.2 %] and [50.1 %, 68.4 %]). The fixed heads re-encode the
 same fitted curve, and their bracket lies within about three points of it.
 It is a property of the inputs, not of the database — more reference data
 does not raise it, only more informative inputs can.
 
-**Classifier vs neighbour vote.** The gradient-boosted classifier is about
-a point ahead of the neighbour vote for a new site (39.9 % against 38.9 %,
-p=0.35, macro-F1 39.4 against 38.8) and four points ahead for a new source
-(30.5 % against 26.6 %, p<0.001; `verify_hybrid.py`, with `--blocked`), and
-the neighbour vote supplies the second opinion. Its weak classes are silt
-(22 % found against the neighbours' 43 %) and sandy clay (25 % against
-36 %).
+**Classifier vs neighbour vote.** The gradient-boosted classifier is level
+with the neighbour vote for a new site (39.7 % against 40.0 %, p=0.79,
+macro-F1 38.7 against 39.7) and four points ahead for a new source (31.4 %
+against 27.7 %, p<0.001; `verify_hybrid.py`, with `--blocked`), and the
+neighbour vote supplies the second opinion. Its weak classes are silt (19 %
+found against the neighbours' 47 %) and sandy clay (24 % against 39 %).
 
 **Benchmarks** — synthetic curves from class-typical parameters, and real
 GSHP soils held out one at a time (`verify_carsel_parrish.py`,
@@ -1044,6 +1133,9 @@ prediction is made, what the validation proves) with its SVGs, and
 
 ## References
 
+- Andreu Cáceres, L. (1992). *Movimiento de agua y sales en suelos
+  recuperados a la marisma del Guadalquivir*. PhD thesis, ETSIA,
+  Universidad de Córdoba.
 - Armas Espinel, S. (2013). Contribución al estudio de las propiedades
   físicas de suelos ándicos de las Islas Canarias. PhD thesis, Universidad de
   La Laguna, Serie Tesis Doctorales, Ciencias y Tecnologías 42.
@@ -1062,13 +1154,22 @@ prediction is made, what the validation proves) with its SVGs, and
   predicting the soil–water retention curve: hyperspectral information vs.
   basic soil properties. *Soil Science Society of America Journal*
   79:1043–1058. doi:10.2136/sssaj2014.09.0355.
+- Bittelli, M. and Flury, M. (2009). Errors in water retention curves
+  determined with pressure plates. *Soil Science Society of America
+  Journal* 73: 1453–1460.
 - Carsel, R.F. and Parrish, R.S. (1988). Developing joint probability
   distributions of soil water retention characteristics. *Water Resources
   Research* 24(5):755–769. doi:10.1029/WR024i005p00755.
 - Childs, E.C. and Collis-George, N. (1950). The permeability of porous
   materials. *Proceedings of the Royal Society of London A* 201:392–405.
+- Cornelis, W.M., Corluy, J., Medina, H., Díaz, J., Hartmann, R., Van
+  Meirvenne, M. and Ruiz, M.E. (2006). Measuring and modelling the soil
+  shrinkage characteristic curve. *Geoderma* 137: 179–191.
 - Cover, T. and Hart, P. (1967). Nearest neighbor pattern classification.
   *IEEE Transactions on Information Theory* 13(1):21–27.
+- Gee, G.W., Ward, A.L., Zhang, Z.F., Campbell, G.S. and Mathison, J.
+  (2002). The influence of hydraulic nonequilibrium on pressure plate data.
+  *Vadose Zone Journal* 1: 172–178.
 - Global Volcanism Program (2026). Volcanoes of the World (v. 5.4.0,
   7 Aug 2026). Smithsonian Institution, compiled by E. Venzke.
   doi:10.5479/si.GVP.VOTW5-2026.5.4.

@@ -132,6 +132,14 @@ data/andalusia_raw/
 data/setenil_reference.csv
 data/tomejil_reference.csv
 data/donana_reference.csv
+data/lebrija_reference.csv
 figures/external/setenil/
 figures/external/tomejil/
 figures/external/donana/
+# Junta de Andalucia, Catalogo de suelos de Andalucia: the 62 profile PDFs and
+# methods (public domain, 19 MB), kept local; rebuild
+# data/catalogo_andalucia_horizons.csv with prepare_catalogo_andalucia.py.
+data/andalucia_catalogo_raw/
+# Vertisol shrinkage-conversion discussion (memo, figures, scripts): shows
+# Laikipia and Andalusian values, so it stays local like their tables.
+Vertisol_shrinkage/

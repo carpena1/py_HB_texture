@@ -19,7 +19,7 @@ every fold, and each sample is scored with and without depth and bulk
 density. Always answering the dataset's most common class is the baseline
 to beat, not chance.
 
-Usage:  python verify_external.py willard|babaeian_zanjanrood|babaeian_az|armas|tong|boorowa|nj_ssir26|setenil|tomejil|donana
+Usage:  python verify_external.py willard|babaeian_zanjanrood|babaeian_az|armas|tong|boorowa|nj_ssir26|setenil|tomejil|donana|lebrija
                                   [n_mc] [--truth=resin]
 """
 
@@ -51,7 +51,7 @@ DATASETS = {"willard": prepare_willard,
             # one module, one table per Andalusian site
             **{site: SimpleNamespace(
                 measured_points=lambda site=site: prepare_andalusia.measured_points(site))
-               for site in ("setenil", "tomejil", "donana")}}
+               for site in ("setenil", "tomejil", "donana", "lebrija")}}
 N_FOLDS = 20
 
 

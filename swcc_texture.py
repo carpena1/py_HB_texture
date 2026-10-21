@@ -56,7 +56,8 @@ REFERENCE_SETS = {
                "euhydi_reference.csv", "willard_reference.csv",
                "babaeian_az_reference.csv", "armas_reference.csv",
                "tong_reference.csv", "setenil_reference.csv",
-               "tomejil_reference.csv", "local_reference.csv"],
+               "tomejil_reference.csv", "lebrija_reference.csv",
+               "donana_reference.csv", "local_reference.csv"],
     # The distributed tables: what a fresh clone has.
     "public": ["gshp_reference.csv", "kssl_reference.csv",
                "hohenbrink_reference.csv", "babaeian_zanjanrood_reference.csv",
@@ -101,15 +102,26 @@ REFERENCE_SETS = {
     # site, 0.0 new source; +2 pp European, p~0.1), its own sites +5.6 pp.
     "setenil": ["setenil_reference.csv"],
     "tomejil": ["tomejil_reference.csv"],
-    # Donana sands (El Abalario, El Acebuche); no particle-size analysis, so a
-    # test set only.
+    # Donana sands (El Abalario, El Acebuche; no Ks). Particle size from IGME
+    # (2026-10) for 16 of the 17 curves, all sand. In the default since
+    # 2026-10: verify_join_effect.py on 1,733 reference soils finds no
+    # significant effect on the rest (-0.5 pp exact for a new site, p=0.55,
+    # and for a new source, p=0.52) and Ks unchanged (-0.0008 dex, p=0.19).
     "donana": ["donana_reference.csv"],
+    # Sector B-XII, Lebrija: 8 points in one reclaimed-marsh clay field, no
+    # Ks, theta_v from a shrinkage curve fitted to the field void ratios of
+    # Andreu Caceres (1992) (7 of the 8 analysed). In the default since 2026-10:
+    # verify_join_effect.py on 1,733 reference soils finds no harm to the
+    # rest (+0.9 pp exact for a new site, p=0.18; +0.2 pp for a new source,
+    # p=0.84) and Ks unchanged (median |log10 err| +0.0009 dex, p=0.87).
+    "lebrija": ["lebrija_reference.csv"],
     "all": ["gshp_reference.csv", "kssl_reference.csv",
             "hohenbrink_reference.csv", "babaeian_zanjanrood_reference.csv",
             "euhydi_reference.csv", "willard_reference.csv",
             "babaeian_az_reference.csv", "armas_reference.csv",
             "tong_reference.csv", "setenil_reference.csv",
-            "tomejil_reference.csv", "unsoda_reference.csv", "sdb_reference.csv",
+            "tomejil_reference.csv", "lebrija_reference.csv",
+            "donana_reference.csv", "unsoda_reference.csv", "sdb_reference.csv",
             "local_reference.csv"],
 }
 DEFAULT_REFERENCE = "merged"
@@ -121,7 +133,8 @@ DEFAULT_REFERENCE = "merged"
 # only of restricted tables cannot load at all.
 RESTRICTED_TABLES = {"euhydi_reference.csv", "willard_reference.csv",
                      "boorowa_reference.csv", "setenil_reference.csv",
-                     "tomejil_reference.csv", "donana_reference.csv"}
+                     "tomejil_reference.csv", "donana_reference.csv",
+                     "lebrija_reference.csv"}
 _noted_missing = set()
 
 # A user's own lab-verified curves, written by add_local_data.py. Joins the
