@@ -143,3 +143,5 @@ data/andalucia_catalogo_raw/
 # Vertisol shrinkage-conversion discussion (memo, figures, scripts): shows
 # Laikipia and Andalusian values, so it stays local like their tables.
 Vertisol_shrinkage/
+# CSIRO NatSoil API downloads (CC BY 4.0), rebuilt with prepare_natsoil.py; kept local.
+data/natsoil_raw/

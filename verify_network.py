@@ -66,9 +66,11 @@ def load():
     g = g.merge(raw, on="layer_id", how="left")
     g["study"] = g.source_db
     for src, col in (("ETH_Literature", "reference"), ("UNSODA", "method"),
-                     ("Australian_database", "reference")):
+                     ("Australian_database", "reference"),
+                     ("NatSoil", "natsoil_project")):
         m = g.source_db == src
-        g.loc[m, "study"] = src + ":" + g.loc[m, col].fillna("?").astype(str)
+        if m.any() and col in g:
+            g.loc[m, "study"] = src + ":" + g.loc[m, col].fillna("?").astype(str)
     # The NCSS Characterization Database is KSSL's with cooperating
     # laboratories, but its method codes are KSSL handbook procedures that the
     # cooperators share, so they do not name the laboratory. The retained
@@ -478,6 +480,9 @@ def weighting_per_source(g, plan, est, res):
     built from the verified cores' residuals (one value per source: the mean
     over the draws)."""
     truth = g.set_index("layer_id")[["texture_class", "ksat_cmh"]]
+    # Cached results can predate a reference change and list a source that
+    # is no longer in it (e.g. GSHP's Australian rows, rebuilt from NatSoil).
+    est = est[est.source.isin(plan)]
     est = est.join(truth, on="layer_id")
     # local Ks offset: k = 0 predictions times 10^offset from the k verified cores
     base0 = est[(est.k == 0) & (est.arm == "base")]

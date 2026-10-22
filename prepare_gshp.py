@@ -42,6 +42,12 @@ def main():
     lay = lay[lay["tex_psda"].isin(USDA_CLASSES)]
     lay = lay[lay["data_flag"] == "good quality estimate"]
     lay = lay[(lay["n"] > 1.0) & (lay["alpha"] > 0)]
+    # The Australian layers (CSIRO_2020 and Forrest et al. 1985) are rebuilt
+    # from NatSoil by prepare_natsoil.py: GSHP gives most of them no particle
+    # size, gives Forrest's the Australian 2-20 um silt as if it were USDA
+    # silt, and moves Forrest's sites by whole degrees. Left out here so that
+    # no soil is counted twice.
+    lay = lay[lay["source_db"] != "Australian_database"]
 
     out = pd.DataFrame({
         "layer_id": lay["layer_id"],

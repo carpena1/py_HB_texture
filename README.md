@@ -19,23 +19,23 @@ measurement signature about as strong as the texture signal:
 
 | | new data source | your source already in the reference | chance |
 |---|---|---|---|
-| exact USDA class (12 classes) | **31 %** (best possible* 45 %) | **40 %** (best possible 53 %) | 8 % |
-| … with depth and bulk density | 32 % | 45 % | |
-| texture group (4 groups) | **58 %** (68 %) | **64 %** (73 %) | 25 % |
-| … with depth and bulk density | 58 % | 69 % | |
+| exact USDA class (12 classes) | **30 %** (best possible* 44 %) | **40 %** (best possible 54 %) | 8 % |
+| … with depth and bulk density | 32 % | 46 % | |
+| texture group (4 groups) | **57 %** (68 %) | **64 %** (73 %) | 25 % |
+| … with depth and bulk density | 57 % | 66 % | |
 | Ks, typical error | factor of 4 | factor of 3 | — |
-| … with bulk density | factor of 4 | factor of 2.6 | — |
-| Ks within a factor of 10 | 68 % | 76 % | — |
+| … with bulk density | factor of 3.6 | factor of 2.4 | — |
+| Ks within a factor of 10 | 68 % | 78 % | — |
 
 \* The Cover & Hart (1967) bound for *any* method that uses the four van
 Genuchten parameters (see "Validation"). All rows are the same 1,733 test
-soils (`verify_holdout.py`); the "with" rows use the 1,688 of them that carry
+soils (`verify_holdout.py`); the "with" rows use the 1,680 of them that carry
 depth and bulk density, compared with the curve alone on those soils.
 
 A new depth at a site whose other horizons are already in the reference does
-slightly better than a new site (41.3 % against 39.6 %, p=0.058, not
-significant). Depth and bulk density add 5.5 to 6 points of exact class at
-both (p<0.001), and nothing significant for a new source (+1.2, p=0.22).
+no better than a new site (40.2 % against 39.8 %, p=0.67). Depth and bulk
+density add about 6 points of exact class at both (p<0.001) and 2.6 for a
+new source (p=0.005).
 
 **You can move from the first column to the second.** Adding lab-verified
 curves from your own sites (see "Adding your own verified data") is the most
@@ -51,7 +51,7 @@ produce nearly identical curves, and the laboratory that measured a curve
 leaves a mark on it that is as large as the texture signal. The tool therefore
 reports ranked class probabilities, fraction ranges and a Ks band rather than
 a single answer, plus a second opinion whose agreement is a useful confidence
-flag (right 37 % of the time when the two agree, 26 % when they do not, for a
+flag (right 35 % of the time when the two agree, 24 % when they do not, for a
 new source). Treat Ks as an order-of-magnitude estimate.
 
 ## Is it predictive? What a new sensor network can expect
@@ -76,17 +76,17 @@ it (`verify_predictive.py`, `verify_network.py`):
 Every measure is compared, paired on the same soils, with what a user knows
 without the curve — depth and bulk density alone (a gradient-boosted model on
 those two) — and with chance; 95 % intervals come from a bootstrap over
-studies, the study being the independent unit. 1,731 soils (851 with a
-measured Ks) from 76 studies, all with depth and bulk density supplied:
+studies, the study being the independent unit. 1,731 soils (840 with a
+measured Ks) from 71 studies, all with depth and bulk density supplied:
 
 | | new network | established network | depth + bulk density alone (new network) | chance / best possible |
 |---|---|---|---|---|
-| exact class (12) | **32 %** [25–38] | **44 %** [37–49] | 12 % | 8 % |
-| true class in the top two | 52 % [44–57] | 65 % [57–70] | — | 17 % |
-| texture group (4) | **58 %** [50–65] | **67 %** [62–72] | 31 % | 25 % |
-| Ks within ×10, physical / neighbours | **75 %** [51–86] / 69 % [45–79] | 75 % / **78 %** [54–88] | 54 % | 93 %* |
-| Ks within ×2, physical / neighbours | 35 % / 26 % | 35 % / 44 % | 18 % | 42 %* |
-| Ks typical error, physical / neighbours | ×2.9 / ×4.0 | ×2.9 / ×2.5 | ×8.3 | ×2.3* |
+| exact class (12) | **32 %** [25–38] | **44 %** [35–51] | 12 % | 8 % |
+| true class in the top two | 53 % [45–58] | 65 % [58–72] | — | 17 % |
+| texture group (4) | **58 %** [50–65] | **66 %** [60–71] | 32 % | 25 % |
+| Ks within ×10, physical / neighbours | **75 %** [52–85] / 69 % [44–79] | 75 % / **79 %** [55–88] | 52 % | 93 %* |
+| Ks within ×2, physical / neighbours | 39 % / 28 % | 39 % / 43 % | 18 % | 42 %* |
+| Ks typical error, physical / neighbours | ×2.7 / ×3.9 | ×2.7 / ×2.4 | ×8.8 | ×2.3* |
 
 \* Best possible for Ks: replicate cores of the same soil in the reference
 (130 groups) differ by a median factor of 3.3, so a single measured core
@@ -96,29 +96,29 @@ predictor would put only 42 % of cores within a factor of 2.
 ![Predictive skill against depth and bulk density alone](figures/predictive/p1_skill.png)
 
 **The curve is what predicts.** For a new network it adds 20 points of exact
-class (95 % interval +14 to +24) and 27 of texture group (+18 to +34) to what
-depth and bulk density give, and 22 points of Ks within a factor of 10 for
-the physical estimate (+4 to +31; +15, from +2 to +22, for the neighbours),
-whose rank correlation with the measured Ks rises from −0.05 to 0.64. The
-physical estimate is the better Ks for a new network (×2.9 against ×4.0);
+class (95 % interval +14 to +24) and 26 of texture group (+18 to +33) to what
+depth and bulk density give, and 23 points of Ks within a factor of 10 for
+the physical estimate (+8 to +30; +17, from +4 to +24, for the neighbours),
+whose rank correlation with the measured Ks rises from −0.02 to 0.64. The
+physical estimate is the better Ks for a new network (×2.7 against ×3.9);
 once the network's own verified sites are in, the neighbour estimate reaches
-×2.5, close to the replicate floor, and its 5–95 % band holds 89 % of the
+×2.4, close to the replicate floor, and its 5–95 % band holds 88 % of the
 measurements against a nominal 90 %.
 
 ![Share of measured cores within each factor of the prediction](figures/predictive/p2_ks_accuracy.png)
 
 **Accuracy varies by network.** Across the 19 studies with at least 20 test
-soils, a new network's exact class runs from 15 to 46 % (10th to 90th
-percentile, median 29 %), its texture group from 41 to 67 %, and Ks within a
-factor of 10 from 41 to 87 %.
+soils, a new network's exact class runs from 13 to 42 % (10th to 90th
+percentile, median 31 %), its texture group from 35 to 71 %, and Ks within a
+factor of 10 from 52 to 89 %.
 
 **The tool says which answers to trust.** For a new network, when the
-classifier gives its top class at least 0.7 (10 % of soils) the class is right
-70 % of the time and the group 88 %; below 0.3 (23 % of soils), 24 % and 50 %.
-When the neighbour vote agrees with the classifier the class is right 40 % of
-the time, 25 % when it does not; when the neighbour and physical Ks fall
-within a factor of 10 of each other (83 % of soils), 76 % of them are within
-a factor of 10 of the core, 35 % otherwise.
+classifier gives its top class at least 0.7 (9 % of soils) the class is right
+75 % of the time and the group 90 %; below 0.3 (24 % of soils), 23 % and 44 %.
+When the neighbour vote agrees with the classifier the class is right 44 % of
+the time, 22 % when it does not; when the neighbour and physical Ks fall
+within a factor of 10 of each other (85 % of soils), 76 % of them are within
+a factor of 10 of the core, 31 % otherwise.
 
 ![Accuracy by the tool's own confidence signals](figures/predictive/p4_confidence.png)
 
@@ -157,16 +157,18 @@ Calling `.venv/bin/python` directly (as below) runs inside the virtual
 environment without activating it.
 
 The reference tables are committed, so **the tool runs out of the box with no
-downloads.** Six tables are exceptions: EU-HYDI, which is restricted to its
-consortium, the Laikipia soils, which are unpublished, and the Setenil,
+downloads.** Seven tables are exceptions: EU-HYDI, which is restricted to its
+consortium, the Laikipia soils, which are unpublished, the Setenil,
 Tomejil, Lebrija and Doñana soils (Andalusia), whose distribution is not yet
-agreed. Their tables (`data/euhydi_reference.csv`,
+agreed, and the CSIRO Boorowa soils, whose CC BY-NC-SA licence does not allow
+redistribution here. Their tables (`data/euhydi_reference.csv`,
 `data/willard_reference.csv`, `data/setenil_reference.csv`,
 `data/tomejil_reference.csv`, `data/lebrija_reference.csv`,
-`data/donana_reference.csv`) are built
-locally with `prepare_euhydi.py`, `prepare_willard.py` and
-`prepare_andalusia.py` by those who hold the data and are not distributed. A fresh clone runs on the other seven databases
-(14,372 layers) and prints a note saying so.
+`data/donana_reference.csv`, `data/boorowa_reference.csv`) are built
+locally with `prepare_euhydi.py`, `prepare_willard.py`,
+`prepare_andalusia.py` and `prepare_boorowa.py` by those who hold the data
+and are not distributed. A fresh clone runs on the other eight databases
+(14,500 layers) and prints a note saying so.
 
 ## Usage
 
@@ -416,20 +418,22 @@ every other number identical.
 
 | source | layers | with Ks | sample type | distribution |
 |---|---|---|---|---|
-| GSHP (Gupta et al. 2022), quality-filtered | 9,996 | 6,644 | per contributor | CC BY 4.0, committed |
+| GSHP (Gupta et al. 2022), quality-filtered, without its Australian rows | 9,900 | 6,552 | per contributor | CC BY 4.0, committed |
 | NCSS/KSSL (USDA-NRCS) | 2,530 | 0 | undisturbed | public domain, committed |
 | Hohenbrink et al. (2023), German cores | 560 | 402 | undisturbed | committed |
 | Zanjanrood, north-west Iran (Babaeian et al. 2015) | 169 | 169 | undisturbed | committed |
 | Arizona, USA (E. Babaeian, measurements shared with this project) | 21 | 21 | undisturbed | committed |
 | Canary Islands andic soils (Armas Espinel 2013) | 66 | 62 | undisturbed | committed |
 | Yellow River Basin, China (Tong et al. 2024) | 1,030 | 1,015 | undisturbed | committed |
+| Australia, CSIRO NatSoil: Forrest et al. (1985) and Geeves et al. (1995) cores | 224 | 105 | undisturbed | CC BY 4.0, committed |
 | EU-HYDI (Weynants et al. 2013), 21 laboratories, 16 countries | 6,797 | 2,704 | per sample | **restricted, never distributed** |
 | Laikipia, central Kenya (Willard et al., under review) | 70 | 26 | undisturbed | **unpublished, never distributed** |
 | Setenil, Andalusia, Spain (K. Vanderlinden, IFAPA) | 44 | 44 | undisturbed | **not distributed (pending agreement)** |
 | Tomejil vertisol, Andalusia, Spain (Vanderlinden et al. 2021) | 54 | 0 | undisturbed | **not distributed (pending agreement)** |
 | Lebrija marsh clay, Andalusia, Spain (K. Vanderlinden, IFAPA) | 7 | 0 | undisturbed | **not distributed (pending agreement)** |
 | Doñana sands, Andalusia, Spain (K. Vanderlinden, IFAPA) | 17 | 0 | undisturbed | **not distributed (pending agreement)** |
-| **default reference** | **21,361** | **11,087** | | |
+| CSIRO Boorowa Farm, NSW, Australia (2025) | 57 | 0 | 25 intact, 32 repacked | **CC BY-NC-SA, not distributed** |
+| **default reference** | **21,546** | **11,100** | | |
 
 Each source gets its own `prepare_*.py`, because each ships something
 different, and each needed a correction before its curves were comparable:
@@ -506,6 +510,36 @@ different, and each needed a correction before its curves were comparable:
   1.0 cm/h, within 10× for 54 %), while the capillary-bundle estimate is
   within 10× for 92 % (median ratio 0.35); with the set's own sites in the
   reference the kNN reaches ×3.0, 81 % within 10×.
+- **Australia** (CSIRO NatSoil, `prepare_natsoil.py`): GSHP's 768
+  Australian intact-core layers are rebuilt from the CSIRO National Soil Site
+  Database (public API, CC BY 4.0), because GSHP gives most of them no
+  particle size (none of the 621 CSIRO cores), passes Forrest et al.'s (1985)
+  Australian particle-size limits (silt 2–20 µm) off as USDA (silt 2–50 µm),
+  and moves Forrest's sites by whole degrees (kept decimals, degrees set to
+  36° S, 142° E). GSHP's Australian rows are left out of its table. From
+  NatSoil each replicate core keeps its own curve, saturation or 1 kPa to
+  1500 kPa (median 8 points), with the sample's pressure-plate points
+  attached to every core, and each horizon's texture is converted to USDA
+  limits: from Sedigraph curves at 53 µm, from the wet-sieved 20–63 µm
+  fraction (Geeves et al. 1995), or — flagged in `texture_method` — by
+  interpolating between 20 and 200 µm (Forrest), which recovers the measured
+  USDA class for 94 % of the Sedigraph horizons against 71 % when the
+  Australian silt is read as USDA silt. 552 cores pass. All together they
+  read poorly as a new source (18 % exact; always answering "clay" scores
+  41 %) and moved a new source's exact class for the rest by −1.6 pp
+  (p = 0.052), the misses coming mostly from the Sedigraph projects
+  (Morphology, RAALS, CSIRO_LW), whose curves read about 10 points less
+  clayey than measured. So only **Forrest and SSM** (224 cores, 126 sites;
+  105 with lab Ks) joined the default, which leaves the rest alone
+  (−0.2 pp exact for a new site, p = 0.82; +0.6 pp for a new source,
+  p = 0.46). As a new source they read 22 % exact from the curve alone and
+  34 % with depth and bulk density (always answering "clay": 37 %), 43 %
+  with their own sites in the reference; Ks is within ×5.8 of the
+  measurement (70 % within 10×, ρ = 0.67). The Sedigraph projects
+  (328 cores from 29 sites, `natsoil_other`) are an independent Australian
+  test set: as a new source they read 16 % exact class with or without depth
+  and bulk density (texture group 61–63 %; always answering "clay" scores
+  44 %), and Ks is within 10× for 55 % (59 % with bulk density).
 - **Arizona** curves run from saturation to about 29,000 kPa; only points to
   1500 kPa are fitted, as for the rest of the reference, and a 500 cm reading
   that falls below the 800 cm one in three samples (AZ15, AZ18, AZ19) is
@@ -555,40 +589,40 @@ default reference: 18,551 undisturbed, 1,581 disturbed, 1,221 unknown. Of
 the 11,061 layers with a measured Ks, 10,995 are undisturbed and only 45
 disturbed.
 
-**Coverage.** 20,712 layers carry coordinates (`figures/fig2_coverage_map.png`).
+**Coverage.** 20,897 layers carry coordinates (`figures/fig2_coverage_map.png`).
 North America holds 9,256, Europe 7,862 (38 %), Asia 2,653 (1,030 of them in
 the Yellow River Basin), South America 639, Africa 742 (with the Canary
-Islands) and Australasia 111; Florida alone supplies 28 %. Southern Europe and the Balkans remain thin.
+Islands) and Australasia 296; Florida alone supplies 27 %. Southern Europe and the Balkans remain thin.
 
 **Texture classes.** The classes are far from balanced
 (`figures/fig5_texture_classes.png`): sand outnumbers silt 56 to 1, and
-Florida alone supplies 79 % of the sand (3,657 of 4,637 layers). The
+Florida alone supplies 79 % of the sand (3,657 of 4,635 layers). The
 restricted tables supply most of the silty clay (57 %) and 40 % of the silt
 loam; the Yellow River Basin adds 732 silt loams and 22 of the 83 silts.
 Ks is measured for 80 % of sandy soils but for about a third of silty ones.
 
 | group | class | layers | share | with Ks | distributed | restricted |
 |---|---|---|---|---|---|---|
-| Sandy | sand | 4,637 | 21.7 % | 4,020 | 4,051 | 586 |
-| | loamy sand | 1,467 | 6.9 % | 856 | 1,000 | 467 |
-| Loamy | sandy loam | 3,817 | 17.9 % | 1,755 | 2,306 | 1,511 |
-| | loam | 1,880 | 8.8 % | 516 | 1,162 | 718 |
-| | sandy clay loam | 1,337 | 6.3 % | 794 | 1,101 | 236 |
-| | clay loam | 1,006 | 4.7 % | 371 | 632 | 374 |
+| Sandy | sand | 4,635 | 21.5 % | 4,019 | 4,049 | 586 |
+| | loamy sand | 1,467 | 6.8 % | 852 | 995 | 472 |
+| Loamy | sandy loam | 3,856 | 17.9 % | 1,741 | 2,306 | 1,550 |
+| | loam | 1,926 | 8.9 % | 529 | 1,208 | 718 |
+| | sandy clay loam | 1,324 | 6.1 % | 771 | 1,082 | 242 |
+| | clay loam | 1,038 | 4.8 % | 382 | 664 | 374 |
 | Silty | silt | 83 | 0.4 % | 48 | 69 | 14 |
-| | silt loam | 3,328 | 15.6 % | 1,331 | 1,989 | 1,339 |
-| | silty clay loam | 1,322 | 6.2 % | 327 | 721 | 601 |
-| Clayey | sandy clay | 185 | 0.9 % | 112 | 172 | 13 |
-| | silty clay | 627 | 2.9 % | 182 | 270 | 357 |
-| | clay | 1,672 | 7.8 % | 775 | 899 | 773 |
+| | silt loam | 3,352 | 15.6 % | 1,333 | 2,013 | 1,339 |
+| | silty clay loam | 1,323 | 6.1 % | 326 | 722 | 601 |
+| Clayey | sandy clay | 185 | 0.9 % | 108 | 169 | 16 |
+| | silty clay | 629 | 2.9 % | 183 | 272 | 357 |
+| | clay | 1,728 | 8.0 % | 808 | 951 | 777 |
 
 | texture group | layers | share | with Ks | distributed | restricted |
 |---|---|---|---|---|---|
-| Sandy | 6,104 | 28.6 % | 4,876 (80 %) | 5,051 | 1,053 |
-| Loamy | 8,040 | 37.6 % | 3,436 (43 %) | 5,201 | 2,839 |
-| Silty | 4,733 | 22.2 % | 1,706 (36 %) | 2,779 | 1,954 |
-| Clayey | 2,484 | 11.6 % | 1,069 (43 %) | 1,341 | 1,143 |
-| **total** | **21,361** | | **11,087** | **14,372** | **6,989** |
+| Sandy | 6,102 | 28.3 % | 4,871 (80 %) | 5,044 | 1,058 |
+| Loamy | 8,144 | 37.8 % | 3,423 (42 %) | 5,260 | 2,884 |
+| Silty | 4,758 | 22.1 % | 1,707 (36 %) | 2,804 | 1,954 |
+| Clayey | 2,542 | 11.8 % | 1,099 (43 %) | 1,392 | 1,150 |
+| **total** | **21,546** | | **11,100** | **14,500** | **7,046** |
 
 The neighbour vote weights each class by the inverse of its count and the
 classifier uses balanced class weights, so neither favours sand for being
@@ -601,14 +635,16 @@ loaded with `--reference all`, but most of their soils are already inside
 GSHP, so they are not in the default.
 
 The CSIRO Boorowa Farm soils (57 intact and repacked samples from seven NSW
-sites, 2025; `prepare_boorowa.py`) are kept as an independent Australian test
-set rather than joined: their CC BY-NC-SA licence keeps them local, and they
-are too few to change the class balance. As a new source they read 46 %
-exact class and 70 % texture group, with a macro-F1 of 42 against 16 for
-always answering their majority class, sandy loam (which is right for 68 %
-of them); the seven clays and sandy clays are read correctly four times
-(`verify_external.py boorowa`; per-soil report with
-`figures/make_external_report.py boorowa`).
+sites, 2025; `prepare_boorowa.py`) were kept as an independent Australian
+test set until 2026-10 and joined the default once the NatSoil Sedigraph
+projects (below) took that role; their CC BY-NC-SA licence keeps the table
+local. Adding them leaves the rest alone (`verify_join_effect.py`, 1,733
+targets: +0.06 pp exact for a new site and −0.06 pp for a new source, both
+p = 1.00). As a new source they read 46 % exact class and 70 % texture
+group, with a macro-F1 of 42 against 16 for always answering their majority
+class, sandy loam (which is right for 68 % of them); the seven clays and
+sandy clays are read correctly four times (`verify_external.py boorowa`;
+per-soil report with `figures/make_external_report.py boorowa`).
 
 The **New Jersey Coastal Plain soils** of Soil Survey Investigations Report
 26 (USDA-SCS and Rutgers, 1974; `prepare_nj_ssir26.py`) are a second
@@ -766,27 +802,27 @@ targets, with the classifier and the neighbours both blind to the target.
 The same 1,733 targets (150 per class, every silt) under each hold-out, with
 the shipped tool (`verify_holdout.py`, `figures/validation/v6_holdout_levels.png`).
 The last two columns run it as with `--depth` and `--bulk-density`, on the
-1,688 targets that carry both:
+1,680 targets that carry both:
 
 | hidden along with the test soil | real-life situation | exact class | texture group | exact, + depth & BD | group, + depth & BD |
 |---|---|---|---|---|---|
-| nothing else | a new depth at a site already in the reference | 41.3 % | 63.6 % | 46.4 % (+5.5, p<0.001) | 67.6 % (+4.1, p<0.001) |
-| its profile | a new site, from a source already in the reference | 39.6 % | 63.9 % | 45.4 % (+6.0, p<0.001) | 68.5 % (+4.5, p<0.001) |
-| its whole source | a new site, from a new source | **31.4 %** | **58.2 %** | 32.2 % (+1.2, p=0.22) | 57.5 % (−0.7, p=0.54) |
-| best possible (ceiling) | | 53 % / 45 % | 73 % / 68 % | | |
+| nothing else | a new depth at a site already in the reference | 40.2 % | 63.4 % | 46.4 % (+6.1, p<0.001) | 67.1 % (+3.5, p<0.001) |
+| its profile | a new site, from a source already in the reference | 39.8 % | 63.5 % | 45.5 % (+5.8, p<0.001) | 66.3 % (+2.9, p=0.003) |
+| its whole source | a new site, from a new source | **29.7 %** | **56.5 %** | 31.9 % (+2.6, p=0.005) | 56.8 % (+0.2, p=0.85) |
+| best possible (ceiling) | | 54 % / 44 % | 73 % / 68 % | | |
 
-(The gains in brackets are paired against the curve alone on the same 1,688
-soils, where it scores 40.9, 39.4 and 30.9 % exact.)
+(The gains in brackets are paired against the curve alone on the same 1,680
+soils, where it scores 40.4, 39.7 and 29.3 % exact.)
 
 **Fixed heads against the van Genuchten parameters.** Until September 2026
 the tool matched on the four fitted vG parameters. On the same targets those
-score 40.8, 38.8 and 32.5 % exact (62.8, 62.1 and 58.5 % group), and 45.4,
-42.5 and 32.2 % with depth and bulk density (`SWCC_FEATURE_MODE=vg`). On the
-current reference the fixed heads are level on the curve alone (−1.1 to
-+0.8 points; they led by 1.6 to 2.8 when adopted) and ahead with the
-covariates by 1.0 and 2.9 points with the source in the reference (level for
-a new source). They
-also lower the Ks error for a new source (0.65 against 0.73 dex), lifted the
+score 38.5, 38.6 and 30.1 % exact (62.0, 61.3 and 57.5 % group), and 43.8,
+41.9 and 29.9 % with depth and bulk density (`SWCC_FEATURE_MODE=vg`). On the
+current reference the fixed heads lead on the curve alone by 1.2 to 1.7
+points with the source in the reference and are level for a new source
+(−0.4; they led by 1.6 to 2.8 when adopted), and lead with the covariates by
+2.0 to 3.6 points. They
+also lower the Ks error for a new source (0.59 against 0.69 dex), lifted the
 rarest class, silt, from 15 to 30 % found when they were adopted
 (`verify_hybrid.py`), and predict better on four of the six outside sets
 (see *Reference data*). What they lose is the andic
@@ -802,30 +838,29 @@ worse reference. Part of the depth-and-bulk-density gain with the source in
 the reference is the Yellow River soils' own signature (deep loess cores); on
 the previous draw it is +3.1 pp for a new site (p=0.003).
 
-Keeping the target's other horizons in the reference helps a little
-(+1.7 pp, p=0.058, not significant). 1,126 of the targets have a horizon of
-the same class in their profile (46.6 % with it in the reference against
-43.8 % without); siblings of a different class do not matter (31.4 % against
-31.7 %) — eluviation makes the horizons of one profile genuinely different
-samples. What matters is the data source: hiding it costs 8.2 points
-(p<0.0001).
+Keeping the target's other horizons in the reference barely helps
+(+0.4 pp, p=0.67). 1,107 of the targets have a horizon of the same class in
+their profile (45.6 % with it in the reference against 44.5 % without);
+siblings of a different class do not matter (29.9 % against 30.8 %) —
+eluviation makes the horizons of one profile genuinely different samples.
+What matters is the data source: hiding it costs 10.1 points (p<0.0001).
 
 **The ceiling.** Cover & Hart (1967) bound the Bayes error by the
 nearest-neighbour error, giving a model-free limit for any classifier on the
 fitted curve (`verify_ceiling.py`, computed on the four vG parameters): 1NN
-accuracy 29.7 % gives a bracket of [29.7 %, 52.6 %] in-distribution and
-[23.3 %, 45.3 %] with the laboratory held out (texture group: [55.9 %,
-73.2 %] and [50.1 %, 68.4 %]). The fixed heads re-encode the
+accuracy 30.8 % gives a bracket of [30.8 %, 53.7 %] in-distribution and
+[22.0 %, 43.7 %] with the laboratory held out (texture group: [56.0 %,
+73.2 %] and [49.7 %, 68.1 %]). The fixed heads re-encode the
 same fitted curve, and their bracket lies within about three points of it.
 It is a property of the inputs, not of the database — more reference data
 does not raise it, only more informative inputs can.
 
 **Classifier vs neighbour vote.** The gradient-boosted classifier is level
-with the neighbour vote for a new site (39.7 % against 40.0 %, p=0.79,
-macro-F1 38.7 against 39.7) and four points ahead for a new source (31.4 %
-against 27.7 %, p<0.001; `verify_hybrid.py`, with `--blocked`), and the
-neighbour vote supplies the second opinion. Its weak classes are silt (19 %
-found against the neighbours' 47 %) and sandy clay (24 % against 39 %).
+with the neighbour vote for a new site (38.7 % against 38.7 %, p=1.0,
+macro-F1 38.0 against 38.5) and three points ahead for a new source (29.7 %
+against 26.7 %, p=0.004; `verify_hybrid.py`, with `--blocked`), and the
+neighbour vote supplies the second opinion. Its weak classes are silt (22 %
+found against the neighbours' 40 %) and sandy clay (23 % against 37 %).
 
 **Benchmarks** — synthetic curves from class-typical parameters, and real
 GSHP soils held out one at a time (`verify_carsel_parrish.py`,
@@ -1107,7 +1142,7 @@ target's laboratory in the reference is worth +5 points, which is what
 **Building the reference** — each script documents where to obtain its raw
 input: `prepare_gshp.py`, `prepare_kssl.py`, `prepare_hohenbrink.py`,
 `prepare_babaeian_zanjanrood.py`, `prepare_babaeian_az.py`,
-`prepare_armas.py`, `prepare_tong.py`, `prepare_boorowa.py`, `prepare_nj_ssir26.py`, `prepare_andalusia.py`, `prepare_euhydi.py`, `prepare_willard.py`,
+`prepare_armas.py`, `prepare_tong.py`, `prepare_natsoil.py`, `prepare_boorowa.py`, `prepare_nj_ssir26.py`, `prepare_andalusia.py`, `prepare_euhydi.py`, `prepare_willard.py`,
 `prepare_unsoda.py`, `prepare_sdb.py`; `prepare_volcanic.py` (the volcanic and andic fields);
 `free_m.py` (an unconstrained companion fit written alongside the Mualem
 one).

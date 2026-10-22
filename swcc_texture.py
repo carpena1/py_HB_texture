@@ -57,12 +57,13 @@ REFERENCE_SETS = {
                "babaeian_az_reference.csv", "armas_reference.csv",
                "tong_reference.csv", "setenil_reference.csv",
                "tomejil_reference.csv", "lebrija_reference.csv",
-               "donana_reference.csv", "local_reference.csv"],
+               "donana_reference.csv", "natsoil_reference.csv",
+               "boorowa_reference.csv", "local_reference.csv"],
     # The distributed tables: what a fresh clone has.
     "public": ["gshp_reference.csv", "kssl_reference.csv",
                "hohenbrink_reference.csv", "babaeian_zanjanrood_reference.csv",
                "babaeian_az_reference.csv", "armas_reference.csv",
-               "tong_reference.csv"],
+               "tong_reference.csv", "natsoil_reference.csv"],
     "gshp": ["gshp_reference.csv"],
     "kssl": ["kssl_reference.csv"],
     "hohenbrink": ["hohenbrink_reference.csv"],
@@ -85,7 +86,11 @@ REFERENCE_SETS = {
     # loam when added (verify_external.py).
     "tong": ["tong_reference.csv"],
     # CSIRO Boorowa Farm, NSW (2025; prepare_boorowa.py), CC BY-NC-SA, so
-    # restricted; under test with verify_external.py.
+    # restricted. Kept as an independent Australian test set until 2026-10,
+    # when the NatSoil Sedigraph projects took that role; in the default
+    # since: verify_join_effect.py on 1,733 reference soils finds no effect
+    # on the rest (+0.06 pp exact for a new site, -0.06 pp for a new source,
+    # both p=1.00; Ks -0.0006 dex).
     "boorowa": ["boorowa_reference.csv"],
     # New Jersey Coastal Plain, USDA-SCS Soil Survey Investigations Report 26
     # (1974; prepare_nj_ssir26.py): intact-core Ks, the Arya-Paris test set;
@@ -115,13 +120,25 @@ REFERENCE_SETS = {
     # rest (+0.9 pp exact for a new site, p=0.18; +0.2 pp for a new source,
     # p=0.84) and Ks unchanged (median |log10 err| +0.0009 dex, p=0.87).
     "lebrija": ["lebrija_reference.csv"],
+    # Australian intact cores from the CSIRO NatSoil API (CC BY 4.0;
+    # prepare_natsoil.py): the soils behind GSHP's Australian_database,
+    # rebuilt with USDA texture and NatSoil's coordinates; GSHP's own
+    # Australian rows are left out of gshp_reference.csv. Forrest and SSM
+    # (224 cores) are in the default since 2026-10: verify_join_effect.py on
+    # 1,733 reference soils finds no harm to the rest (-0.2 pp exact for a
+    # new site, p=0.82; +0.6 pp for a new source, p=0.46).
+    "natsoil": ["natsoil_reference.csv"],
+    # The NatSoil projects measured by Sedigraph (Morphology, RAALS,
+    # CSIRO_LW): read poorly as a new source, so a test set only.
+    "natsoil_other": ["natsoil_other_reference.csv"],
     "all": ["gshp_reference.csv", "kssl_reference.csv",
             "hohenbrink_reference.csv", "babaeian_zanjanrood_reference.csv",
             "euhydi_reference.csv", "willard_reference.csv",
             "babaeian_az_reference.csv", "armas_reference.csv",
             "tong_reference.csv", "setenil_reference.csv",
             "tomejil_reference.csv", "lebrija_reference.csv",
-            "donana_reference.csv", "unsoda_reference.csv", "sdb_reference.csv",
+            "donana_reference.csv", "natsoil_reference.csv",
+            "boorowa_reference.csv", "unsoda_reference.csv", "sdb_reference.csv",
             "local_reference.csv"],
 }
 DEFAULT_REFERENCE = "merged"
