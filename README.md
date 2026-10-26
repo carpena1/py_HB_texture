@@ -157,18 +157,16 @@ Calling `.venv/bin/python` directly (as below) runs inside the virtual
 environment without activating it.
 
 The reference tables are committed, so **the tool runs out of the box with no
-downloads.** Seven tables are exceptions: EU-HYDI, which is restricted to its
-consortium, the Laikipia soils, which are unpublished, the Setenil,
-Tomejil, Lebrija and Doñana soils (Andalusia), whose distribution is not yet
-agreed, and the CSIRO Boorowa soils, whose CC BY-NC-SA licence does not allow
-redistribution here. Their tables (`data/euhydi_reference.csv`,
-`data/willard_reference.csv`, `data/setenil_reference.csv`,
-`data/tomejil_reference.csv`, `data/lebrija_reference.csv`,
-`data/donana_reference.csv`, `data/boorowa_reference.csv`) are built
-locally with `prepare_euhydi.py`, `prepare_willard.py`,
-`prepare_andalusia.py` and `prepare_boorowa.py` by those who hold the data
-and are not distributed. A fresh clone runs on the other eight databases
-(14,500 layers) and prints a note saying so.
+downloads.** Three tables are exceptions: EU-HYDI, which is restricted to its
+consortium, the Laikipia soils, which are unpublished, and the CSIRO Boorowa
+soils, whose CC BY-NC-SA licence does not allow redistribution here. Their
+tables (`data/euhydi_reference.csv`, `data/willard_reference.csv`,
+`data/boorowa_reference.csv`) are built locally with `prepare_euhydi.py`,
+`prepare_willard.py` and `prepare_boorowa.py` by those who hold the data and
+are not distributed. A fresh clone runs on the other tables (14,622 layers)
+and prints a note saying so. The Andalusian tables (Setenil, Tomejil,
+Lebrija, Doñana) are distributed with the agreement of K. Vanderlinden
+(IFAPA) since 2026-10; their raw files are not.
 
 ## Usage
 
@@ -428,10 +426,10 @@ every other number identical.
 | Australia, CSIRO NatSoil: Forrest et al. (1985) and Geeves et al. (1995) cores | 224 | 105 | undisturbed | CC BY 4.0, committed |
 | EU-HYDI (Weynants et al. 2013), 21 laboratories, 16 countries | 6,797 | 2,704 | per sample | **restricted, never distributed** |
 | Laikipia, central Kenya (Willard et al., under review) | 70 | 26 | undisturbed | **unpublished, never distributed** |
-| Setenil, Andalusia, Spain (K. Vanderlinden, IFAPA) | 44 | 44 | undisturbed | **not distributed (pending agreement)** |
-| Tomejil vertisol, Andalusia, Spain (Vanderlinden et al. 2021) | 54 | 0 | undisturbed | **not distributed (pending agreement)** |
-| Lebrija marsh clay, Andalusia, Spain (K. Vanderlinden, IFAPA) | 7 | 0 | undisturbed | **not distributed (pending agreement)** |
-| Doñana sands, Andalusia, Spain (K. Vanderlinden, IFAPA) | 17 | 0 | undisturbed | **not distributed (pending agreement)** |
+| Setenil, Andalusia, Spain (K. Vanderlinden, IFAPA) | 44 | 44 | undisturbed | committed |
+| Tomejil vertisol, Andalusia, Spain (Vanderlinden et al. 2021) | 54 | 0 | undisturbed | committed |
+| Lebrija marsh clay, Andalusia, Spain (K. Vanderlinden, IFAPA) | 7 | 0 | undisturbed | committed |
+| Doñana sands, Andalusia, Spain (K. Vanderlinden, IFAPA) | 17 | 0 | undisturbed | committed |
 | CSIRO Boorowa Farm, NSW, Australia (2025) | 57 | 0 | 25 intact, 32 repacked | **CC BY-NC-SA, not distributed** |
 | **default reference** | **21,546** | **11,100** | | |
 
@@ -603,26 +601,26 @@ Ks is measured for 80 % of sandy soils but for about a third of silty ones.
 
 | group | class | layers | share | with Ks | distributed | restricted |
 |---|---|---|---|---|---|---|
-| Sandy | sand | 4,635 | 21.5 % | 4,019 | 4,049 | 586 |
+| Sandy | sand | 4,635 | 21.5 % | 4,019 | 4,066 | 569 |
 | | loamy sand | 1,467 | 6.8 % | 852 | 995 | 472 |
-| Loamy | sandy loam | 3,856 | 17.9 % | 1,741 | 2,306 | 1,550 |
+| Loamy | sandy loam | 3,856 | 17.9 % | 1,741 | 2,335 | 1,521 |
 | | loam | 1,926 | 8.9 % | 529 | 1,208 | 718 |
-| | sandy clay loam | 1,324 | 6.1 % | 771 | 1,082 | 242 |
+| | sandy clay loam | 1,324 | 6.1 % | 771 | 1,097 | 227 |
 | | clay loam | 1,038 | 4.8 % | 382 | 664 | 374 |
 | Silty | silt | 83 | 0.4 % | 48 | 69 | 14 |
 | | silt loam | 3,352 | 15.6 % | 1,333 | 2,013 | 1,339 |
 | | silty clay loam | 1,323 | 6.1 % | 326 | 722 | 601 |
 | Clayey | sandy clay | 185 | 0.9 % | 108 | 169 | 16 |
 | | silty clay | 629 | 2.9 % | 183 | 272 | 357 |
-| | clay | 1,728 | 8.0 % | 808 | 951 | 777 |
+| | clay | 1,728 | 8.0 % | 808 | 1,012 | 716 |
 
 | texture group | layers | share | with Ks | distributed | restricted |
 |---|---|---|---|---|---|
-| Sandy | 6,102 | 28.3 % | 4,871 (80 %) | 5,044 | 1,058 |
-| Loamy | 8,144 | 37.8 % | 3,423 (42 %) | 5,260 | 2,884 |
+| Sandy | 6,102 | 28.3 % | 4,871 (80 %) | 5,061 | 1,041 |
+| Loamy | 8,144 | 37.8 % | 3,423 (42 %) | 5,304 | 2,840 |
 | Silty | 4,758 | 22.1 % | 1,707 (36 %) | 2,804 | 1,954 |
-| Clayey | 2,542 | 11.8 % | 1,099 (43 %) | 1,392 | 1,150 |
-| **total** | **21,546** | | **11,100** | **14,500** | **7,046** |
+| Clayey | 2,542 | 11.8 % | 1,099 (43 %) | 1,453 | 1,089 |
+| **total** | **21,546** | | **11,100** | **14,622** | **6,924** |
 
 The neighbour vote weights each class by the inverse of its count and the
 classifier uses balanced class weights, so neither favours sand for being
@@ -1305,10 +1303,12 @@ table is CC-BY-3.0 (Vereecken et al. 2017). The Zanjanrood table
 distributed with the data owner's permission; cite Babaeian et al. (2015). The
 New Jersey table (`data/nj_ssir26_reference.csv`) is transcribed from US
 government publications (USDA-SCS 1974; Arya et al. 1982), which are in the
-public domain. EU-HYDI data and anything derived
-from it at sample level are not part of this repository, nor are the
-unpublished Laikipia data or the Andalusian data (Setenil, Tomejil,
-Doñana): their owner agrees to their distribution, pending the opinion of
-a co-author. When they are used, cite Vanderlinden et al. (2017, 2021) for
-Tomejil and acknowledge projects RTA2006-00058-C03-02, AGL2009-12936-C03-03,
-AGL2012-40128-C03-03 and AGL2015-65036-C3-3-R for the rest.
+public domain. The Andalusian tables (`data/setenil_reference.csv`,
+`data/tomejil_reference.csv`, `data/lebrija_reference.csv`,
+`data/donana_reference.csv`) hold K. Vanderlinden's (IFAPA) measurements,
+distributed with the data owner's permission (2026-10-22); the Lebrija
+curves are unpublished. When they are used, cite Vanderlinden et al. (2017,
+2021) for Tomejil and acknowledge projects RTA2006-00058-C03-02,
+AGL2009-12936-C03-03, AGL2012-40128-C03-03 and AGL2015-65036-C3-3-R for the
+rest. EU-HYDI data and anything derived from it at sample level are not part
+of this repository, nor are the unpublished Laikipia data.

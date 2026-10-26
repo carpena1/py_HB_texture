@@ -63,7 +63,9 @@ REFERENCE_SETS = {
     "public": ["gshp_reference.csv", "kssl_reference.csv",
                "hohenbrink_reference.csv", "babaeian_zanjanrood_reference.csv",
                "babaeian_az_reference.csv", "armas_reference.csv",
-               "tong_reference.csv", "natsoil_reference.csv"],
+               "tong_reference.csv", "setenil_reference.csv",
+               "tomejil_reference.csv", "lebrija_reference.csv",
+               "donana_reference.csv", "natsoil_reference.csv"],
     "gshp": ["gshp_reference.csv"],
     "kssl": ["kssl_reference.csv"],
     "hohenbrink": ["hohenbrink_reference.csv"],
@@ -97,9 +99,10 @@ REFERENCE_SETS = {
     # under test with verify_external.py.
     "nj_ssir26": ["nj_ssir26_reference.csv"],
     # Andalusia, Spain (K. Vanderlinden, IFAPA; prepare_andalusia.py), one
-    # table per site, restricted until distribution is agreed; under test
-    # with verify_external.py. Setenil (olive-grove sandy loams, laboratory
-    # Ks on the rings) is in the default since 2026-10: neutral for the rest
+    # table per site, distributed since 2026-10-23 (K. Vanderlinden; raw
+    # files stay local); tested with verify_external.py. Setenil (olive-grove
+    # sandy loams, laboratory Ks on the rings) is in the default since
+    # 2026-10: neutral for the rest
     # of the reference, Ks slightly better for a new source, and its own
     # sites gain (+7 pp exact, Ks rho 0.40 -> 0.65). Tomejil (a vertisol, no
     # Ks; fractions and bulk density are treatment means) is in the default
@@ -149,9 +152,7 @@ DEFAULT_REFERENCE = "merged"
 # note on stderr -- so a fresh clone of the public repository runs. A set made
 # only of restricted tables cannot load at all.
 RESTRICTED_TABLES = {"euhydi_reference.csv", "willard_reference.csv",
-                     "boorowa_reference.csv", "setenil_reference.csv",
-                     "tomejil_reference.csv", "donana_reference.csv",
-                     "lebrija_reference.csv"}
+                     "boorowa_reference.csv"}
 _noted_missing = set()
 
 # A user's own lab-verified curves, written by add_local_data.py. Joins the

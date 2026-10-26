@@ -84,7 +84,7 @@ def main():
                 transform=ax.get_yaxis_transform(), color=vp.AXIS, lw=1,
                 clip_on=False)
     hd = [Rectangle((0, 0), 1, 1, color=c) for c in (vp.S1, vp.S2)]
-    ax.legend(hd, ["distributed tables", "restricted tables (EU-HYDI, Laikipia, Andalusia)"],
+    ax.legend(hd, ["distributed tables", "restricted tables (EU-HYDI, Laikipia, Boorowa)"],
               loc="upper center", bbox_to_anchor=(0.5, -0.1), ncol=2, fontsize=9)
     big, small = t.total.idxmax(), t.total.idxmin()
     vp.title(fig, "Texture classes in the default reference",
