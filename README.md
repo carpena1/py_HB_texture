@@ -474,10 +474,26 @@ different, and each needed a correction before its curves were comparable:
   renormalising already sends most of it to sand in soils averaging 60 %
   sand. It is left uncorrected: the correction is far below the tool's own
   fraction error (9–13 points) and would import an assumption from other
-  countries' soils. Russian, Hungarian, Czech and Slovak samples all break at
-  2000 µm and are unaffected. `verify_psd_standard.py` looked for the bias in
-  the curves themselves and did not find it, which is what a 0.6-point effect
-  should look like against a between-laboratory spread of 9.6 points.
+  countries' soils, where the 1–2 mm share can reach 20 % of a Polish sample
+  (A. Nemes, pers. comm., 2026-10). Hungarian, Czech and Slovak samples break
+  at 2000 µm. Shein's Russian samples do too, but the Russian standard is
+  1 mm sieving (Shein's own reviews; the laboratory responsible for it today),
+  so that label is doubtful, and the Russian EGRPR compilation that reaches
+  the reference through GSHP probably shares the standard.
+  `verify_psd_standard.py` looked for the bias in the curves themselves and
+  did not find it, which is what a 0.6-point effect should look like against
+  a between-laboratory spread of 9.6 points. The three sources (Poland 431
+  layers, Shein 283, Russia_EGRPR 1,001) are flagged in
+  `swcc_texture.SIEVE_1MM_SOURCES`, not corrected, and `verify_sieve_1mm.py`
+  tests what they do to everyone else: 1,724 soils from the other sources,
+  scored with and without the 1,715 flagged layers on identical folds. Texture
+  does not change (exact class −0.35 points for a new site, p = 0.72; +0.06
+  for a new source, p = 1.00), nor does the bias in predicted sand (+0.06 →
+  +0.04 points); the mean sand error rises by 0.13 points for a new source
+  (16.00 → 16.13, p = 0.018). Ks improves, from the Polish measurements
+  (median error 0.739 → 0.708 dex, within 10× 62.2 → 63.2 %, p < 0.001). They
+  stay in the default. Whether their own sand values are biased is a separate
+  question, for a paired study of one laboratory under both standards.
 - **Zanjanrood** curves combine an intact core for 0–100 cm suction with
   sieved soil for the dry end, and are refitted here; four curves with no
   point wetter than 330 cm are dropped. Ks was measured on repacked samples

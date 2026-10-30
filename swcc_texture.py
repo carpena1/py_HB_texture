@@ -155,6 +155,13 @@ RESTRICTED_TABLES = {"euhydi_reference.csv", "willard_reference.csv",
                      "boorowa_reference.csv"}
 _noted_missing = set()
 
+# Sources whose particle size may be on a < 1 mm sieving basis (sand 50-1000
+# um, not 50-2000): Poland before about 2008 (EU-HYDI's PSD code says so) and,
+# per A. Nemes (2026-10), the Russian standard, although Shein's EU-HYDI rows
+# break at 2000 um. Flagged, not corrected: the 1-2 mm share varies up to 20 %
+# (verify_sieve_1mm.py tests what they do to the rest of the reference).
+SIEVE_1MM_SOURCES = {"EUHYDI_Lamorski", "EUHYDI_Shein", "Russia_EGRPR"}
+
 # A user's own lab-verified curves, written by add_local_data.py. Joins the
 # default reference whenever it exists; its absence is normal and silent.
 OPTIONAL_TABLES = {"local_reference.csv"}
