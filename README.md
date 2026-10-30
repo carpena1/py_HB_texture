@@ -440,15 +440,20 @@ different, and each needed a correction before its curves were comparable:
   a plain fit puts α five to sixteen times too low. One anchor point at
   θ(0) = 0.95 × porosity fixes it (θs sits ~5 % below porosity because of
   entrapped air; median θs/porosity in GSHP is 0.946). KSSL has no Ks.
-  Its `sample_type` is **mixed, and labelled `undisturbed` deliberately**: the
-  method codes put the wet end on natural clods (DbWR1, 4B1c) and the dry end
-  on material sieved to &lt;2 mm (3C1, 3C2), so the 33 and 1500 kPa points —
-  the ones carrying most of the texture signal — are on repacked material
-  (raised by A. Nemes, pers. comm., 2026). The label was left as it is on
-  evidence, not convenience: `verify_kssl_label.py` scores all three
-  labellings on identical folds and finds nothing significant, with the two
-  arms disagreeing in sign (relabelling `disturbed` gives +1.3 pp for other
-  soils, p = 0.42, and −2.9 pp for KSSL's own, p = 0.24). It is not inert —
+  Its `sample_type` is **mixed, and labelled `undisturbed` deliberately**.
+  The method codes show the material for each suction. The 33 kPa point is
+  on natural clods in all 2,530 layers (DbWR1, 4B1c). Most 6 and 10 kPa
+  points are on clods too (76 % and 85 %). The 100 to 1500 kPa points are on
+  soil sieved to &lt;2 mm (3C1, 3C2), so the dry end is on repacked material
+  (raised by A. Nemes, pers. comm., 2026). A clod holds no water in the pores
+  between aggregates, so near saturation and at 33 kPa it can hold less water
+  than a ring of the same soil. This method difference can explain part of
+  any difference between KSSL soils and sources measured on rings. The label
+  was left as it is on evidence, not convenience: `verify_kssl_label.py`
+  scores all three labellings on identical folds and finds nothing
+  significant, with the two arms disagreeing in sign (relabelling
+  `disturbed` gives +1.3 pp for other soils, p = 0.42, and −2.9 pp for
+  KSSL's own, p = 0.24). It is not inert —
   162 of 410 answers change — but it shuffles predictions without improving
   them, which matches `verify_sample_type.py` scoring the feature at +0.0 pp
   overall. Ks cannot be affected either way, since no KSSL row carries a
