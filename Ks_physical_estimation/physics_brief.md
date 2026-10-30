@@ -1,6 +1,6 @@
 # Physics-based estimates from the retention curve: brief
 
-Status on 2026-09-23, commit `1e01b5e`; Section 5 (texture) updated 2026-10-01; kNN Ks figures updated 2026-10-03 for the new Ks lookup (150 Ks-bearing neighbours, `verify_ks_neighbors.py`). Code: `ks_physical.py` (the
+Status on 2026-09-23, commit `1e01b5e`; Section 5 (texture) updated 2026-10-01; kNN Ks figures updated 2026-10-03 for the new Ks lookup (150 Ks-bearing neighbours, `verify_ks_neighbors.py`); methods from the literature review (`Literature_metanalysis/review.md`) added 2026-10-30 (Sections 3 and 5, `verify_literature_methods.py`). Code: `ks_physical.py` (the
 calculation), `verify_ks_physical.py` (the tests),
 `figures/make_external_report.py` (fig6 and `ks_variants.csv` per external
 set).
@@ -169,6 +169,78 @@ lab-based estimate reproduces, so it cannot separate the methods.
 variants holds the measured Ks only 10–39 % of the time. The honest
 empirical 5–95 % range is 3.7 dex wide (×/÷ 70) and the same for every soil.
 
+**Other forms from the literature review (2026-10-30).** The review
+(`Literature_metanalysis/review.md`) ranks critical-path analysis (CPA)
+first among the curve-based Ks models: RMSLE 0.87 on 313 Kansas Mesonet
+cores (Ghanbarian and Patrignani 2026). It and four other forms were scored
+with `verify_literature_methods.py`, exactly as that paper writes them:
+
+- **CPA:** Ks = (ρg/μ) dc² / (C F), with C = 53.5 (Skaggs 2011).
+  - dc is the pore-throat diameter (d = 4σ/ρgh) at the inflection point of
+    the van Genuchten curve. The inflection is read on log h,
+    h = m^(−1/n)/α, and, as a variant, on linear h, h = m^(1/n)/α.
+  - F is the formation factor from porosity (Ghanbarian et al. 2014):
+    F = (1 − φc)(φx − φc)/(φ − φc)² below the crossover φx = 0.75, and
+    (1 − φc)/(φ − φc) above it. The critical porosity is φc = θr. With
+    φc = 0 and φx = 1, this is Archie's F = φ⁻².
+- **JKS** (Johnson et al. 1986): Ks = (ρg/μ) Λ²/(8F), with Λ = 0.21 dc.
+- **Guarracino (2007):** Ks = 4.65 × 10⁴ φ α² cm/d, with α in cm⁻¹.
+- **Mishra and Parker (1990):** Ks = 108 (θs − θr)^2.5 α² cm/s.
+- **Effective-porosity Kozeny–Carman** (Ahuja et al. 1989):
+  Ks = 764.5 φe^3.29 cm/h, with φe = φ − θ(33 kPa).
+
+φ is θs. Where bulk density is known, 1 − ρb/2.65 is a variant. Each form is
+also matched with its own factor, defined as in Section 2 and refitted
+without the scored source. The forms are computed from the stored van
+Genuchten parameters. The targets are the 1,843 source-blocked targets of
+`verify_ks_neighbors.py` (19 sources), so the kNN column is that script's
+150-neighbour value. "Sources" counts the sources where the form beats the
+shipped physics.
+
+| Ks estimate | Median error | RMSLE | Within 2× / 10× | Bias | ρ | Sources |
+|---|---|---|---|---|---|---|
+| **Physics, 50 cm cap (shipped)** | **0.62** | **1.22** | 27 % / 68 % | +0.04 | 0.51 | – |
+| kNN (the tool's Ks) | 0.71 | 1.31 | 24 % / 64 % | +0.15 | 0.35 | 4/19 |
+| Kozeny–Carman (Ahuja), φ from ρb, raw | 0.66 | 1.99 | 25 % / 65 % | −0.34 | 0.51 | 6/19 |
+| Kozeny–Carman (Ahuja), φ = θs, raw | 0.69 | 1.82 | 25 % / 64 % | −0.43 | 0.50 | 5/19 |
+| CPA, log-h inflection, matched (factor 3.0) | 0.78 | 1.52 | 21 % / 60 % | +0.08 | 0.44 | 2/19 |
+| CPA, log-h inflection, raw | 0.94 | 1.61 | 18 % / 52 % | +0.55 | 0.44 | 2/19 |
+| JKS, raw | 0.78 | 1.52 | 23 % / 60 % | +0.02 | 0.44 | 3/19 |
+| Guarracino 2007, matched | 0.91 | 1.67 | 17 % / 54 % | +0.17 | 0.36 | 3/19 |
+| Mishra and Parker 1990, matched | 0.93 | 1.71 | 17 % / 53 % | +0.15 | 0.37 | 2/19 |
+| CPA, linear-h inflection, raw | 2.28 | 3.18 | 4 % / 19 % | +2.48 | 0.29 | 0/19 |
+| Half shipped, half Kozeny–Carman (φ from ρb) | 0.62 | 1.45 | 27 % / 68 % | −0.15 | 0.52 | 9/19 |
+
+None is better than the shipped physics. Every row is significantly worse
+on median error (p ≤ 10⁻⁴, paired), except the last, which is level
+(p = 0.45).
+
+- **CPA ranks second-best on our data, not first.** Its RMSLE is 1.52
+  here, against 0.87 on the Kansas cores, and the shipped bundle's is
+  1.22. CPA reads one pore size at the inflection point. The bundle sums
+  over every pore up to the 50 cm cap. On a global reference with many
+  laboratories, the whole pore-size distribution carries more than one
+  point of it. CPA loses in every texture group (all 11,100 layers with a
+  Ks, matched: sandy 0.21 against 0.18 dex, loamy 0.69 against 0.55,
+  silty 0.90 against 0.69, clayey 0.95 against 0.72).
+- **The inflection must be read on log h.** On linear h the critical
+  throat is about 9 times wider (median), and Ks comes out about 300 times
+  too high (+2.48 dex).
+- **JKS is CPA with another constant.** Λ²/8 = 0.0055 d² against
+  d²/53.5 = 0.019 d². Its raw form lands where matched CPA does.
+- **Kozeny–Carman is close on the median and worse in the tails.** It
+  needs θ(33 kPa) and a porosity, so it is the only candidate that uses
+  something besides the curve's shape. Its RMSLE is the worst of the
+  plausible forms, it under-predicts by 0.3–0.4 dex, and a 50/50 blend with
+  the shipped physics adds nothing.
+- **Guarracino and Mishra–Parker** put all of Ks into α², as Peters et al.
+  (2023) do, and they score close to Peters (0.90 dex in the table above).
+  Their levels are far off: matched, Guarracino is multiplied by 6.7 and
+  Mishra–Parker divided by 6.5. Matched, the order CPA, JKS, Guarracino,
+  Mishra–Parker is the same as in the Kansas paper.
+
+Not adopted. The shipped capillary bundle stays the second opinion.
+
 ## 4. How the tool reports it (user decisions, 2026-09-23)
 
 ```
@@ -184,7 +256,9 @@ Predicted Ks: 2.16 cm/h  [5-95 %: 0.00433 - 41.7]   (from the kNN: the 150 neare
   "Agrees" means within a factor of 10 of the kNN, judged on the matched
   value.
 - **Not adopted:** the physics median with the kNN band, blending, a
-  variant range, the Peters form, and Brutsaert's Brooks–Corey form.
+  variant range, the Peters form, Brutsaert's Brooks–Corey form, and the
+  forms from the literature review (CPA, JKS, Guarracino, Mishra–Parker,
+  effective-porosity Kozeny–Carman; Section 3).
 
 ## 5. Texture from the pore sizes (tested, not adopted)
 
@@ -275,6 +349,62 @@ says anything. An earlier
 Arya–Paris figure of 35.1 % came from the reference's sand-heavy natural class
 mix and was withdrawn.
 
+**Clay from the dry end (2026-10-30).** The literature review calls this the
+best-validated inverse route. At high suction, water is held by adsorption
+on particle surfaces, so the water at 1500 kPa scales with clay (Tuller and
+Or 2005; Wuddivira et al. 2012). Three forms were tested
+(`verify_literature_methods.py`):
+
+- the NRCS laboratory rule, clay ≈ 2.5 × gravimetric water at 1500 kPa
+  (%), the water taken from the fitted curve and divided by bulk density;
+- the same rule with organic carbon (%) taken off the water first;
+- a straight line of clay on that water, or on the volumetric water,
+  fitted on the other studies.
+
+They were scored against the tool's fractions on the 1,731 targets of
+`verify_predictive.py` (71 studies, each study hidden from the tool, depth
+and bulk density supplied; the tool's predictions read from
+`figures/cache/predictive.csv`):
+
+| Clay estimate | n | Mean error (points) | Bias | ρ | vs tool | Studies better |
+|---|---|---|---|---|---|---|
+| **Tool (kNN fractions)** | 1,730 | **8.45** | −0.92 | 0.76 | – | – |
+| NRCS rule | 1,730 | 9.95 | +4.98 | 0.77 | +1.50 (p < 10⁻¹¹) | 33/71 |
+| NRCS rule, organic carbon removed | 741 | 8.62 | +1.50 | 0.75 | +0.36 (p = 0.60) | 27/54 |
+| Line on volumetric water, other studies | 1,730 | 9.01 | −1.99 | 0.76 | +0.56 (p < 10⁻⁸) | 35/71 |
+| Line on gravimetric water, other studies | 1,730 | 10.42 | −3.48 | 0.74 | +1.97 (p < 10⁻²⁹) | 22/71 |
+| Half tool, half gravimetric line | 1,730 | 8.95 | −2.20 | 0.77 | +0.50 (p < 10⁻⁷) | 27/71 |
+
+- **No form beats the tool.** Only the rule with organic carbon removed is
+  level with it, and only 741 of the targets carry organic carbon.
+- **By measured texture group, the rule beats the tool in clayey soils
+  only** (11.7 against 12.3 points, p = 0.03). It loses in sandy (6.9
+  against 3.9), loamy (9.6 against 7.8) and silty soils (10.8 against 8.6).
+  A user does not know the group in advance, so this cannot be used
+  directly.
+- **The class gets worse.** With the tool's sand kept and its clay
+  replaced by the fitted line, the class read from the fractions falls from
+  29.5 to 23.6 % exact (to 27.0 % with half and half). The tool's own
+  classifier scores 32.5 % on these targets.
+- **As a confidence flag for the fractions it has some value.** Where the
+  rule (organic carbon removed when known) agrees with the tool's clay
+  within 5 points (54 % of soils), the tool's clay error is 7.1 points,
+  against 10.0 where it does not. It does not flag the class (32.6 against
+  32.3 % exact). Not adopted.
+- **Partly circular.** Where GSHP lacked dry-end points, its θr came from a
+  pedotransfer function on texture (Gupta et al. 2022). That affects the
+  rule and the tool's classifier alike, since both read the same fitted
+  curve at 1500 kPa.
+
+**Not tested, and why.** The other texture routes in the review either
+belong to the shape-similarity family already scored here (Mohammadi and
+Vanclooster, Arya and Heitman, the fractal and lognormal models are
+refinements of inverse Arya–Paris, with the same documented failure in fine
+soils), or need data a single curve does not have (humidity isotherms below
+−10 MPa; soil-moisture time series for data assimilation). Any method that
+reads the same curve is also bounded by the Cover and Hart ceiling, about
+44 % exact for a new source (README, *Validation*).
+
 ## 6. Caveats
 
 - **The cap and the factor were chosen on the reference's measured Ks.**
@@ -304,6 +434,7 @@ caffeinate -i .venv/bin/python verify_ks_physical.py > ks_physical.log 2>&1     
 caffeinate -i .venv/bin/python verify_external.py nj_ssir26 > nj_external.log 2>&1        # the New Jersey test set, all three designs
 caffeinate -i .venv/bin/python figures/make_external_report.py nj_ssir26                  # its fig6 and ks_variants.csv
 caffeinate -i .venv/bin/python figures/make_external_report.py babaeian_zanjanrood        # the same for Zanjanrood
+.venv/bin/python verify_literature_methods.py > literature_methods.log 2>&1               # seconds: the review's forms (Sections 3 and 5); reads figures/cache/ks_neighbors.csv and predictive.csv
 ```
 
 The per-soil reports go to `figures/external/<set>/`. `caffeinate` is
@@ -311,6 +442,10 @@ macOS only; elsewhere, drop it.
 
 ## References
 
+- Ahuja, L.R., Cassel, D.K., Bruce, R.R. and Barnes, B.B. (1989).
+  Evaluation of spatial distribution of hydraulic conductivity using
+  effective porosity data. *Soil Science* 148:404–411.
+  doi:10.1097/00010694-198912000-00002.
 - Arya, L.M. and Paris, J.F. (1981). A physicoempirical model to predict the
   soil moisture characteristic from particle-size distribution and bulk
   density data. *Soil Science Society of America Journal* 45:1023–1030.
@@ -334,9 +469,23 @@ macOS only; elsewhere, drop it.
 - Fredlund, M.D., Fredlund, D.G. and Wilson, G.W. (2000). An equation to
   represent grain-size distribution. *Canadian Geotechnical Journal*
   37:817–827.
+- Ghanbarian, B., Hunt, A.G., Ewing, R.P. and Skinner, T.E. (2014).
+  Universal scaling of the formation factor in porous media derived by
+  combining percolation and effective medium theories. *Geophysical
+  Research Letters* 41:3884–3890.
+- Ghanbarian, B. and Patrignani, A. (2026). Estimating saturated hydraulic
+  conductivity of soil samples from Kansas Mesonet database. *Soil Science
+  Society of America Journal*. doi:10.1002/saj2.70222. Preprint:
+  arXiv:2602.00893.
 - Greenland, D.J. (1977). Soil damage by intensive arable cultivation:
   temporary or permanent? *Philosophical Transactions of the Royal Society
   of London B* 281:193–208.
+- Guarracino, L. (2007). Estimation of saturated hydraulic conductivity Ks
+  from the van Genuchten shape parameter α. *Water Resources Research*
+  43:W11502. doi:10.1029/2006WR005766.
+- Gupta, S., Papritz, A., Lehmann, P., Hengl, T., Bonetti, S. and Or, D.
+  (2022). Global Soil Hydraulic Properties dataset based on legacy site
+  observations and robust parameterization. *Scientific Data* 9:444.
 - Hillel, D. (1980). *Fundamentals of Soil Physics*. Academic Press, New
   York. Chapters 8 and 9.
 - Ippisch, O., Vogel, H.-J. and Bastian, P. (2006). Validity limits for the
@@ -344,8 +493,14 @@ macOS only; elsewhere, drop it.
   numerical simulation. *Advances in Water Resources* 29:1780–1789.
 - Jackson, R.D. (1972). On the calculation of hydraulic conductivity. *Soil
   Science Society of America Proceedings* 36:380–382.
+- Johnson, D.L., Koplik, J. and Schwartz, L.M. (1986). New pore-size
+  parameter characterizing transport in porous media. *Physical Review
+  Letters* 57:2564–2567.
 - Marshall, T.J. (1958). A relation between permeability and size
   distribution of pores. *Journal of Soil Science* 9:1–8.
+- Mishra, S. and Parker, J.C. (1990). On the relation between saturated
+  conductivity and capillary retention characteristics. *Groundwater*
+  28:775–777.
 - Nguyen, M. and Elwood, D. (2025). An iterative program to back-analyze
   grain-size distribution from a predetermined soil–water characteristic
   curve. *Transportation Geotechnics* 51:101485.
@@ -366,6 +521,16 @@ macOS only; elsewhere, drop it.
 - van Genuchten, M.Th. (1980). A closed-form equation for predicting the
   hydraulic conductivity of unsaturated soils. *Soil Science Society of
   America Journal* 44:892–898.
+- Skaggs, T.H. (2011). Assessment of critical path analyses of the
+  relationship between permeability and electrical conductivity of pore
+  networks. *Advances in Water Resources* 34:1335–1342.
+- Tuller, M. and Or, D. (2005). Water films and scaling of soil
+  characteristic curves at low water contents. *Water Resources Research*
+  41:W09403. doi:10.1029/2005WR004142.
 - Vogel, T., van Genuchten, M.Th. and Císlerová, M. (2001). Effect of the
   shape of the soil hydraulic functions near saturation on variably-saturated
   flow predictions. *Advances in Water Resources* 24:133–144.
+- Wuddivira, M.N., Robinson, D.A., Lebron, I. et al. (2012). Estimation of
+  soil clay content from hygroscopic water content measurements. *Soil
+  Science Society of America Journal* 76:1529–1535.
+  doi:10.2136/sssaj2012.0034.
