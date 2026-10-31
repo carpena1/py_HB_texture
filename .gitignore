@@ -137,3 +137,7 @@ figures/external/donana/
 data/andalucia_catalogo_raw/
 # CSIRO NatSoil API downloads (CC BY 4.0), rebuilt with prepare_natsoil.py; kept local.
 data/natsoil_raw/
+# Kansas Mesonet soils (Parker et al. 2022; public file, 2026-10-31): under
+# independent test, distribution not yet decided, so raw file and table stay local.
+data/kansas_raw/
+data/kansas_reference.csv

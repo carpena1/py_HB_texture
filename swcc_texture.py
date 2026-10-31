@@ -134,6 +134,11 @@ REFERENCE_SETS = {
     # 1,733 reference soils finds no harm to the rest (-0.2 pp exact for a
     # new site, p=0.82; +0.6 pp for a new source, p=0.46).
     "natsoil": ["natsoil_reference.csv"],
+    # Kansas Mesonet, USA (Parker et al. 2022, SSSAJ; prepare_kansas.py):
+    # 156 undisturbed cores with texture, retention and Ks on the same
+    # core; public file, distribution not yet decided; independent test
+    # with verify_external.py.
+    "kansas": ["kansas_reference.csv"],
     # The NatSoil projects measured by Sedigraph (Morphology, RAALS,
     # CSIRO_LW): read poorly as a new source, so a test set only.
     "natsoil_other": ["natsoil_other_reference.csv"],

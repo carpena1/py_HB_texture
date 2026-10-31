@@ -19,7 +19,7 @@ every fold, and each sample is scored with and without depth and bulk
 density. Always answering the dataset's most common class is the baseline
 to beat, not chance.
 
-Usage:  python verify_external.py willard|babaeian_zanjanrood|babaeian_az|armas|tong|boorowa|nj_ssir26|setenil|tomejil|donana|lebrija|natsoil|natsoil_other
+Usage:  python verify_external.py willard|babaeian_zanjanrood|babaeian_az|armas|tong|boorowa|nj_ssir26|kansas|setenil|tomejil|donana|lebrija|natsoil|natsoil_other
                                   [n_mc] [--truth=resin]
 """
 
@@ -37,6 +37,7 @@ import prepare_armas
 import prepare_babaeian_az
 import prepare_babaeian_zanjanrood
 import prepare_boorowa
+import prepare_kansas
 import prepare_natsoil
 import prepare_nj_ssir26
 import prepare_tong
@@ -49,6 +50,7 @@ DATASETS = {"willard": prepare_willard,
             "babaeian_az": prepare_babaeian_az, "armas": prepare_armas,
             "tong": prepare_tong, "boorowa": prepare_boorowa,
             "nj_ssir26": prepare_nj_ssir26,
+            "kansas": prepare_kansas,
             "natsoil": prepare_natsoil,
             "natsoil_other": prepare_natsoil,
             # one module, one table per Andalusian site
