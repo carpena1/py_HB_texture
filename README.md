@@ -737,7 +737,9 @@ The **Andalusian soils** measured by K. Vanderlinden (IFAPA;
   both vertisols seem to lose water steeply just below saturation (at 330 cm
   they hold 63–65 % of their water at saturation, against 82 % for the
   reference clays); with the shrinking density they hold 73 % (Laikipia)
-  and 80 % (Tomejil).
+  and 80 % (Tomejil). The folder `Vertisol_shrinkage/` explains the
+  conversion: a memo with the method and a worked example for each soil,
+  its references, the figures, and a test of how much the cap matters.
 - **Doñana** (El Abalario and El Acebuche, aeolian sands under scrub; 17
   curves at 11 and 6 depths to over 2 m, each the mean of 2–3 rings, sand
   boxes to 50 kPa, bulk density 1.70, no Ks) joined the default in 2026-10,

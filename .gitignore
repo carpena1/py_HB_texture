@@ -135,8 +135,5 @@ figures/external/donana/
 # methods (public domain, 19 MB), kept local; rebuild
 # data/catalogo_andalucia_horizons.csv with prepare_catalogo_andalucia.py.
 data/andalucia_catalogo_raw/
-# Vertisol shrinkage-conversion discussion (memo, figures, scripts): shows
-# Laikipia and Andalusian values, so it stays local like their tables.
-Vertisol_shrinkage/
 # CSIRO NatSoil API downloads (CC BY 4.0), rebuilt with prepare_natsoil.py; kept local.
 data/natsoil_raw/
