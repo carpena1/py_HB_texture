@@ -2039,10 +2039,6 @@ Asghari_2014_R_1,unlikely,unknown,,0.0,Cambisols,66.9,Sabalan,268.9,Tskhouk-Karc
 Asghari_2014_R_2,unlikely,unknown,,0.0,Cambisols,66.9,Sabalan,268.9,Tskhouk-Karckar
 Asghari_2014_R_3,unlikely,unknown,,0.0,Cambisols,66.9,Sabalan,268.9,Tskhouk-Karckar
 Asghari_2014_R_4,unlikely,unknown,,0.0,Cambisols,66.9,Sabalan,268.9,Tskhouk-Karckar
-B562 1 1 1,unlikely,unknown,,0.0,Acrisols,181.7,Bundaberg-Boyne Province,1280.5,McBride Volcanic Province
-B562 11 1 1,unlikely,unknown,,0.0,Acrisols,181.7,Bundaberg-Boyne Province,1280.5,McBride Volcanic Province
-B568 3 1 1,unlikely,unknown,,1.0,Acrisols,123.1,Bundaberg-Boyne Province,1221.7,McBride Volcanic Province
-B569 5 1 1,unlikely,unknown,,0.0,Acrisols,181.7,Bundaberg-Boyne Province,1280.5,McBride Volcanic Province
 BAMBRA_10,unlikely,unknown,,1.0,Cambisols,682.5,Ashikule Volcanic Field,682.5,Ashikule Volcanic Field
 BAMBRA_11,unlikely,unknown,,1.0,Cambisols,682.5,Ashikule Volcanic Field,682.5,Ashikule Volcanic Field
 BAMBRA_12,unlikely,unknown,,1.0,Cambisols,682.5,Ashikule Volcanic Field,682.5,Ashikule Volcanic Field
@@ -7933,98 +7929,6 @@ Florida_ksat_data_996,unlikely,unknown,,0.0,Acrisols,1591.3,Utila Volcanic Cente
 Florida_ksat_data_997,unlikely,unknown,,0.0,Arenosols,1262.1,Utila Volcanic Center,1426.7,"Yojoa, Lago"
 Florida_ksat_data_998,unlikely,unknown,,0.0,Arenosols,1262.1,Utila Volcanic Center,1426.7,"Yojoa, Lago"
 Florida_ksat_data_999,unlikely,unknown,,0.0,Arenosols,1253.5,Utila Volcanic Center,1417.7,"Yojoa, Lago"
-Forrest_JA_1985_1,unlikely,unknown,,1.0,Solonetz,128.8,Newer Volcanics Province,128.8,Newer Volcanics Province
-Forrest_JA_1985_10,unlikely,unknown,,1.0,Solonetz,132.0,Newer Volcanics Province,132.0,Newer Volcanics Province
-Forrest_JA_1985_103,unlikely,unknown,,0.0,Solonetz,176.0,Newer Volcanics Province,176.0,Newer Volcanics Province
-Forrest_JA_1985_104,unlikely,unknown,,0.0,Solonetz,176.0,Newer Volcanics Province,176.0,Newer Volcanics Province
-Forrest_JA_1985_105,unlikely,unknown,,0.0,Solonetz,173.9,Newer Volcanics Province,173.9,Newer Volcanics Province
-Forrest_JA_1985_107,unlikely,unknown,,0.0,Solonetz,172.1,Newer Volcanics Province,172.1,Newer Volcanics Province
-Forrest_JA_1985_108,unlikely,unknown,,0.0,Solonetz,172.1,Newer Volcanics Province,172.1,Newer Volcanics Province
-Forrest_JA_1985_109,unlikely,unknown,,0.0,Luvisols,178.2,Newer Volcanics Province,178.2,Newer Volcanics Province
-Forrest_JA_1985_11,unlikely,unknown,,1.0,Luvisols,198.2,Newer Volcanics Province,198.2,Newer Volcanics Province
-Forrest_JA_1985_110,unlikely,unknown,,0.0,Luvisols,178.2,Newer Volcanics Province,178.2,Newer Volcanics Province
-Forrest_JA_1985_111,unlikely,unknown,,0.0,Solonetz,171.2,Newer Volcanics Province,171.2,Newer Volcanics Province
-Forrest_JA_1985_112,unlikely,unknown,,0.0,Solonetz,171.2,Newer Volcanics Province,171.2,Newer Volcanics Province
-Forrest_JA_1985_113,unlikely,unknown,,0.0,Luvisols,190.1,Newer Volcanics Province,190.1,Newer Volcanics Province
-Forrest_JA_1985_114,unlikely,unknown,,0.0,Luvisols,190.1,Newer Volcanics Province,190.1,Newer Volcanics Province
-Forrest_JA_1985_116,unlikely,unknown,,0.0,Luvisols,188.0,Newer Volcanics Province,188.0,Newer Volcanics Province
-Forrest_JA_1985_117,unlikely,unknown,,2.0,Solonetz,123.4,Newer Volcanics Province,123.4,Newer Volcanics Province
-Forrest_JA_1985_118,unlikely,unknown,,2.0,Solonetz,123.4,Newer Volcanics Province,123.4,Newer Volcanics Province
-Forrest_JA_1985_119,unlikely,unknown,,2.0,Solonetz,121.6,Newer Volcanics Province,121.6,Newer Volcanics Province
-Forrest_JA_1985_120,unlikely,unknown,,2.0,Solonetz,121.6,Newer Volcanics Province,121.6,Newer Volcanics Province
-Forrest_JA_1985_13,unlikely,unknown,,1.0,Luvisols,94.9,Newer Volcanics Province,94.9,Newer Volcanics Province
-Forrest_JA_1985_16,unlikely,unknown,,0.0,Luvisols,191.1,Newer Volcanics Province,191.1,Newer Volcanics Province
-Forrest_JA_1985_17,unlikely,unknown,,0.0,Solonetz,192.7,Newer Volcanics Province,192.7,Newer Volcanics Province
-Forrest_JA_1985_2,unlikely,unknown,,1.0,Solonetz,128.8,Newer Volcanics Province,128.8,Newer Volcanics Province
-Forrest_JA_1985_21,unlikely,unknown,,0.0,Luvisols,188.5,Newer Volcanics Province,188.5,Newer Volcanics Province
-Forrest_JA_1985_23,unlikely,unknown,,2.0,Solonetz,91.0,Newer Volcanics Province,91.0,Newer Volcanics Province
-Forrest_JA_1985_24,unlikely,unknown,,2.0,Solonetz,91.0,Newer Volcanics Province,91.0,Newer Volcanics Province
-Forrest_JA_1985_25,unlikely,unknown,,0.0,Solonetz,191.9,Newer Volcanics Province,191.9,Newer Volcanics Province
-Forrest_JA_1985_27,unlikely,unknown,,0.0,Luvisols,193.6,Newer Volcanics Province,193.6,Newer Volcanics Province
-Forrest_JA_1985_28,unlikely,unknown,,0.0,Luvisols,193.6,Newer Volcanics Province,193.6,Newer Volcanics Province
-Forrest_JA_1985_29,unlikely,unknown,,0.0,Solonetz,176.5,Newer Volcanics Province,176.5,Newer Volcanics Province
-Forrest_JA_1985_3,unlikely,unknown,,1.0,Solonetz,130.6,Newer Volcanics Province,130.6,Newer Volcanics Province
-Forrest_JA_1985_31,unlikely,unknown,,0.0,Solonetz,152.3,Newer Volcanics Province,152.3,Newer Volcanics Province
-Forrest_JA_1985_32,unlikely,unknown,,0.0,Solonetz,152.3,Newer Volcanics Province,152.3,Newer Volcanics Province
-Forrest_JA_1985_33,unlikely,unknown,,0.0,Luvisols,152.4,Newer Volcanics Province,152.4,Newer Volcanics Province
-Forrest_JA_1985_35,unlikely,unknown,,0.0,Luvisols,154.3,Newer Volcanics Province,154.3,Newer Volcanics Province
-Forrest_JA_1985_37,unlikely,unknown,,3.0,Solonetz,98.1,Newer Volcanics Province,98.1,Newer Volcanics Province
-Forrest_JA_1985_38,unlikely,unknown,,3.0,Solonetz,98.1,Newer Volcanics Province,98.1,Newer Volcanics Province
-Forrest_JA_1985_39,unlikely,unknown,,2.0,Solonetz,94.4,Newer Volcanics Province,94.4,Newer Volcanics Province
-Forrest_JA_1985_40,unlikely,unknown,,2.0,Solonetz,94.4,Newer Volcanics Province,94.4,Newer Volcanics Province
-Forrest_JA_1985_41,unlikely,unknown,,3.0,Solonetz,96.3,Newer Volcanics Province,96.3,Newer Volcanics Province
-Forrest_JA_1985_42,unlikely,unknown,,3.0,Solonetz,96.3,Newer Volcanics Province,96.3,Newer Volcanics Province
-Forrest_JA_1985_43,unlikely,unknown,,3.0,Solonetz,97.9,Newer Volcanics Province,97.9,Newer Volcanics Province
-Forrest_JA_1985_44,unlikely,unknown,,3.0,Solonetz,97.9,Newer Volcanics Province,97.9,Newer Volcanics Province
-Forrest_JA_1985_45,unlikely,unknown,,1.0,Solonetz,88.7,Newer Volcanics Province,88.7,Newer Volcanics Province
-Forrest_JA_1985_46,unlikely,unknown,,1.0,Solonetz,88.7,Newer Volcanics Province,88.7,Newer Volcanics Province
-Forrest_JA_1985_47,unlikely,unknown,,0.0,Luvisols,171.2,Newer Volcanics Province,171.2,Newer Volcanics Province
-Forrest_JA_1985_48,unlikely,unknown,,0.0,Luvisols,171.2,Newer Volcanics Province,171.2,Newer Volcanics Province
-Forrest_JA_1985_49,unlikely,unknown,,0.0,Luvisols,171.1,Newer Volcanics Province,171.1,Newer Volcanics Province
-Forrest_JA_1985_5,unlikely,unknown,,1.0,Solonetz,130.4,Newer Volcanics Province,130.4,Newer Volcanics Province
-Forrest_JA_1985_50,unlikely,unknown,,0.0,Luvisols,171.1,Newer Volcanics Province,171.1,Newer Volcanics Province
-Forrest_JA_1985_51,unlikely,unknown,,0.0,Luvisols,167.3,Newer Volcanics Province,167.3,Newer Volcanics Province
-Forrest_JA_1985_52,unlikely,unknown,,0.0,Luvisols,167.3,Newer Volcanics Province,167.3,Newer Volcanics Province
-Forrest_JA_1985_54,unlikely,unknown,,0.0,Luvisols,165.5,Newer Volcanics Province,165.5,Newer Volcanics Province
-Forrest_JA_1985_55,unlikely,unknown,,0.0,Luvisols,163.6,Newer Volcanics Province,163.6,Newer Volcanics Province
-Forrest_JA_1985_57,unlikely,unknown,,0.0,Solonetz,152.7,Newer Volcanics Province,152.7,Newer Volcanics Province
-Forrest_JA_1985_58,unlikely,unknown,,0.0,Solonetz,152.7,Newer Volcanics Province,152.7,Newer Volcanics Province
-Forrest_JA_1985_59,unlikely,unknown,,1.0,Solonetz,140.5,Newer Volcanics Province,140.5,Newer Volcanics Province
-Forrest_JA_1985_6,unlikely,unknown,,1.0,Solonetz,130.4,Newer Volcanics Province,130.4,Newer Volcanics Province
-Forrest_JA_1985_60,unlikely,unknown,,1.0,Solonetz,140.5,Newer Volcanics Province,140.5,Newer Volcanics Province
-Forrest_JA_1985_61,unlikely,unknown,,1.0,Solonetz,140.5,Newer Volcanics Province,140.5,Newer Volcanics Province
-Forrest_JA_1985_62,unlikely,unknown,,1.0,Solonetz,140.5,Newer Volcanics Province,140.5,Newer Volcanics Province
-Forrest_JA_1985_63,unlikely,unknown,,0.0,Solonetz,142.7,Newer Volcanics Province,142.7,Newer Volcanics Province
-Forrest_JA_1985_64,unlikely,unknown,,0.0,Solonetz,142.7,Newer Volcanics Province,142.7,Newer Volcanics Province
-Forrest_JA_1985_65,unlikely,unknown,,0.0,Solonetz,140.9,Newer Volcanics Province,140.9,Newer Volcanics Province
-Forrest_JA_1985_67,unlikely,unknown,,0.0,Solonetz,142.7,Newer Volcanics Province,142.7,Newer Volcanics Province
-Forrest_JA_1985_68,unlikely,unknown,,0.0,Solonetz,142.7,Newer Volcanics Province,142.7,Newer Volcanics Province
-Forrest_JA_1985_69,unlikely,unknown,,0.0,Solonetz,142.7,Newer Volcanics Province,142.7,Newer Volcanics Province
-Forrest_JA_1985_7,unlikely,unknown,,0.0,Solonetz,124.4,Newer Volcanics Province,124.4,Newer Volcanics Province
-Forrest_JA_1985_70,unlikely,unknown,,0.0,Solonetz,142.7,Newer Volcanics Province,142.7,Newer Volcanics Province
-Forrest_JA_1985_71,unlikely,unknown,,1.0,Solonetz,132.2,Newer Volcanics Province,132.2,Newer Volcanics Province
-Forrest_JA_1985_72,unlikely,unknown,,1.0,Solonetz,132.2,Newer Volcanics Province,132.2,Newer Volcanics Province
-Forrest_JA_1985_73,unlikely,unknown,,0.0,Solonetz,139.5,Newer Volcanics Province,139.5,Newer Volcanics Province
-Forrest_JA_1985_74,unlikely,unknown,,0.0,Solonetz,139.5,Newer Volcanics Province,139.5,Newer Volcanics Province
-Forrest_JA_1985_75,unlikely,unknown,,3.0,Solonetz,107.5,Newer Volcanics Province,107.5,Newer Volcanics Province
-Forrest_JA_1985_77,unlikely,unknown,,2.0,Solonetz,112.5,Newer Volcanics Province,112.5,Newer Volcanics Province
-Forrest_JA_1985_78,unlikely,unknown,,2.0,Solonetz,112.5,Newer Volcanics Province,112.5,Newer Volcanics Province
-Forrest_JA_1985_79,unlikely,unknown,,2.0,Solonetz,118.0,Newer Volcanics Province,118.0,Newer Volcanics Province
-Forrest_JA_1985_8,unlikely,unknown,,0.0,Solonetz,124.4,Newer Volcanics Province,124.4,Newer Volcanics Province
-Forrest_JA_1985_80,unlikely,unknown,,2.0,Solonetz,118.0,Newer Volcanics Province,118.0,Newer Volcanics Province
-Forrest_JA_1985_81,unlikely,unknown,,2.0,Solonetz,116.2,Newer Volcanics Province,116.2,Newer Volcanics Province
-Forrest_JA_1985_82,unlikely,unknown,,2.0,Solonetz,116.2,Newer Volcanics Province,116.2,Newer Volcanics Province
-Forrest_JA_1985_83,unlikely,unknown,,3.0,Solonetz,105.0,Newer Volcanics Province,105.0,Newer Volcanics Province
-Forrest_JA_1985_85,unlikely,unknown,,1.0,Solonetz,109.6,Newer Volcanics Province,109.6,Newer Volcanics Province
-Forrest_JA_1985_86,unlikely,unknown,,1.0,Solonetz,109.6,Newer Volcanics Province,109.6,Newer Volcanics Province
-Forrest_JA_1985_87,unlikely,unknown,,1.0,Solonetz,105.2,Newer Volcanics Province,105.2,Newer Volcanics Province
-Forrest_JA_1985_88,unlikely,unknown,,1.0,Solonetz,105.2,Newer Volcanics Province,105.2,Newer Volcanics Province
-Forrest_JA_1985_9,unlikely,unknown,,1.0,Solonetz,132.0,Newer Volcanics Province,132.0,Newer Volcanics Province
-Forrest_JA_1985_92,unlikely,unknown,,0.0,Luvisols,184.2,Newer Volcanics Province,184.2,Newer Volcanics Province
-Forrest_JA_1985_93,unlikely,unknown,,0.0,Solonetz,182.6,Newer Volcanics Province,182.6,Newer Volcanics Province
-Forrest_JA_1985_94,unlikely,unknown,,0.0,Solonetz,182.6,Newer Volcanics Province,182.6,Newer Volcanics Province
-Forrest_JA_1985_96,unlikely,unknown,,0.0,Luvisols,179.0,Newer Volcanics Province,179.0,Newer Volcanics Province
-Forrest_JA_1985_97,unlikely,unknown,,0.0,Luvisols,179.0,Newer Volcanics Province,179.0,Newer Volcanics Province
 GA wasp_1_2,unlikely,no,AfSP not volcanic,0.0,Ferralsols,561.2,"Biao, Pico",563.9,"Basile, Pico"
 GA wasp_1_3,unlikely,no,AfSP not volcanic,0.0,Ferralsols,561.2,"Biao, Pico",563.9,"Basile, Pico"
 GA wasp_1_5,unlikely,no,AfSP not volcanic,0.0,Ferralsols,561.2,"Biao, Pico",563.9,"Basile, Pico"
@@ -14000,6 +13904,76 @@ sDB_P_38_4,unknown,unknown,,,,,,,
 sDB_P_39_0,unknown,unknown,,,,,,,
 sDB_P_39_1,unknown,unknown,,,,,,,
 sDB_P_39_2,unknown,unknown,,,,,,,
+WL_2LB06731,known,no,"Mount Kenya volcanics, not andic; volcano <= 100 km + SoilGrids >= 5 %",7.0,Vertisols,87.2,Elmenteita Badlands,87.2,Elmenteita Badlands
+WL_2LB06734,known,no,"Mount Kenya volcanics, not andic; volcano <= 100 km + SoilGrids >= 5 %",7.0,Vertisols,87.2,Elmenteita Badlands,87.2,Elmenteita Badlands
+WL_2LB06821,known,no,"Mount Kenya volcanics, not andic",3.0,Vertisols,95.8,Nyambeni Hills,95.8,Nyambeni Hills
+WL_2LB06824,known,no,"Mount Kenya volcanics, not andic",3.0,Vertisols,95.8,Nyambeni Hills,95.8,Nyambeni Hills
+WL_2LN06711,known,no,"Mount Kenya volcanics, not andic",,,,,,
+WL_2LN06714,known,no,"Mount Kenya volcanics, not andic",,,,,,
+WL_2LT06721,known,no,"Mount Kenya volcanics, not andic",,,,,,
+WL_2LT06724,known,no,"Mount Kenya volcanics, not andic",,,,,,
+WL_2LT06811,known,no,"Mount Kenya volcanics, not andic",,,,,,
+WL_2LT06814,known,no,"Mount Kenya volcanics, not andic",,,,,,
+WL_2LT07711,known,no,"Mount Kenya volcanics, not andic",,,,,,
+WL_2LT07714,known,no,"Mount Kenya volcanics, not andic",,,,,,
+WL_2SB05711,known,no,"Mount Kenya volcanics, not andic; volcano <= 100 km + SoilGrids >= 5 %",6.0,Vertisols,93.9,Nyambeni Hills,93.9,Nyambeni Hills
+WL_2SB05714,known,no,"Mount Kenya volcanics, not andic; volcano <= 100 km + SoilGrids >= 5 %",6.0,Vertisols,93.9,Nyambeni Hills,93.9,Nyambeni Hills
+WL_2SB05811,known,no,"Mount Kenya volcanics, not andic",2.0,Vertisols,97.3,Elmenteita Badlands,97.3,Elmenteita Badlands
+WL_2SB05814,known,no,"Mount Kenya volcanics, not andic",2.0,Vertisols,97.3,Elmenteita Badlands,97.3,Elmenteita Badlands
+WL_2ST05511,known,no,"Mount Kenya volcanics, not andic; volcano <= 100 km + SoilGrids >= 5 %",6.0,Vertisols,93.9,Nyambeni Hills,93.9,Nyambeni Hills
+WL_2ST05514,known,no,"Mount Kenya volcanics, not andic; volcano <= 100 km + SoilGrids >= 5 %",6.0,Vertisols,93.9,Nyambeni Hills,93.9,Nyambeni Hills
+WL_2ST05611,known,no,"Mount Kenya volcanics, not andic; volcano <= 100 km + SoilGrids >= 5 %",6.0,Vertisols,93.9,Nyambeni Hills,93.9,Nyambeni Hills
+WL_2ST05614,known,no,"Mount Kenya volcanics, not andic; volcano <= 100 km + SoilGrids >= 5 %",6.0,Vertisols,93.9,Nyambeni Hills,93.9,Nyambeni Hills
+WL_2ST06011,known,no,"Mount Kenya volcanics, not andic",1.0,Vertisols,97.9,Elmenteita Badlands,97.9,Elmenteita Badlands
+WL_2ST06014,known,no,"Mount Kenya volcanics, not andic",1.0,Vertisols,97.9,Elmenteita Badlands,97.9,Elmenteita Badlands
+WL_2ST06911,known,no,"Mount Kenya volcanics, not andic",3.0,Vertisols,94.5,Nyambeni Hills,94.5,Nyambeni Hills
+WL_2ST06914,known,no,"Mount Kenya volcanics, not andic",3.0,Vertisols,94.5,Nyambeni Hills,94.5,Nyambeni Hills
+WL_2ST27711,known,no,"Mount Kenya volcanics, not andic",4.0,Vertisols,92.0,Elmenteita Badlands,92.0,Elmenteita Badlands
+WL_2ST27714,known,no,"Mount Kenya volcanics, not andic",4.0,Vertisols,92.0,Elmenteita Badlands,92.0,Elmenteita Badlands
+WL_2ST29311,known,no,"Mount Kenya volcanics, not andic",2.0,Vertisols,99.2,Nyambeni Hills,99.2,Nyambeni Hills
+WL_2ST29314,known,no,"Mount Kenya volcanics, not andic",2.0,Vertisols,99.2,Nyambeni Hills,99.2,Nyambeni Hills
+WL_3LN06221,known,no,"Mount Kenya volcanics, not andic",,,,,,
+WL_3LN06224,known,no,"Mount Kenya volcanics, not andic",,,,,,
+WL_3LN06311,known,no,"Mount Kenya volcanics, not andic",,,,,,
+WL_3LN06314,known,no,"Mount Kenya volcanics, not andic",,,,,,
+WL_3LN06321,known,no,"Mount Kenya volcanics, not andic",,,,,,
+WL_3LN06324,known,no,"Mount Kenya volcanics, not andic",,,,,,
+WL_3LT05911,known,no,"Mount Kenya volcanics, not andic",,,,,,
+WL_3LT05914,known,no,"Mount Kenya volcanics, not andic",,,,,,
+WL_3LT06121,known,no,"Mount Kenya volcanics, not andic",,,,,,
+WL_3LT06124,known,no,"Mount Kenya volcanics, not andic",,,,,,
+WL_3LT06411,known,no,"Mount Kenya volcanics, not andic",,,,,,
+WL_3LT06414,known,no,"Mount Kenya volcanics, not andic",,,,,,
+WL_3LT07411,known,no,"Mount Kenya volcanics, not andic",,,,,,
+WL_3LT07414,known,no,"Mount Kenya volcanics, not andic",,,,,,
+WL_3LT07421,known,no,"Mount Kenya volcanics, not andic",,,,,,
+WL_3LT07424,known,no,"Mount Kenya volcanics, not andic",,,,,,
+WL_3LT07721,known,no,"Mount Kenya volcanics, not andic",,,,,,
+WL_3LT07724,known,no,"Mount Kenya volcanics, not andic",,,,,,
+WL_3SB06511,known,no,"Mount Kenya volcanics, not andic; SoilGrids Andosols; volcano <= 100 km + SoilGrids >= 5 %",15.0,Andosols,56.9,Nyambeni Hills,56.9,Nyambeni Hills
+WL_3SB06514,known,no,"Mount Kenya volcanics, not andic; SoilGrids Andosols; volcano <= 100 km + SoilGrids >= 5 %",15.0,Andosols,56.9,Nyambeni Hills,56.9,Nyambeni Hills
+WL_3SB07031,known,no,"Mount Kenya volcanics, not andic; volcano <= 100 km + SoilGrids >= 5 %",9.0,Vertisols,87.6,Nyambeni Hills,87.6,Nyambeni Hills
+WL_3SB07034,known,no,"Mount Kenya volcanics, not andic; volcano <= 100 km + SoilGrids >= 5 %",9.0,Vertisols,87.6,Nyambeni Hills,87.6,Nyambeni Hills
+WL_3SN07011,known,no,"Mount Kenya volcanics, not andic; volcano <= 100 km + SoilGrids >= 5 %",9.0,Vertisols,87.6,Nyambeni Hills,87.6,Nyambeni Hills
+WL_3SN07014,known,no,"Mount Kenya volcanics, not andic; volcano <= 100 km + SoilGrids >= 5 %",9.0,Vertisols,87.6,Nyambeni Hills,87.6,Nyambeni Hills
+WL_3SN07811,known,no,"Mount Kenya volcanics, not andic",4.0,Vertisols,89.6,Nyambeni Hills,89.6,Nyambeni Hills
+WL_3SN07814,known,no,"Mount Kenya volcanics, not andic",4.0,Vertisols,89.6,Nyambeni Hills,89.6,Nyambeni Hills
+WL_3ST02111,known,no,"Mount Kenya volcanics, not andic; SoilGrids Andosols; volcano <= 100 km + SoilGrids >= 5 %",19.0,Andosols,76.1,Nyambeni Hills,76.1,Nyambeni Hills
+WL_3ST02114,known,no,"Mount Kenya volcanics, not andic; SoilGrids Andosols; volcano <= 100 km + SoilGrids >= 5 %",19.0,Andosols,76.1,Nyambeni Hills,76.1,Nyambeni Hills
+WL_3ST06611,known,no,"Mount Kenya volcanics, not andic; SoilGrids Andosols; volcano <= 100 km + SoilGrids >= 5 %",15.0,Andosols,56.9,Nyambeni Hills,56.9,Nyambeni Hills
+WL_3ST06614,known,no,"Mount Kenya volcanics, not andic; SoilGrids Andosols; volcano <= 100 km + SoilGrids >= 5 %",15.0,Andosols,56.9,Nyambeni Hills,56.9,Nyambeni Hills
+WL_3ST07021,known,no,"Mount Kenya volcanics, not andic; volcano <= 100 km + SoilGrids >= 5 %",9.0,Vertisols,87.6,Nyambeni Hills,87.6,Nyambeni Hills
+WL_3ST07024,known,no,"Mount Kenya volcanics, not andic; volcano <= 100 km + SoilGrids >= 5 %",9.0,Vertisols,87.6,Nyambeni Hills,87.6,Nyambeni Hills
+WL_3ST07111,known,no,"Mount Kenya volcanics, not andic",4.0,Vertisols,92.0,Elmenteita Badlands,92.0,Elmenteita Badlands
+WL_3ST07114,known,no,"Mount Kenya volcanics, not andic",4.0,Vertisols,92.0,Elmenteita Badlands,92.0,Elmenteita Badlands
+WL_3ST07211,known,no,"Mount Kenya volcanics, not andic",4.0,Vertisols,82.3,Nyambeni Hills,82.3,Nyambeni Hills
+WL_3ST07214,known,no,"Mount Kenya volcanics, not andic",4.0,Vertisols,82.3,Nyambeni Hills,82.3,Nyambeni Hills
+WL_3ST07311,known,no,"Mount Kenya volcanics, not andic; volcano <= 100 km + SoilGrids >= 5 %",5.0,Vertisols,83.4,Nyambeni Hills,83.4,Nyambeni Hills
+WL_3ST07314,known,no,"Mount Kenya volcanics, not andic; volcano <= 100 km + SoilGrids >= 5 %",5.0,Vertisols,83.4,Nyambeni Hills,83.4,Nyambeni Hills
+WL_3ST07511,known,no,"Mount Kenya volcanics, not andic; volcano <= 100 km + SoilGrids >= 5 %",7.0,Vertisols,87.2,Nyambeni Hills,87.2,Nyambeni Hills
+WL_3ST07514,known,no,"Mount Kenya volcanics, not andic; volcano <= 100 km + SoilGrids >= 5 %",7.0,Vertisols,87.2,Nyambeni Hills,87.2,Nyambeni Hills
+WL_3ST07911,known,no,"Mount Kenya volcanics, not andic; volcano <= 100 km + SoilGrids >= 5 %",5.0,Vertisols,86.6,Nyambeni Hills,86.6,Nyambeni Hills
+WL_3ST07914,known,no,"Mount Kenya volcanics, not andic; volcano <= 100 km + SoilGrids >= 5 %",5.0,Vertisols,86.6,Nyambeni Hills,86.6,Nyambeni Hills
 AR_C10P1-1_jun94,known,yes,Canary andic set; volcano <= 100 km + SoilGrids >= 5 %,6.0,Luvisols,37.7,Tenerife,37.7,Tenerife
 AR_C10P1-3_jun94,known,yes,Canary andic set; volcano <= 100 km + SoilGrids >= 5 %,6.0,Luvisols,37.7,Tenerife,37.7,Tenerife
 AR_C10P1-5_jun94,known,yes,Canary andic set; volcano <= 100 km + SoilGrids >= 5 %,6.0,Luvisols,37.7,Tenerife,37.7,Tenerife

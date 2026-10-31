@@ -28,15 +28,15 @@ fit a curve — which is why Greece and most of Spain drop out, and Poland's
 texture has to be summed from raw size classes. Its table is built locally
 from consortium-restricted data and never distributed. Laikipia's sandbox did
 not saturate its cores, so only saturation, anchored on porosity, and the
-pressure plates are kept; its table is unpublished and never distributed
-either. The Andalusian rings (K. Vanderlinden, IFAPA) are gravimetric, made
-volumetric with each Setenil ring's density and, for the Tomejil vertisol,
-with a density that follows shrinkage; their tables are distributed with K.
-Vanderlinden's agreement. A checkout without the restricted tables runs on the
-public 14,622. The Arizona, Canary Islands and Yellow River tables are public;
-the Yellow River curves are published only as fits, so they are rebuilt from 1
-to 1000 kPa and refitted; the Canary points are read from the thesis's vector
-figures and checked against its own tables.
+pressure plates are kept; its table is the project's own and distributed. The
+Andalusian rings (K. Vanderlinden, IFAPA) are gravimetric, made volumetric
+with each Setenil ring's density and, for the Tomejil vertisol, with a density
+that follows shrinkage; their tables are distributed with K. Vanderlinden's
+agreement. A checkout without the restricted tables runs on the public 14,692.
+The Arizona, Canary Islands and Yellow River tables are public; the Yellow
+River curves are published only as fits, so they are rebuilt from 1 to 1000
+kPa and refitted; the Canary points are read from the thesis's vector figures
+and checked against its own tables.
 
 | Column | Meaning |
 |---|---|
@@ -60,14 +60,14 @@ from 21 laboratories in 16 countries and takes Europe from 1,261 layers to
 
 *Figure 2.* Equal Earth projection, so circle areas compare across latitudes.
 Samples are binned into 2° cells, with circle area proportional to the number
-of layers. Teal is the public reference (14,317 of its 14,622 layers carry
-coordinates; UNSODA and sDB publish none, and the 21 Arizona soils have none);
-orange-red is EU-HYDI (6,479 of 6,797 layers georeferenced), the Laikipia
-soils (44 of 70; large farms carry no coordinates) and the 57 CSIRO Boorowa
-cores; the 122 Andalusian curves (Setenil, Tomejil, Lebrija and Doñana) are
-part of the public reference since 2026-10. EU-HYDI is consortium-restricted,
-Laikipia unpublished and Boorowa non-commercial only: all three are part of
-the default reference wherever their tables have been built locally, are never
+of layers. Teal is the public reference (14,361 of its 14,692 layers carry
+coordinates; UNSODA and sDB publish none, the 21 Arizona soils have none, and
+26 of the 70 Laikipia soils, from large farms, have none); orange-red is
+EU-HYDI (6,479 of 6,797 layers georeferenced) and the 57 CSIRO Boorowa cores.
+The 122 Andalusian curves (Setenil, Tomejil, Lebrija and Doñana) and the
+Laikipia soils are part of the public reference. EU-HYDI is
+consortium-restricted and Boorowa non-commercial only: both are part of the
+default reference wherever their tables have been built locally, are never
 distributed, and appear here only as cell counts. 3 layers south of 58°S, in
 Antarctica, fall outside the mapped area and are not drawn. Land outline:
 Natural Earth 110 m, public domain.
@@ -78,11 +78,11 @@ Natural Earth 110 m, public domain.
 | Europe | 1,383 | 7,862 | +6,479 |
 | Asia | 2,370 | 2,653 | +283 |
 | South America | 639 | 639 | +0 |
-| Africa | 737 | 793 | +56 |
+| Africa | 781 | 793 | +12 |
 | Australasia | 239 | 296 | +57 |
-| **Georeferenced** | 14,317 | 20,897 | +6,580 |
+| **Georeferenced** | 14,361 | 20,897 | +6,536 |
 
-Europe goes from 9.7 % of the georeferenced reference to 37.6 %, and the
+Europe goes from 9.6 % of the georeferenced reference to 37.6 %, and the
 Nordic gap is largely closed: in Europe above 58°N the reference now holds
 1,333 layers against 160 before, 199 of them above 62°N against 22. What
 EU-HYDI cannot fill is the south. Greece and most of Spain contributed only

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- py_HB_texture, written from figures/workflow.html by figures/make_workflow_md.py -->
-<svg xmlns="http://www.w3.org/2000/svg" width="1040" height="1334" viewBox="0 0 1040 1334" role="img" aria-label="Thirteen source databases pass through per-source preparation scripts into derivative CSV tables; GSHP, KSSL, Hohenbrink, Zanjanrood, Arizona, the Canary Islands, the Yellow River Basin, the restricted EU-HYDI, the unpublished Laikipia, the Andalusian soils and the Australian CSIRO cores (NatSoil and Boorowa) form the default merged reference of 21,546 layers, with UNSODA and sDB added only in the all set.">
+<svg xmlns="http://www.w3.org/2000/svg" width="1040" height="1334" viewBox="0 0 1040 1334" role="img" aria-label="Thirteen source databases pass through per-source preparation scripts into derivative CSV tables; GSHP, KSSL, Hohenbrink, Zanjanrood, Arizona, the Canary Islands, the Yellow River Basin, the restricted EU-HYDI, Laikipia, the Andalusian soils and the Australian CSIRO cores (NatSoil and Boorowa) form the default merged reference of 21,546 layers, with UNSODA and sDB added only in the all set.">
       <defs>
         <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
           <path d="M 0 1 L 9 5 L 0 9 z" fill="#141A1D"/>
@@ -84,7 +84,7 @@
         <text x="28" y="540" font-size="13" font-weight="600" fill="#141A1D">Laikipia (Kenya)</text>
         <text x="28" y="558" font-size="11" fill="#5C6A70">Willard et al., under review</text>
         <text x="28" y="574" font-size="11" fill="#5C6A70">70 cores, 35 fields</text>
-        <text x="28" y="588" font-size="11" fill="#141A1D">unpublished</text>
+        <text x="28" y="588" font-size="11" fill="#141A1D">the project&#8217;s own data</text>
         <rect x="256" y="518" width="300" height="78" rx="3" fill="#EAEEEC" stroke="#141A1D" opacity=".85"/>
         <text x="268" y="538" font-size="11.5" font-family="IBM Plex Mono, monospace" fill="#0E6E73">prepare_willard.py</text>
         <text x="268" y="556" font-size="11" fill="#141A1D">authors&#8217; revised curves (L. Willard)</text>
@@ -212,7 +212,7 @@
           <rect x="596" y="518" width="196" height="78" rx="3" fill="none" stroke="#0E6E73"/>
           <text x="608" y="542" fill="#0E6E73">willard_reference</text>
           <text x="608" y="562" font-size="13" font-family="IBM Plex Sans, sans-serif" font-weight="600" fill="#141A1D">70</text>
-          <text x="608" y="582" font-size="11" font-family="IBM Plex Sans, sans-serif" fill="#5C6A70">26 with K<tspan baseline-shift="sub" font-size="8">s</tspan> (Saturo) &#183; not distributed</text>
+          <text x="608" y="582" font-size="11" font-family="IBM Plex Sans, sans-serif" fill="#5C6A70">26 with K<tspan baseline-shift="sub" font-size="8">s</tspan> (Saturo)</text>
           <rect x="596" y="612" width="196" height="78" rx="3" fill="none" stroke="#0E6E73"/>
           <text x="608" y="636" fill="#0E6E73">babaeian_az_reference</text>
           <text x="608" y="656" font-size="13" font-family="IBM Plex Sans, sans-serif" font-weight="600" fill="#141A1D">21</text>
@@ -249,9 +249,9 @@
         <text x="862" y="285" font-size="11" fill="#5C6A70">sand is 22 % of rows,</text>
         <text x="862" y="300" font-size="11" fill="#5C6A70">silt under 0.4 %</text>
         <text x="862" y="336" font-size="11" fill="#141A1D">Without the restricted</text>
-        <text x="862" y="351" font-size="11" fill="#141A1D">EU-HYDI, Laikipia</text>
-        <text x="862" y="366" font-size="11" fill="#141A1D">and Boorowa</text>
-        <text x="862" y="381" font-size="11" fill="#141A1D">tables, merged: the 14,622</text>
+        <text x="862" y="351" font-size="11" fill="#141A1D">EU-HYDI and Boorowa</text>
+        <text x="862" y="366" font-size="11" fill="#141A1D">tables, merged:</text>
+        <text x="862" y="381" font-size="11" fill="#141A1D">the 14,692</text>
         <text x="862" y="396" font-size="11" fill="#5C6A70">(--reference public)</text>
 
         <rect x="848" y="1082" width="176" height="132" rx="3" fill="none" stroke="#141A1D" opacity=".5"/>

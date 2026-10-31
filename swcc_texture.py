@@ -48,8 +48,8 @@ REFERENCE_CSV = os.path.join(DATA_DIR, "gshp_reference.csv")
 # are selected -- despite KSSL carrying no Ksat of its own.
 REFERENCE_SETS = {
     # Laikipia, Arizona, the Canary Islands and the Yellow River Basin joined
-    # the default in 2026-09, after EU-HYDI. EU-HYDI and Laikipia are restricted, so where their
-    # tables have not been built the default quietly becomes "public" -- see
+    # the default in 2026-09, after EU-HYDI. Where a restricted table has not
+    # been built, the default quietly becomes "public" -- see
     # RESTRICTED_TABLES.
     "merged": ["gshp_reference.csv", "kssl_reference.csv",
                "hohenbrink_reference.csv", "babaeian_zanjanrood_reference.csv",
@@ -63,15 +63,17 @@ REFERENCE_SETS = {
     "public": ["gshp_reference.csv", "kssl_reference.csv",
                "hohenbrink_reference.csv", "babaeian_zanjanrood_reference.csv",
                "babaeian_az_reference.csv", "armas_reference.csv",
-               "tong_reference.csv", "setenil_reference.csv",
-               "tomejil_reference.csv", "lebrija_reference.csv",
-               "donana_reference.csv", "natsoil_reference.csv"],
+               "willard_reference.csv", "tong_reference.csv",
+               "setenil_reference.csv", "tomejil_reference.csv",
+               "lebrija_reference.csv", "donana_reference.csv",
+               "natsoil_reference.csv"],
     "gshp": ["gshp_reference.csv"],
     "kssl": ["kssl_reference.csv"],
     "hohenbrink": ["hohenbrink_reference.csv"],
     "euhydi": ["euhydi_reference.csv"],
-    # Laikipia, Kenya (Willard et al., unpublished; prepare_willard.py); in
-    # the default since 2026-09 after verify_external.py, without its field Ks.
+    # Laikipia, Kenya (Willard et al., under review; prepare_willard.py), the
+    # project's own data, distributed since 2026-10-31; in the default since
+    # 2026-09 after verify_external.py.
     "willard": ["willard_reference.csv"],
     # Zanjanrood, Iran (Babaeian et al. 2015; prepare_babaeian_zanjanrood.py);
     # in the default since 2026-09 after verify_external.py.
@@ -151,8 +153,7 @@ DEFAULT_REFERENCE = "merged"
 # that includes one still loads without it -- from its other tables, with a
 # note on stderr -- so a fresh clone of the public repository runs. A set made
 # only of restricted tables cannot load at all.
-RESTRICTED_TABLES = {"euhydi_reference.csv", "willard_reference.csv",
-                     "boorowa_reference.csv"}
+RESTRICTED_TABLES = {"euhydi_reference.csv", "boorowa_reference.csv"}
 _noted_missing = set()
 
 # Sources whose particle size may be on a < 1 mm sieving basis (sand 50-1000
@@ -1080,20 +1081,15 @@ def main():
                          "recall. 0 disables the correction. See README.")
     ap.add_argument("--reference", choices=sorted(REFERENCE_SETS),
                     default=DEFAULT_REFERENCE,
-                    help="reference table. merged (default) = GSHP 9,996 "
-                         "layers + NCSS/KSSL 2,530 + Hohenbrink 560 + "
-                         "Zanjanrood (Babaeian) 169 + EU-HYDI 6,797 + "
-                         "Laikipia 86 + Arizona 21 + Canary Islands 66 + "
-                         "Yellow River 1,030, 21,255 "
-                         "in total. EU-HYDI (consortium-restricted) and Laikipia "
-                         "(unpublished) are built locally with "
-                         "prepare_euhydi.py and prepare_willard.py and never "
+                    help="reference table. merged (default) = every table "
+                         "of the default reference (21,546 layers; see README, "
+                         "Reference data). EU-HYDI (consortium-restricted) and "
+                         "Boorowa (CC BY-NC-SA) are built locally with "
+                         "prepare_euhydi.py and prepare_boorowa.py and never "
                          "distributed, so where they are absent merged uses "
-                         "the other seven (14,372) and says so. public = those "
-                         "seven distributed tables; gshp, kssl, "
-                         "hohenbrink, babaeian_zanjanrood, euhydi, willard, "
-                         "babaeian_az, armas and tong select "
-                         "one source "
+                         "the distributed tables (14,692 layers) and says so. "
+                         "public = the distributed tables; each source name "
+                         "(gshp, kssl, euhydi, willard, ...) selects one source "
                          "(kssl has NO measured Ksat, so Ks cannot be "
                          "estimated from it); all adds UNSODA 2.0 and sDB. "
                          "NOTE: what merged contains has changed over time -- "

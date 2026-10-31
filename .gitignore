@@ -43,10 +43,9 @@ data/unsoda_psd.csv
 # data/hohenbrink_reference.csv with prepare_hohenbrink.py.
 data/Hohenbrink_raw/
 
-# Laikipia, Kenya soils (the user's own team, unpublished; exact site
-# locations and a submitted manuscript). Not distributed.
+# Laikipia, Kenya soils (the project's own team): the derived table is
+# distributed (2026-10-31); the raw files, with exact site locations, stay local.
 data/willard_raw/
-data/willard_reference.csv
 
 # Canary Islands volcanic ("sorriba") soils: Armas-Espinel et al. (2003) paper
 # and the source dissertation (copyright), and the points digitised from it.
