@@ -16,42 +16,48 @@ Usage:  python verify_sieve_1mm.py [n_per_class] [n_mc]
 
 import sys
 
+# verify_common first: it pins BLAS/OpenMP threads before numpy loads.
+from verify_common import DATA, mcnemar, pool
+
 import numpy as np
 import pandas as pd
 from scipy.stats import wilcoxon
 
 import swcc_texture as st
-from verify_common import map_folds, mcnemar
 from verify_groups import GROUP
 from verify_join_effect import H, N_FOLDS, REF_COLS, curve, prep
 
 
-def score(job, ref_df, tg, n_mc):
-    """One reference (and classifier) per fold; (class, sand %, Ks cm/h)."""
-    col, folds, clf = job
-    pred = np.empty(len(tg), dtype=object)
-    sand = np.full(len(tg), np.nan)
-    ks = np.full(len(tg), np.nan)
-    for held in folds:
-        sel = np.where(tg[col].isin(held).to_numpy())[0]
-        if not len(sel):
-            continue
-        train = ref_df[~ref_df[col].isin(held)]
-        ref = st.GshpReference(df=train[REF_COLS].reset_index(drop=True))
-        model = st.TextureGBM(df=train.reset_index(drop=True)) if clf else None
-        for j in sel:
-            r = tg.iloc[j]
-            out = st.estimate(H, curve(r), ref=ref, n_mc=n_mc, clf=model,
-                              sample_type=r.sample_type)
-            pred[j] = out["texture_class"]
-            sand[j] = out["fractions"]["sand"]
-            ks[j] = out["ksat"]["median_cmh"]
+def one_fold(arm, kind, col, held, n_mc, clf):
+    """One reference (and classifier) per fold, in a worker; (target
+    positions, class, sand %, Ks cm/h)."""
+    ref_df, tg = DATA[arm], DATA[kind]
+    sel = np.where(tg[col].isin(held).to_numpy())[0]
+    if not len(sel):
+        return sel, [], [], []
+    train = ref_df[~ref_df[col].isin(held)]
+    ref = st.GshpReference(df=train[REF_COLS].reset_index(drop=True))
+    model = st.TextureGBM(df=train.reset_index(drop=True)) if clf else None
+    pred, sand, ks = [], [], []
+    for j in sel:
+        r = tg.iloc[j]
+        out = st.estimate(H, curve(r), ref=ref, n_mc=n_mc, clf=model,
+                          sample_type=r.sample_type)
+        pred.append(out["texture_class"])
+        sand.append(out["fractions"]["sand"])
+        ks.append(out["ksat"]["median_cmh"])
+    return sel, pred, sand, ks
+
+
+def score(futs, n):
+    """Collect one job's folds: (class, sand %, Ks cm/h) per target."""
+    pred = np.empty(n, dtype=object)
+    sand = np.full(n, np.nan)
+    ks = np.full(n, np.nan)
+    for f in futs:
+        sel, p, s, k = f.result()
+        pred[sel], sand[sel], ks[sel] = p, s, k
     return pred, sand, ks
-
-
-def run(job, refs, targets, n_mc):
-    arm, kind, col, folds, clf = job
-    return score((col, folds, clf), refs[arm], targets[kind], n_mc)
 
 
 def main():
@@ -67,9 +73,9 @@ def main():
 
     tg = pd.concat([g.sample(min(len(g), n_per_class), random_state=0)
                     for _, g in base.groupby("texture_class")]).reset_index(drop=True)
-    pool = base[base.ksat_cmh.notna() & (base.ksat_cmh > 0)]
+    pool_ks = base[base.ksat_cmh.notna() & (base.ksat_cmh > 0)]
     tk = pd.concat([g.sample(min(len(g), n_per_class), random_state=0)
-                    for _, g in pool.groupby("texture_class")]).reset_index(drop=True)
+                    for _, g in pool_ks.groupby("texture_class")]).reset_index(drop=True)
     rng = np.random.default_rng(0)
     profs = np.array(sorted(tg.profile_id.unique())); rng.shuffle(profs)
     designs = {"new site": ("profile_id", [set(x) for x in np.array_split(profs, N_FOLDS)]),
@@ -80,8 +86,11 @@ def main():
              for arm in ("with", "without")]
     print(f"targets {len(tg)} ({n_per_class}/class), Ks targets {len(tk)}, n_mc={n_mc}\n",
           flush=True)
-    out = map_folds(run, jobs, {"with": both, "without": base}, {"tex": tg, "ks": tk},
-                    n_mc, threads=3)
+    data = {"with": both, "without": base, "tex": tg, "ks": tk}
+    with pool(data) as ex:
+        futs = [[ex.submit(one_fold, arm, kind, col, held, n_mc, clf)
+                 for held in folds] for arm, kind, col, folds, clf in jobs]
+        out = [score(fs, len(data[j[1]])) for j, fs in zip(jobs, futs)]
     res = {(j[0], j[2] if j[1] == "tex" else "ks"): o for j, o in zip(jobs, out)}
 
     truth = tg.texture_class.to_numpy()

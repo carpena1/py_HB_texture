@@ -12,6 +12,9 @@ Ks as log10(cm/day). Converted here to the tool's conventions (alpha kPa^-1,
 Ks cm/h) using 1 cm water head = 0.0980665 kPa and 24 h/day.
 """
 
+# verify_common first: it pins BLAS/OpenMP threads before numpy loads.
+from verify_common import DATA, pool
+
 import numpy as np
 
 import swcc_texture as st
@@ -44,6 +47,13 @@ def rosetta_params(cls):
     return tr, ts, alpha_kpa, n, ks_cmh
 
 
+def one_class(name, h):
+    """One class in a worker, against the shared reference and classifier."""
+    tr, ts, alpha, n, _ = rosetta_params(name)
+    return st.estimate(h, st.vg_theta(h, tr, ts, alpha, n), ref=DATA["ref"],
+                       clf=DATA["clf"])
+
+
 def main():
     centroids = st.usda_centroids()
     ref = st.GshpReference()
@@ -56,10 +66,11 @@ def main():
     print(f"{'true class':<16s} {'predicted':<16s} {'P(true)':>7s} "
           f"{'rank':>4s}  {'sand/silt/clay pred':<20s} {'centroid':<15s} "
           f"{'Ks pred':>8s} {'Ks true':>8s} {'nb':>4s} {'in5-95%':>7s}")
-    for name in ORDER:
+    with pool({"ref": ref, "clf": clf}) as ex:
+        futs = [ex.submit(one_class, name, h) for name in ORDER]
+    for name, f in zip(ORDER, futs):
         tr, ts, alpha, n, ks_true = rosetta_params(name)
-        theta = st.vg_theta(h, tr, ts, alpha, n)
-        res = st.estimate(h, theta, ref=ref, clf=clf)
+        res = f.result()
 
         probs = res["class_probabilities"]
         pred = res["texture_class"]

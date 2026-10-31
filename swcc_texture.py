@@ -49,7 +49,8 @@ REFERENCE_CSV = os.path.join(DATA_DIR, "gshp_reference.csv")
 REFERENCE_SETS = {
     # Laikipia, Arizona, the Canary Islands and the Yellow River Basin joined
     # the default in 2026-09, after EU-HYDI; Fujii (Japan and Southeast Asia)
-    # and Ksat-SSIR-DB (Brazil) on 2026-10-31. Where a restricted table has not
+    # and Ksat-SSIR-DB (Brazil) on 2026-10-31, the Kansas Mesonet the same
+    # day. Where a restricted table has not
     # been built, the default quietly becomes "public" -- see
     # RESTRICTED_TABLES.
     "merged": ["gshp_reference.csv", "kssl_reference.csv",
@@ -60,7 +61,8 @@ REFERENCE_SETS = {
                "tomejil_reference.csv", "lebrija_reference.csv",
                "donana_reference.csv", "natsoil_reference.csv",
                "fujii_reference.csv", "ksatssir_reference.csv",
-               "boorowa_reference.csv", "local_reference.csv"],
+               "kansas_reference.csv", "boorowa_reference.csv",
+               "local_reference.csv"],
     # The distributed tables: what a fresh clone has.
     "public": ["gshp_reference.csv", "kssl_reference.csv",
                "hohenbrink_reference.csv", "babaeian_zanjanrood_reference.csv",
@@ -69,7 +71,7 @@ REFERENCE_SETS = {
                "setenil_reference.csv", "tomejil_reference.csv",
                "lebrija_reference.csv", "donana_reference.csv",
                "natsoil_reference.csv", "fujii_reference.csv",
-               "ksatssir_reference.csv"],
+               "ksatssir_reference.csv", "kansas_reference.csv"],
     "gshp": ["gshp_reference.csv"],
     "kssl": ["kssl_reference.csv"],
     "hohenbrink": ["hohenbrink_reference.csv"],
@@ -137,10 +139,14 @@ REFERENCE_SETS = {
     # 1,733 reference soils finds no harm to the rest (-0.2 pp exact for a
     # new site, p=0.82; +0.6 pp for a new source, p=0.46).
     "natsoil": ["natsoil_reference.csv"],
-    # Kansas Mesonet, USA (Parker et al. 2022, SSSAJ; prepare_kansas.py):
-    # 156 undisturbed cores with texture, retention and Ks on the same
-    # core; public file, distribution not yet decided; independent test
-    # with verify_external.py.
+    # Kansas Mesonet, USA (Parker et al. 2022, SSSAJ; public file, MIT
+    # licence; prepare_kansas.py): 156 undisturbed cores with texture,
+    # retention and Ks on the same core (126 with a clean Ks). As a new
+    # source it reads poorly (20-26 % exact; always "silty clay loam" 32.7 %).
+    # In the default since 2026-10-31: verify_join_effect.py on 1,733
+    # reference soils finds no harm to the rest (+0.2 pp exact for a new
+    # site, p=0.81; -0.3 pp for a new source, p=0.74) and Ks better (394
+    # targets better, 241 worse; -0.0098 dex, p<0.001).
     "kansas": ["kansas_reference.csv"],
     # Fujii et al., Dryad (CC0; prepare_fujii.py): 59 undisturbed cores from
     # Japan, Indonesia, Thailand and Canada, retention to pF 4.2 and Ks. As a
@@ -169,7 +175,8 @@ REFERENCE_SETS = {
             "tomejil_reference.csv", "lebrija_reference.csv",
             "donana_reference.csv", "natsoil_reference.csv",
             "fujii_reference.csv", "ksatssir_reference.csv",
-            "boorowa_reference.csv", "unsoda_reference.csv", "sdb_reference.csv",
+            "kansas_reference.csv", "boorowa_reference.csv",
+            "unsoda_reference.csv", "sdb_reference.csv",
             "local_reference.csv"],
 }
 DEFAULT_REFERENCE = "merged"
@@ -1114,7 +1121,7 @@ def main():
     ap.add_argument("--reference", choices=sorted(REFERENCE_SETS),
                     default=DEFAULT_REFERENCE,
                     help="reference table. merged (default) = every table "
-                         "of the default reference (21,720 layers; see README, "
+                         "of the default reference (21,876 layers; see README, "
                          "Reference data). EU-HYDI (consortium-restricted) and "
                          "Boorowa (CC BY-NC-SA) are built locally with "
                          "prepare_euhydi.py and prepare_boorowa.py and never "

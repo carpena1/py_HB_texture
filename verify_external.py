@@ -28,6 +28,9 @@ import sys
 from collections import Counter
 from types import SimpleNamespace
 
+# verify_common first: it pins BLAS/OpenMP threads before numpy loads.
+from verify_common import DATA, GROUP, mcnemar, merge, n_jobs, pool
+
 import numpy as np
 import pandas as pd
 
@@ -45,7 +48,6 @@ import prepare_nj_ssir26
 import prepare_tong
 import prepare_willard
 import swcc_texture as st
-from verify_common import GROUP, mcnemar
 
 DATASETS = {"willard": prepare_willard,
             "babaeian_zanjanrood": prepare_babaeian_zanjanrood,
@@ -100,16 +102,36 @@ def run(ref_df, tg, idx, pts, out, n_mc):
         out["ks"][j] = (k["median_cmh"], k["p5_cmh"], k["p95_cmh"])
 
 
-def held_out(ref, tg, key, pts, n_mc, rng):
-    """Add tg to ref and predict it with folds of tg[key] held out."""
-    both = pd.concat([ref, tg], ignore_index=True)
+def one_part(key, chunk, idx, n_mc):
+    """Targets idx in a worker. key None: from the default reference without
+    this dataset; otherwise with the dataset added and chunk of tg[key]
+    held out."""
+    ref, tg, pts = DATA["ref"], DATA["tg"], DATA["pts"]
+    if key is not None:
+        both = pd.concat([ref, tg], ignore_index=True)
+        ref = both[~both[key].isin(chunk)]
+    out = empty(len(tg))
+    run(ref, tg, idx, pts, out, n_mc)
+    return out
+
+
+def gather(futs, n):
+    out = empty(n)
+    for idx, f in futs:
+        merge(out, f.result(), idx)
+    return out
+
+
+def held_out(ex, tg, key, n_mc, rng):
+    """Submit tg added to ref and predicted with folds of tg[key] held out.
+    The folds are drawn here, in the serial order of the shared rng."""
     groups = np.array(sorted(tg[key].unique()))
     rng.shuffle(groups)
-    out = empty(len(tg))
+    futs = []
     for chunk in np.array_split(groups, min(N_FOLDS, len(groups))):
         idx = np.where(tg[key].isin(chunk))[0]
-        run(both[~both[key].isin(chunk)], tg, idx, pts, out, n_mc)
-    return out
+        futs.append((idx, ex.submit(one_part, key, chunk, idx, n_mc)))
+    return futs
 
 
 def report(title, tg, out):
@@ -212,14 +234,20 @@ def main():
           f"macro-F1 {base_f1:.1f}")
 
     rng = np.random.default_rng(0)
-    outs = {"new": empty(len(tg))}
-    run(ref, tg, range(len(tg)), pts, outs["new"], n_mc)
+    ex = pool({"ref": ref, "tg": tg, "pts": pts})
+    futs = {"new": [(idx, ex.submit(one_part, None, None, idx, n_mc))
+                    for idx in np.array_split(np.arange(len(tg)), n_jobs())
+                    if len(idx)]}
+    futs["site"] = held_out(ex, tg, "profile_id", n_mc, rng)
+    futs["soil"] = held_out(ex, tg, "layer_id", n_mc, rng)
+    outs = {"new": gather(futs["new"], len(tg))}
     ok_new = report("new source: default reference without this dataset",
                     tg, outs["new"])
-    outs["site"] = held_out(ref, tg, "profile_id", pts, n_mc, rng)
+    outs["site"] = gather(futs["site"], len(tg))
     ok_site = report("own data, each site held out", tg, outs["site"])
-    outs["soil"] = held_out(ref, tg, "layer_id", pts, n_mc, rng)
+    outs["soil"] = gather(futs["soil"], len(tg))
     ok_soil = report("own data, only the soil held out", tg, outs["soil"])
+    ex.shutdown()
     for label, ok in (("site out", ok_site), ("soil out", ok_soil)):
         print(f"own data ({label}) vs new source, exact class: "
               f"{(ok.mean()-ok_new.mean())*100:+.1f} pp, "

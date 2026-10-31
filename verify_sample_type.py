@@ -28,13 +28,15 @@ Usage:  python verify_sample_type.py [n_per_class] [n_mc] [--reference=NAME]
 
 import sys
 
+# verify_common first: it pins BLAS/OpenMP threads before numpy loads.
+from verify_common import DATA, mcnemar, merge, pool
+
 import numpy as np
 import pandas as pd
 from scipy.stats import wilcoxon
 
 import ksat_metrics as km
 import swcc_texture as st
-from verify_common import mcnemar
 from verify_groups import GROUP
 
 H = np.concatenate([[0.0], np.logspace(-1, np.log10(1500.0), 25)])
@@ -73,17 +75,36 @@ def run(train, targets, idx, out, n_mc):
                                  k["n_neighbors_with_ksat"])
 
 
-def predict(ref_df, targets, folds, n_mc):
-    n = len(targets)
-    out = {"cls": {a: np.empty(n, dtype=object) for a in ARMS},
-           "ks": {a: np.full((n, 4), np.nan) for a in ("kNN", "kNN same type")}}
-    for held_col, held in folds:
-        sel = np.where(targets[held_col].isin(held).to_numpy())[0]
-        if len(sel):
-            run(ref_df[~ref_df[held_col].isin(held)], targets, sel, out, n_mc)
-            print(f"  ... fold {sorted(held)[:2]}{'...' if len(held) > 2 else ''}"
-                  f" ({len(sel)} targets)", flush=True)
-    return out
+def empty(n):
+    return {"cls": {a: np.empty(n, dtype=object) for a in ARMS},
+            "ks": {a: np.full((n, 4), np.nan) for a in ("kNN", "kNN same type")}}
+
+
+def one_fold(held_col, held, n_mc):
+    """One fold in a worker: its rows of every arm's result."""
+    ref_df, targets = DATA["df"], DATA["tg"]
+    sel = np.where(targets[held_col].isin(held).to_numpy())[0]
+    out = empty(len(targets))
+    if len(sel):
+        run(ref_df[~ref_df[held_col].isin(held)], targets, sel, out, n_mc)
+    return sel, out
+
+
+def predict(ex, targets, folds, n_mc):
+    """Submit every fold now; the returned function collects them."""
+    futs = [(held, ex.submit(one_fold, held_col, held, n_mc))
+            for held_col, held in folds]
+
+    def collect():
+        out = empty(len(targets))
+        for held, f in futs:
+            sel, part = f.result()
+            if len(sel):
+                merge(out, part, sel)
+                print(f"  ... fold {sorted(held)[:2]}{'...' if len(held) > 2 else ''}"
+                      f" ({len(sel)} targets)", flush=True)
+        return out
+    return collect
 
 
 def report(title, tg, out):
@@ -133,9 +154,9 @@ def main():
     print("with measured Ks: "
           f"{df[has_ks].sample_type.value_counts().to_dict()}")
 
-    pool = df[has_ks & df.sample_type.isin(TYPES)]
+    pool_df = df[has_ks & df.sample_type.isin(TYPES)]
     tg = pd.concat([g.sample(min(len(g), n_per_class), random_state=0)
-                    for _, g in pool.groupby(["sample_type", "texture_class"])]
+                    for _, g in pool_df.groupby(["sample_type", "texture_class"])]
                    ).reset_index(drop=True)
     print(f"targets: {len(tg)} ({tg.sample_type.value_counts().to_dict()}), "
           f"{n_per_class}/class/type; n_mc={n_mc}")
@@ -149,9 +170,12 @@ def main():
         "profile": [("profile_id", set(x)) for x in np.array_split(profs, N_FOLDS)],
         "lab": [("source_db", {s}) for s in sorted(tg.source_db.unique())],
     }
+    ex = pool({"df": df, "tg": tg})
+    pending = {name: predict(ex, tg, folds, n_mc)
+               for name, folds in designs.items()}
     for name, folds in designs.items():
         print(f"--- {name} folds ---", flush=True)
-        out = predict(df, tg, folds, n_mc)
+        out = pending[name]()
         for t in TYPES + ("all",):
             m = np.ones(len(tg), bool) if t == "all" else (tg.sample_type == t).to_numpy()
             sub = {"cls": {a: v[m] for a, v in out["cls"].items()},
@@ -169,6 +193,7 @@ def main():
                 print(f"    {s:<24s} {g.sample_type.iloc[0]:<12s} "
                       f"{np.nanmedian(ea):5.2f} {np.nanmedian(eb):5.2f}  "
                       f"{len(g):4d}")
+    ex.shutdown()
 
 
 if __name__ == "__main__":

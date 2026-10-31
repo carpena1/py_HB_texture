@@ -50,16 +50,25 @@ LABEL = {"euhydi": "EU-HYDI", "hohenbrink": "Hohenbrink", "kssl": "KSSL",
 BAKE = {"var(--accent)": "#0E6E73", "var(--add)": "#B8471E",
         "var(--muted)": "#5C6A70", "var(--sunken)": "#EAEEEC",
         "currentColor": "#141A1D"}
+# Each layer is counted in ONE region: the first, in PRIORITY order, whose
+# boxes hold it, so the regions add up to the georeferenced total.
 REGIONS = {"North America": (-170, -52, 15, 72),
-           "Europe": (*EU_BBOX["lon"], *EU_BBOX["lat"]),
+           # North of 36.5 N: keeps Sicily and southern Spain, leaves out
+           # Tunisia and Iraq (the reference has no soils on Malta, Crete or
+           # Cyprus, which this would also leave out).
+           "Europe": (EU_BBOX["lon"][0], EU_BBOX["lon"][1], 36.5, EU_BBOX["lat"][1]),
            # Two boxes, so Southeast Asia (Indonesia, Fujii et al.) is
            # counted: east of 90 E Asia reaches 11 S, meeting Australasia.
-           "Asia": [(32, 150, 5, 78), (90, 150, -11, 4.99)],
+           # Asia reaches 180 E, for Kamchatka and Magadan.
+           "Asia": [(32, 180, 5, 78), (90, 180, -11, 4.99)],
            "South America": (-82, -34, -56, 13),
-           # Two boxes, so Africa stops taking in Iran and eastern Arabia:
-           # east of 43 E only the Horn, south of 12 N, is African.
-           "Africa": [(-18, 43, -35, 37), (43.01, 52, -35, 12)],
+           # East of Suez (32 E) Africa stops at 29.5 N, so the Levant and
+           # Iraq are Asian; east of 43 E only the Horn, south of 12 N.
+           "Africa": [(-18, 32, -35, 37), (32, 43, -35, 29.5), (43.01, 52, -35, 12)],
            "Australasia": (110, 180, -48, -8)}
+PRIORITY = ["Europe", "Africa", "Australasia", "Asia", "North America",
+            "South America"]
+OTHER = "Antarctica"
 
 A1, A2, A3, A4 = 1.340264, -0.081106, 0.000893, 0.003796
 M = math.sqrt(3) / 2.0
@@ -139,21 +148,34 @@ def cells(d):
     return b.groupby(["lon", "lat"]).size().reset_index(name="n")
 
 
-def in_region(d, box):
-    """Layers inside a (w, e, s, n) box, or inside any of a list of boxes."""
+def in_box(d, box):
+    """Mask of layers inside a (w, e, s, n) box, or any of a list of boxes."""
     if isinstance(box, list):
-        return sum(in_region(d, b) for b in box)
+        return np.logical_or.reduce([in_box(d, b) for b in box])
     w, e, s, n = box
-    return int((d.lon.between(w, e) & d.lat.between(s, n)).sum())
+    return (d.lon.between(w, e) & d.lat.between(s, n)).to_numpy()
+
+
+def region_of(d):
+    """One region per layer, by PRIORITY; OTHER where no box holds it."""
+    reg = np.full(len(d), OTHER, dtype=object)
+    for k in reversed(PRIORITY):
+        reg[in_box(d, REGIONS[k])] = k
+    return reg
+
+
+def in_region(d, name):
+    return int((region_of(d) == name).sum())
 
 
 def main():
     base_name = sys.argv[1] if len(sys.argv) > 1 else "merged"
     add_name = sys.argv[2] if len(sys.argv) > 2 else None
-    base = georef(st.load_reference_df(base_name))
+    base_all = st.load_reference_df(base_name)
     # An addition may join several sets with "+", e.g. euhydi+willard.
-    add = (georef(pd.concat([st.load_reference_df(n) for n in add_name.split("+")],
-                            ignore_index=True)) if add_name else base.iloc[:0])
+    add_all = (pd.concat([st.load_reference_df(n) for n in add_name.split("+")],
+                         ignore_index=True) if add_name else base_all.iloc[:0])
+    base, add = georef(base_all), georef(add_all)
     if add_name:
         LABEL.setdefault(add_name, " + ".join(LABEL.get(n, n) for n in add_name.split("+")))
     allr = pd.concat([base, add], ignore_index=True)
@@ -182,15 +204,14 @@ def main():
         la = np.linspace(LAT_S, LAT_N, 50)
         grat.append(path(*px(np.full_like(la, lo), la)))
 
-    ew, ee = EU_BBOX["lon"]
-    es, en = EU_BBOX["lat"]
+    ew, ee, es, en = REGIONS["Europe"]
     elon = np.concatenate([np.linspace(ew, ee, 40), np.full(24, ee),
                            np.linspace(ee, ew, 40), np.full(24, ew)])
     elat = np.concatenate([np.full(40, en), np.linspace(en, es, 24),
                            np.full(40, es), np.linspace(es, en, 24)])
     ex, ey = px(elon, elat)
-    eu_b = in_region(base, REGIONS["Europe"])
-    eu_t = in_region(allr, REGIONS["Europe"])
+    eu_b = in_region(base, "Europe")
+    eu_t = in_region(allr, "Europe")
     eu_label = (f"Europe &#183; {eu_b:,} &#8594; {eu_t:,} layers" if add_name
                 else f"Europe &#183; {eu_b:,} layers")
     eu_sub = f"{eu_t / len(allr) * 100:.1f} % of the reference"
@@ -220,6 +241,8 @@ def main():
         <text x="830" y="208">Yellow River Basin {int(src.get("Tong_YellowRiver", 0)):,}</text>
         <line x1="279" y1="149" x2="238" y2="120" stroke="currentColor" opacity=".55"/>
         <text x="234" y="116" text-anchor="end">KSSL, across the US {int(src.get("KSSL", 0)):,}</text>
+        <line x1="268" y1="154" x2="210" y2="190" stroke="currentColor" opacity=".55"/>
+        <text x="206" y="196" text-anchor="end">Kansas Mesonet {int(src.get("Kansas_Mesonet", 0)):,}</text>
         <line x1="321" y1="308" x2="300" y2="318" stroke="currentColor" opacity=".55"/>
         <text x="296" y="322" text-anchor="end">Ksat-SSIR-DB (Brazil) {ksb_n:,}</text>
         <line x1="849" y1="297" x2="878" y2="318" stroke="currentColor" opacity=".55"/>
@@ -271,7 +294,7 @@ def main():
       <g font-family="IBM Plex Sans, sans-serif" font-size="11.5">
         <path d="{path(ex, ey, close=True)}" fill="none" stroke="currentColor" stroke-width="1.1" stroke-dasharray="4 3" opacity=".75"/>
         <text x="{ex.min():.0f}" y="{ey.min() - 9:.0f}" fill="currentColor" font-weight="600">{eu_label}</text>
-        <text x="{ex.max():.0f}" y="{ey.max() + 16:.0f}" text-anchor="end" fill="var(--muted)">{eu_sub}</text>
+        <text x="{ex.max() - 22:.0f}" y="{ey.max() + 34:.0f}" text-anchor="end" fill="var(--muted)">{eu_sub}</text>
       </g>
       <g font-family="IBM Plex Sans, sans-serif" font-size="11" fill="currentColor">{callouts}
       </g>
@@ -297,10 +320,13 @@ def main():
         'public domain. 2-degree cell counts only. -->\n' + baked + "\n")
 
     print(f"{'region':<15s} {base_name:>10s}" + (f" {'+' + add_name:>10s} {'added':>7s}" if add_name else ""))
-    for k, box in REGIONS.items():
-        b, t = in_region(base, box), in_region(allr, box)
+    for k in list(REGIONS) + [OTHER]:
+        b, t = in_region(base, k), in_region(allr, k)
         print(f"{k:<15s} {b:10,d}" + (f" {t:10,d} {t - b:+7,d}" if add_name else ""))
     print(f"{'georeferenced':<15s} {len(base):10,d}" + (f" {len(allr):10,d} {len(add):+7,d}" if add_name else ""))
+    nb, na = len(base_all) - len(base), len(add_all) - len(add)
+    print(f"{'no coordinates':<15s} {nb:10,d}" + (f" {nb + na:10,d} {na:+7,d}" if add_name else ""))
+    print(f"{'total':<15s} {len(base_all):10,d}" + (f" {len(base_all) + len(add_all):10,d} {len(add_all):+7,d}" if add_name else ""))
     print(f"cells {len(cb)} base, {len(ca)} added; largest cell {nmax}")
     off = int((~allr.lat.between(LAT_S, LAT_N)).sum())
     print(f"off-map (outside {LAT_S:g}..{LAT_N:g} lat, not drawn): {off}")

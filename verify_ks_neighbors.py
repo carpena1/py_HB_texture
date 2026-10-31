@@ -25,12 +25,14 @@ EU-HYDI layers). Folds run in parallel (verify_common.map_folds).
 import os
 import sys
 
+# verify_common first: it pins BLAS/OpenMP threads before numpy loads.
+from verify_common import COLS, map_folds
+
 import numpy as np
 import pandas as pd
 from scipy.stats import spearmanr, wilcoxon
 
 import swcc_texture as st
-from verify_common import COLS, map_folds
 
 H = np.arange(0.0, 150.0 + 0.1, 5.0)
 MIN_SOURCE = 40

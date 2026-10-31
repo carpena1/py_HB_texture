@@ -27,11 +27,13 @@ seed sets the fold split and the control draw (default 0).
 
 import sys
 
+# verify_common first: it pins BLAS/OpenMP threads before numpy loads.
+from verify_common import DATA, GROUP, mcnemar, pool
+
 import numpy as np
 import pandas as pd
 
 import swcc_texture as st
-from verify_common import GROUP, mcnemar
 
 N_FOLDS = 5
 SEED = int(sys.argv[2]) if len(sys.argv) > 2 else 0
@@ -57,22 +59,40 @@ def predict(clf, df):
     return clf.clf.predict(x)
 
 
-def run(ref, tg, key, extra=None):
-    """Predict tg with folds of tg[key] held out of the training data."""
-    out = {a: np.empty(len(tg), object) for a in ARMS}
+def one_fit(key, chunk, cov, test):
+    """One classifier in a worker: chunk of ref[key] held out and tg[test]
+    predicted, or (chunk None) the whole reference and the extra set."""
+    ref, tg = DATA["ref"], DATA["tg"]
+    if chunk is None:
+        return predict(st.TextureGBM(df=ref, covariates=cov), DATA["extra"])
+    clf = st.TextureGBM(df=ref[~ref[key].isin(chunk)], covariates=cov)
+    return predict(clf, tg[test])
+
+
+def run(workers, tg, key, extra=None):
+    """Submit tg with folds of tg[key] held out of the training data; the
+    returned function collects the predictions."""
     groups = np.array(sorted(tg[key].unique()))
     np.random.default_rng(SEED).shuffle(groups)
+    futs = []
     for chunk in np.array_split(groups, N_FOLDS):
         test = tg[key].isin(chunk).to_numpy()
-        train = ref[~ref[key].isin(chunk)]
-        for arm, cov in ARMS.items():
-            clf = st.TextureGBM(df=train, covariates=cov)
-            out[arm][test] = predict(clf, tg[test])
+        futs.append((test, {arm: workers.submit(one_fit, key, chunk, cov, test)
+                            for arm, cov in ARMS.items()}))
     if extra is not None:              # a set outside the reference: new source
-        for arm, cov in ARMS.items():
-            clf = st.TextureGBM(df=ref, covariates=cov)
-            out[arm] = np.concatenate([out[arm], predict(clf, extra)])
-    return out
+        fx = {arm: workers.submit(one_fit, key, None, cov, None)
+              for arm, cov in ARMS.items()}
+
+    def collect():
+        out = {a: np.empty(len(tg), object) for a in ARMS}
+        for test, fs in futs:
+            for arm in ARMS:
+                out[arm][test] = fs[arm].result()
+        if extra is not None:
+            for arm in ARMS:
+                out[arm] = np.concatenate([out[arm], fx[arm].result()])
+        return out
+    return collect
 
 
 def report(title, truth, out, mask):
@@ -117,10 +137,14 @@ def main():
     print(f"volcanic targets by source: {ref[volc].source_db.value_counts().head(8).to_dict()}")
     print(f"volcanic targets by class: {ref[volc].texture_class.value_counts().to_dict()}")
 
-    for key, name in (("profile_id", "profile folds (source in the reference)"),
-                      ("source_db", "source folds (new source)")):
+    designs = (("profile_id", "profile folds (source in the reference)"),
+               ("source_db", "source folds (new source)"))
+    workers = pool({"ref": ref, "tg": tg, "extra": extra})
+    pending = [run(workers, tg, key, extra if key == "source_db" else None)
+               for key, _ in designs]
+    for (key, name), collect in zip(designs, pending):
         ex = extra if key == "source_db" else None
-        out = run(ref, tg, key, ex)
+        out = collect()
         allt = pd.concat([tg, ex]) if ex is not None else tg
         truth = allt.texture_class.to_numpy()
         v = allt.volcanic.isin(["known", "probable"]).to_numpy()
@@ -133,6 +157,7 @@ def main():
         if ex is not None:
             c = np.r_[np.zeros(len(tg), bool), np.ones(len(ex), bool)]
             report("Canary (not in the reference)", truth, out, c)
+    workers.shutdown()
 
 
 if __name__ == "__main__":

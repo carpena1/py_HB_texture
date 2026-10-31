@@ -44,6 +44,9 @@ Usage:  python verify_ks_physical.py [n_per_source] [n_mc] [--reference=NAME]
 
 import sys
 
+# verify_common first: it pins BLAS/OpenMP threads before numpy loads.
+from verify_common import COLS, DATA, GROUP, GROUP_ORDER, pool
+
 import numpy as np
 import pandas as pd
 from scipy.optimize import curve_fit
@@ -52,7 +55,6 @@ from scipy.stats import spearmanr, wilcoxon
 import ks_physical
 import ksat_metrics as km
 import swcc_texture as st
-from verify_common import COLS, GROUP, GROUP_ORDER
 
 MIN_SOURCE = 40          # measured-Ks layers a source needs to be scored
 H = np.arange(0.0, 150.0 + 0.1, 5.0)
@@ -75,6 +77,19 @@ def predict(ref, clf, targets, blocked, n_mc):
                      for c in ("thetar", "thetas", "alpha_kpa", "n")})
     return (np.array(knn, float), np.array(lo, float), np.array(hi, float),
             np.array(phys, float), np.array(cls), pd.DataFrame(fits))
+
+
+def one_source(s, n_per_source, n_mc):
+    """One source in a worker: its targets and their predictions."""
+    df, with_ks = DATA["df"], DATA["with_ks"]
+    ref = st.GshpReference(df=df[REF_COLS].reset_index(drop=True))
+    sub = with_ks[with_ks.source_db == s]
+    tg = pd.concat([g.sample(min(len(g), max(1, n_per_source // 12)),
+                             random_state=0)
+                    for _, g in sub.groupby("texture_class")])
+    blocked = (df.source_db.to_numpy() == s)
+    clf = st.TextureGBM(df=df[~blocked])
+    return tg, predict(ref, clf, tg, blocked, n_mc)
 
 
 def _bc(h_cm, thr, ths, log_psib, lam):
@@ -181,8 +196,6 @@ def main():
     df = st.load_reference_df(ref_name)
     df["source_db"] = df.source_db.fillna("KSSL")
     df["profile_id"] = df.profile_id.fillna("solo_" + df.layer_id.astype(str))
-    ref = st.GshpReference(df=df[REF_COLS].reset_index(drop=True))
-    src_all = df.source_db.to_numpy()
 
     with_ks = df[df.ksat_cmh.notna() & (df.ksat_cmh > 0)]
     sizes = with_ks.source_db.value_counts()
@@ -193,14 +206,10 @@ def main():
           f"each source hidden from the kNN and the classifier\n")
 
     keep = []
-    for s in sources:
-        sub = with_ks[with_ks.source_db == s]
-        tg = pd.concat([g.sample(min(len(g), max(1, n_per_source // 12)),
-                                 random_state=0)
-                        for _, g in sub.groupby("texture_class")])
-        blocked = (src_all == s)
-        clf = st.TextureGBM(df=df[~blocked])
-        knn, lo, hi, phys, cls, fits = predict(ref, clf, tg, blocked, n_mc)
+    with pool({"df": df, "with_ks": with_ks}) as ex:
+        futs = [ex.submit(one_source, s, n_per_source, n_mc) for s in sources]
+    for s, f in zip(sources, futs):
+        tg, (knn, lo, hi, phys, cls, fits) = f.result()
         obs = tg.ksat_cmh.to_numpy(float)
         ok = np.isfinite(knn) & np.isfinite(phys) & (knn > 0) & (phys > 0)
         keep.append(pd.DataFrame(dict(

@@ -29,12 +29,14 @@ Usage:  python verify_andic.py [n_per_class] [n_mc]
 
 import sys
 
+# verify_common first: it pins BLAS/OpenMP threads before numpy loads.
+from verify_common import DATA, GROUP, mcnemar, merge, pool
+
 import numpy as np
 import pandas as pd
 from scipy.stats import wilcoxon
 
 import swcc_texture as st
-from verify_common import GROUP, mcnemar
 
 N_FOLDS = 5
 H = np.concatenate([[0.0], np.logspace(-1, np.log10(1500.0), 25)])
@@ -44,52 +46,71 @@ def points(r):
     return H, st.vg_theta(H, r.thetar, r.thetas, r.alpha_kpa, r.n)
 
 
-def run(ref_df, tg, key, n_mc, extra=None):
+def empty(n):
+    return {a: dict(cls=np.empty(n, object), knn=np.empty(n, object),
+                    ens=np.empty(n, object), frac=np.full((n, 3), np.nan), ks=np.full(n, np.nan))
+            for a in ("without", "with")}
+
+
+def run(ex, tg, key, n_mc, extra=None):
+    """Submit every fold now; the returned function collects them."""
     allt = pd.concat([tg, extra], ignore_index=True) if extra is not None else tg
     n = len(allt)
-    out = {a: dict(cls=np.empty(n, object), knn=np.empty(n, object),
-                   ens=np.empty(n, object), frac=np.full((n, 3), np.nan), ks=np.full(n, np.nan))
-           for a in ("without", "with")}
     groups = np.array(sorted(tg[key].unique()))
     np.random.default_rng(0).shuffle(groups)
     chunks = ([[g] for g in groups] if key == "source_db"
               else np.array_split(groups, N_FOLDS))
-    folds = [(tg[key].isin(c).to_numpy(), ref_df[~ref_df[key].isin(c)])
-             for c in chunks]
+    folds = [(tg[key].isin(c).to_numpy(), c) for c in chunks]
     if extra is not None:
         folds.append((np.r_[np.zeros(len(tg), bool), np.ones(len(extra), bool)],
-                      ref_df))
-    for test, train in folds:
+                      None))
+    futs = []
+    for test, c in folds:
         test = np.r_[test, np.zeros(n - len(test), bool)] if len(test) < n else test
-        train = train.reset_index(drop=True)
-        ref = st.GshpReference(df=train)
-        clf0 = st.TextureGBM(df=train)
-        clf1 = st.TextureGBM(df=train, covariates=["andic_code"])
-        if st.ANDIC_FEATURE_MODE == ref.feature_mode:
-            ref_a, clf1_a = ref, clf1
-        else:
-            ref_a = st.GshpReference(df=train, feature_mode=st.ANDIC_FEATURE_MODE)
-            clf1_a = st.TextureGBM(df=train, covariates=["andic_code"],
-                                   feature_mode=st.ANDIC_FEATURE_MODE)
-        for j in np.where(test)[0]:
-            r = allt.iloc[j]
-            h, th = points(r)
-            flag = "yes" if r.andic in ("yes", "likely") else "no"
-            routed = (ref_a, clf1_a) if flag == "yes" else (ref, clf1)
-            for arm, (rf, clf), a in (("without", (ref, clf0), None),
-                                      ("with", routed, flag)):
-                e = st.estimate(h, th, ref=rf, clf=clf, n_mc=n_mc,
-                                sample_type=r.sample_type, andic=a)
-                o = out[arm]
-                o["cls"][j] = e["texture_class"]
-                o["knn"][j] = next(iter(e["knn_class_probabilities"]))
-                pg, pk = e["class_probabilities"], e["knn_class_probabilities"]
-                o["ens"][j] = max(st.USDA_CLASSES, key=lambda c: (
-                    np.log(max(pg.get(c, 0.0), 1e-12))
-                    + np.log(max(pk.get(c, 0.0), 1e-12))))
-                o["frac"][j] = [e["fractions"][c] for c in ("sand", "silt", "clay")]
-                o["ks"][j] = e["ksat"]["median_cmh"]
-    return allt, out
+        futs.append((test, ex.submit(one_fold, key, test, c, n_mc)))
+
+    def collect():
+        out = empty(n)
+        for test, f in futs:
+            merge(out, f.result(), test)
+        return allt, out
+    return collect
+
+
+def one_fold(key, test, chunk, n_mc):
+    """One fold in a worker; chunk is held out (None: nothing is)."""
+    ref_df, allt = DATA["ref_df"], DATA[key]
+    out = empty(len(allt))
+    train = ref_df if chunk is None else ref_df[~ref_df[key].isin(chunk)]
+    train = train.reset_index(drop=True)
+    ref = st.GshpReference(df=train)
+    clf0 = st.TextureGBM(df=train)
+    clf1 = st.TextureGBM(df=train, covariates=["andic_code"])
+    if st.ANDIC_FEATURE_MODE == ref.feature_mode:
+        ref_a, clf1_a = ref, clf1
+    else:
+        ref_a = st.GshpReference(df=train, feature_mode=st.ANDIC_FEATURE_MODE)
+        clf1_a = st.TextureGBM(df=train, covariates=["andic_code"],
+                               feature_mode=st.ANDIC_FEATURE_MODE)
+    for j in np.where(test)[0]:
+        r = allt.iloc[j]
+        h, th = points(r)
+        flag = "yes" if r.andic in ("yes", "likely") else "no"
+        routed = (ref_a, clf1_a) if flag == "yes" else (ref, clf1)
+        for arm, (rf, clf), a in (("without", (ref, clf0), None),
+                                  ("with", routed, flag)):
+            e = st.estimate(h, th, ref=rf, clf=clf, n_mc=n_mc,
+                            sample_type=r.sample_type, andic=a)
+            o = out[arm]
+            o["cls"][j] = e["texture_class"]
+            o["knn"][j] = next(iter(e["knn_class_probabilities"]))
+            pg, pk = e["class_probabilities"], e["knn_class_probabilities"]
+            o["ens"][j] = max(st.USDA_CLASSES, key=lambda c: (
+                np.log(max(pg.get(c, 0.0), 1e-12))
+                + np.log(max(pk.get(c, 0.0), 1e-12))))
+            o["frac"][j] = [e["fractions"][c] for c in ("sand", "silt", "clay")]
+            o["ks"][j] = e["ksat"]["median_cmh"]
+    return out
 
 
 def report(title, allt, out, mask):
@@ -147,9 +168,16 @@ def main():
     print(f"reference {len(ref_df)}; targets {andic.sum()} andic + {len(ctrl)} "
           f"controls" + (f" + {len(extra)} Canary" if extra is not None else "")
           + f"; n_mc={n_mc}")
-    for key, name in (("profile_id", "profile folds (source in the reference)"),
-                      ("source_db", "leave-one-source-out (new source)")):
-        allt, out = run(ref_df, tg, key, n_mc, extra if key == "source_db" else None)
+    designs = (("profile_id", "profile folds (source in the reference)"),
+               ("source_db", "leave-one-source-out (new source)"))
+    allts = {key: pd.concat([tg, extra], ignore_index=True)
+             if key == "source_db" and extra is not None else tg
+             for key, _ in designs}
+    ex = pool({"ref_df": ref_df, **allts})
+    pending = [run(ex, tg, key, n_mc, extra if key == "source_db" else None)
+               for key, _ in designs]
+    for (key, name), collect in zip(designs, pending):
+        allt, out = collect()
         a = allt.andic.isin(["yes", "likely"]).to_numpy()
         canary = allt.source_db.eq("Armas_Canarias").to_numpy()
         print(f"\n=== {name} ===")
@@ -157,6 +185,7 @@ def main():
         report("controls, stated not andic", allt, out, ~a)
         if canary.any():
             report("Canary Islands", allt, out, canary)
+    ex.shutdown()
 
 
 if __name__ == "__main__":

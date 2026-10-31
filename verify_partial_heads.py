@@ -34,11 +34,13 @@ Usage:  python verify_partial_heads.py [profile|source] [n_per_class]
 import os
 import sys
 
+# verify_common first: it pins BLAS/OpenMP threads before numpy loads.
+from verify_common import DATA, GROUP, mcnemar, pool
+
 import numpy as np
 import pandas as pd
 
 import swcc_texture as st
-from verify_common import GROUP, mcnemar
 
 NPDB = os.path.join("data", "npdb_raw", "Physical.csv")
 CM_TO_KPA = 0.0980665
@@ -176,6 +178,20 @@ def gbm(x, y):
         random_state=0, class_weight="balanced").fit(x, y)
 
 
+def one_fit(key, held, sel, arm):
+    """One arm, one fold, in a worker: classes for targets sel."""
+    g, ref_x, partial, tgt_x = (DATA[k] for k in ("g", "ref_x", "partial",
+                                                  "tgt_x"))
+    train = ref_x[~g[key].isin(held).to_numpy()]
+    # a held-out laboratory is held out of the partial rows too
+    pt = partial[~partial.source_db.isin(held)] if key == "source_db" \
+        else partial
+    tr = train if arm == "reference" else pd.concat([train, pt],
+                                                    ignore_index=True)
+    m = gbm(tr[HEAD_COLS].to_numpy(float), tr.texture_class.to_numpy())
+    return m.predict(tgt_x.iloc[sel][HEAD_COLS].to_numpy(float))
+
+
 def main():
     design = sys.argv[1] if len(sys.argv) > 1 else "profile"
     n_per_class = int(sys.argv[2]) if len(sys.argv) > 2 else 150
@@ -212,20 +228,19 @@ def main():
     ref_x = head_frame(g)
     tgt_x = head_frame(tg)
     out = {a: np.empty(len(tg), object) for a in ("reference", "+ partial")}
-    for key, held in fold_list:
-        sel = np.where(tg[key].isin(held))[0]
-        if not len(sel):
-            continue
-        train = ref_x[~g[key].isin(held).to_numpy()]
-        # a held-out laboratory is held out of the partial rows too
-        pt = partial[~partial.source_db.isin(held)] if key == "source_db" \
-            else partial
-        for arm, tr in (("reference", train),
-                        ("+ partial", pd.concat([train, pt], ignore_index=True))):
-            m = gbm(tr[HEAD_COLS].to_numpy(float),
-                    tr.texture_class.to_numpy())
-            out[arm][sel] = m.predict(tgt_x.iloc[sel][HEAD_COLS].to_numpy(float))
-        print(f"  fold {sorted(held)[0]}: {len(sel)} targets", flush=True)
+    data = {"g": g, "ref_x": ref_x, "partial": partial, "tgt_x": tgt_x}
+    with pool(data) as ex:
+        futs = []
+        for key, held in fold_list:
+            sel = np.where(tg[key].isin(held))[0]
+            if len(sel):
+                futs.append((held, sel, {arm: ex.submit(one_fit, key, held,
+                                                        sel, arm)
+                                         for arm in out}))
+        for held, sel, fs in futs:
+            for arm, f in fs.items():
+                out[arm][sel] = f.result()
+            print(f"  fold {sorted(held)[0]}: {len(sel)} targets", flush=True)
 
     truth = tg.texture_class.to_numpy()
     print(f"\n=== {design} design, {len(tg)} targets ===")

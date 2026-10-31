@@ -36,11 +36,13 @@ Usage:  python verify_psd_standard.py [n_per_source] [n_mc]
 
 import sys
 
+# verify_common first: it pins BLAS/OpenMP threads before numpy loads.
+from verify_common import COLS, DATA, pool
+
 import numpy as np
 import pandas as pd
 
 import swcc_texture as st
-from verify_common import COLS
 
 MIN_SOURCE = 80
 H = np.arange(0.0, 150.0 + 0.1, 5.0)
@@ -63,6 +65,17 @@ def predict_sand_clay(ref, targets, mask, n_mc):
         f = st.estimate(H, theta, ref=ref, n_mc=n_mc)["fractions"]
         sand.append(f["sand"]); clay.append(f["clay"])
     return np.array(sand, float), np.array(clay, float)
+
+
+def one_source(s, n_per_source, n_mc):
+    """One source in a worker: its targets and their fractions."""
+    df = DATA["df"]
+    ref = st.GshpReference(df=df[REF_COLS].reset_index(drop=True))
+    sub = df[df.source_db == s]
+    tg = pd.concat([x.sample(min(len(x), max(1, n_per_source // 12)),
+                             random_state=0)
+                    for _, x in sub.groupby("texture_class")])
+    return tg, predict_sand_clay(ref, tg, df.source_db.to_numpy() == s, n_mc)
 
 
 def matched_mean(res, sand, weights_from):
@@ -94,8 +107,6 @@ def main():
     df["source_db"] = df.source_db.fillna("KSSL")
     df["profile_id"] = df.profile_id.fillna("solo_" + df.layer_id.astype(str))
     df = df[df.sand.notna() & df.clay.notna()].reset_index(drop=True)
-    ref = st.GshpReference(df=df[REF_COLS].reset_index(drop=True))
-    src_all = df.source_db.to_numpy()
 
     sizes = df.source_db.value_counts()
     control = [s for s in sizes.index
@@ -108,15 +119,15 @@ def main():
           f"up to {n_per_source} targets per source\n")
     rows, res = [], {g: {} for g in groups}
     keep = {g: {"res": [], "sand": [], "clay": []} for g in groups}
+    with pool({"df": df}) as ex:
+        futs = {s: ex.submit(one_source, s, n_per_source, n_mc)
+                for sources in groups.values() for s in sources
+                if sizes.get(s, 0) >= MIN_SOURCE}
     for g, sources in groups.items():
         for s in sources:
             if sizes.get(s, 0) < MIN_SOURCE:
                 continue
-            sub = df[df.source_db == s]
-            tg = pd.concat([x.sample(min(len(x), max(1, n_per_source // 12)),
-                                     random_state=0)
-                            for _, x in sub.groupby("texture_class")])
-            ps, pc = predict_sand_clay(ref, tg, src_all == s, n_mc)
+            tg, (ps, pc) = futs[s].result()
             r_sand = ps - tg.sand.to_numpy(float)
             r_clay = pc - tg.clay.to_numpy(float)
             res[g][s] = float(r_sand.mean())

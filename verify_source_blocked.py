@@ -21,14 +21,15 @@ Usage:  python verify_source_blocked.py [n_per_source] [n_mc] [--reference=NAME]
 
 import sys
 
+# verify_common first: it pins BLAS/OpenMP threads before numpy loads.
+from verify_common import COLS, DATA, mcnemar, pool
+
 import numpy as np
 import pandas as pd
 
 import ksat_metrics as km
 import swcc_texture as st
-from verify_common import mcnemar
 from verify_groups import GROUP
-from verify_common import COLS
 
 MIN_SOURCE = 80          # skip contributors too small to score meaningfully
 H = np.arange(0.0, 150.0 + 0.1, 5.0)
@@ -53,6 +54,19 @@ def predict(ref, targets, blocked_mask, n_mc):
             np.array(hi, float))
 
 
+def one_source(s, n_per_source, n_mc):
+    """One source in a worker: its targets, profile-LOO and blocked."""
+    gshp = DATA["gshp"]
+    ref = st.GshpReference(df=gshp[REF_COLS].reset_index(drop=True))
+    sub = gshp[gshp.source_db == s]
+    # stratify within the source so its own class mix does not dominate
+    tg = pd.concat([g.sample(min(len(g), max(1, n_per_source // 12)),
+                             random_state=0)
+                    for _, g in sub.groupby("texture_class")])
+    mask = (gshp.source_db.to_numpy() == s)
+    return tg, predict(ref, tg, None, n_mc), predict(ref, tg, mask, n_mc)
+
+
 def main():
     args = [a for a in sys.argv[1:] if not a.startswith("--")]
     ref_name = next((a.split("=", 1)[1] for a in sys.argv[1:]
@@ -64,8 +78,6 @@ def main():
     # KSSL rows carry no source_db, and some layers no profile_id.
     gshp["source_db"] = gshp.source_db.fillna("KSSL")
     gshp["profile_id"] = gshp.profile_id.fillna("solo_" + gshp.layer_id.astype(str))
-    ref = st.GshpReference(df=gshp[REF_COLS].reset_index(drop=True))
-    src_all = gshp.source_db.to_numpy()
 
     sizes = gshp.source_db.value_counts()
     sources = [s for s in sizes.index if sizes[s] >= MIN_SOURCE]
@@ -75,17 +87,11 @@ def main():
 
     rows, pooled = [], {"prof": [], "block": [], "gprof": [], "gblock": [],
                         "obs": [], "kb": [[], [], []]}
-    for s in sources:
-        sub = gshp[gshp.source_db == s]
-        # stratify within the source so its own class mix does not dominate
-        tg = pd.concat([g.sample(min(len(g), max(1, n_per_source // 12)),
-                                 random_state=0)
-                        for _, g in sub.groupby("texture_class")])
+    with pool({"gshp": gshp}) as ex:
+        futs = [ex.submit(one_source, s, n_per_source, n_mc) for s in sources]
+    for s, f in zip(sources, futs):
+        tg, p_prof, p_block = f.result()
         truth = tg.texture_class.to_numpy()
-        mask = (src_all == s)
-
-        p_prof = predict(ref, tg, None, n_mc)
-        p_block = predict(ref, tg, mask, n_mc)
         a, b = p_prof[0] == truth, p_block[0] == truth
         ga = np.array([GROUP[p] == GROUP[t] for p, t in zip(p_prof[0], truth)])
         gb = np.array([GROUP[p] == GROUP[t] for p, t in zip(p_block[0], truth)])

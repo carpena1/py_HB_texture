@@ -49,12 +49,14 @@ Usage:  python verify_ivg.py [profile|source|az|ceiling] [n_per_class]
 import os
 import sys
 
+# verify_common first: it pins BLAS/OpenMP threads before numpy loads.
+from verify_common import DATA, GROUP, mcnemar, pool
+
 import numpy as np
 import pandas as pd
 
 import swcc_texture as st
 from verify_ceiling import bayes_bracket
-from verify_common import GROUP, mcnemar
 
 CACHE = os.path.join("figures", "cache", "ivg_fits.csv")
 HEADS = [0, 50, 100, 330, 1000, 5000, 15000, 100000]
@@ -170,6 +172,12 @@ def fit_predict(train, test, cols, use_cov):
     return cls, frac, frac2, ks
 
 
+def one_fit(key, held, sel, cols, use_cov):
+    """One arm, one fold, in a worker."""
+    g, tg = DATA["g"], DATA["tg"]
+    return fit_predict(g[~g[key].isin(held)], tg.iloc[sel], cols, use_cov)
+
+
 def folds(tg, design):
     rng = np.random.default_rng(0)
     if design == "profile":
@@ -192,6 +200,28 @@ def score(name, truth, pred, base=None):
     return ex, gp
 
 
+def one_nn(blocked, cols, use_cov):
+    """1NN class for every target, one predictor set, in a worker."""
+    from sklearn.model_selection import GroupKFold
+    ref, t, tpos = DATA["ref"], DATA["t"], DATA["tpos"]
+    c = list(cols) + (COVS if use_cov else [])
+    x = ref[c].to_numpy(float)
+    keep = np.isfinite(x).all(axis=1)
+    mu, sd = x[keep].mean(0), x[keep].std(0) + 1e-12
+    z = (x - mu) / sd
+    pred = np.empty(len(t), object)
+    for tr, te in GroupKFold(n_splits=N_FOLDS).split(
+            ref, groups=ref[blocked].to_numpy()):
+        sel = np.isin(tpos, te)
+        tr = tr[keep[tr]]
+        if not sel.any():
+            continue
+        a, b = z[tr], z[tpos[sel]]
+        d = ((b[:, None, :] - a[None, :, :]) ** 2).sum(2)
+        pred[sel] = ref.texture_class.to_numpy()[tr][d.argmin(1)]
+    return pred
+
+
 def ceiling(g, n_per_class, cap=300):
     """Cover & Hart bracket per predictor set, profile- and source-blocked.
 
@@ -199,7 +229,6 @@ def ceiling(g, n_per_class, cap=300):
     class -- the uniform prior the tool assumes -- so the brackets are
     comparable with verify_ceiling.py's.
     """
-    from sklearn.model_selection import GroupKFold
     ref = pd.concat([x.sample(min(len(x), cap), random_state=0)
                      for _, x in g.groupby("texture_class")]).reset_index(drop=True)
     t = pd.concat([x.sample(min(len(x), n_per_class), random_state=1)
@@ -207,27 +236,17 @@ def ceiling(g, n_per_class, cap=300):
     tpos = np.array([ref.index.get_loc(i) for i in t.index])
     truth = t.texture_class.to_numpy()
     print(f"reference {len(ref)} layers (<= {cap}/class), targets {len(t)}\n")
+    ex = pool({"ref": ref, "t": t, "tpos": tpos})
+    futs = {(blocked, arm, use_cov): ex.submit(one_nn, blocked, cols, use_cov)
+            for blocked in ("profile_id", "source_db")
+            for arm, cols in ARMS.items() for use_cov in (False, True)}
     for blocked in ("profile_id", "source_db"):
         print(f"--- 1NN blocked by {blocked} ---")
         print(f"{'predictors':24s} {'1NN':>6s}  {'Bayes accuracy':>18s}   "
               f"{'group 1NN':>9s}  {'Bayes group':>18s}")
         for arm, cols in ARMS.items():
             for use_cov in (False, True):
-                c = list(cols) + (COVS if use_cov else [])
-                x = ref[c].to_numpy(float)
-                keep = np.isfinite(x).all(axis=1)
-                mu, sd = x[keep].mean(0), x[keep].std(0) + 1e-12
-                z = (x - mu) / sd
-                pred = np.empty(len(t), object)
-                for tr, te in GroupKFold(n_splits=N_FOLDS).split(
-                        ref, groups=ref[blocked].to_numpy()):
-                    sel = np.isin(tpos, te)
-                    tr = tr[keep[tr]]
-                    if not sel.any():
-                        continue
-                    a, b = z[tr], z[tpos[sel]]
-                    d = ((b[:, None, :] - a[None, :, :]) ** 2).sum(2)
-                    pred[sel] = ref.texture_class.to_numpy()[tr][d.argmin(1)]
+                pred = futs[blocked, arm, use_cov].result()
                 ok = np.array([p == q for p, q in zip(pred, truth)])
                 gp = np.array([GROUP[p] == GROUP[q] for p, q in zip(pred, truth)])
                 lo, hi = bayes_bracket(1 - ok.mean(), 12)
@@ -237,6 +256,7 @@ def ceiling(g, n_per_class, cap=300):
                       f"[{lo * 100:5.1f}%, {hi * 100:5.1f}%]   "
                       f"{gp.mean() * 100:8.1f}%  [{glo * 100:5.1f}%, {ghi * 100:5.1f}%]")
         print()
+    ex.shutdown()
 
 
 def main():
@@ -280,21 +300,24 @@ def main():
     res = {(a, c): dict(cls=np.empty(n, object), frac=np.full((n, 3), np.nan),
                         frac2=np.full((n, 3), np.nan), ks=np.full(n, np.nan))
            for a in ARMS for c in (False, True)}
-    for key, held in fold_list:
-        sel = np.where(tg[key].isin(held))[0]
-        if not len(sel):
-            continue
-        train = g[~g[key].isin(held)]
-        test = tg.iloc[sel]
-        for arm, cols in ARMS.items():
-            for use_cov in (False, True):
-                cls, frac, frac2, ks = fit_predict(train, test, cols, use_cov)
+    with pool({"g": g, "tg": tg}) as ex:
+        futs = []
+        for key, held in fold_list:
+            sel = np.where(tg[key].isin(held))[0]
+            if not len(sel):
+                continue
+            futs.append((held, sel, {
+                (arm, use_cov): ex.submit(one_fit, key, held, sel, cols, use_cov)
+                for arm, cols in ARMS.items() for use_cov in (False, True)}))
+        for held, sel, fs in futs:
+            for (arm, use_cov), f in fs.items():
+                cls, frac, frac2, ks = f.result()
                 r = res[(arm, use_cov)]
                 r["cls"][sel] = cls
                 r["frac"][sel] = frac
                 r["frac2"][sel] = frac2
                 r["ks"][sel] = ks
-        print(f"  fold {sorted(held)[0]}: {len(sel)} targets", flush=True)
+            print(f"  fold {sorted(held)[0]}: {len(sel)} targets", flush=True)
 
     truth = tg.texture_class.to_numpy()
     tfrac = tg[["sand", "silt", "clay"]].to_numpy()

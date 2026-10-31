@@ -12,6 +12,9 @@ texture and Ksat, so predictions are checked against the actual per-soil
 sand/silt/clay and Ks -- not class centroids.
 """
 
+# verify_common first: it pins BLAS/OpenMP threads before numpy loads.
+from verify_common import DATA, pool
+
 import numpy as np
 import pandas as pd
 
@@ -39,13 +42,30 @@ def representative_layer(df, cls):
     return pool.index[np.argmin((z ** 2).sum(1))]
 
 
+def one_class(name, h):
+    """One class in a worker: its representative soil, left out."""
+    pool_df, df = DATA["pool"], DATA["df"]
+    j = representative_layer(pool_df, name)
+    row = pool_df.loc[j]
+    theta = st.vg_theta(h, row.thetar, row.thetas, row.alpha_kpa, row.n)
+
+    # leave-one-out: drop this exact layer from the reference
+    loo = df[df.layer_id != row.layer_id].reset_index(drop=True)
+    ref = st.GshpReference(df=loo)
+    # The classifier must also be blind to the target layer.
+    clf = st.TextureGBM(df=loo)
+    # The target's own sample type, as a user with the metadata would pass.
+    return row, st.estimate(h, theta, ref=ref, clf=clf,
+                            sample_type=row.sample_type)
+
+
 def main():
     # The 12 target soils are chosen from GSHP alone, not from the merged
     # reference. That is forced rather than conservative: a target must carry a
     # measured Ksat to be scored against one, and KSSL has none at all. Keeping
     # the selection pool fixed also keeps these soils identical to the shipped
     # Testing/<i>_<code>_GHSP.csv files.
-    pool = pd.read_csv(st.REFERENCE_CSV)
+    pool_df = pd.read_csv(st.REFERENCE_CSV)
     # Predictions are made against the shipping default reference (merged).
     df = st.load_reference_df()
     h = np.arange(0.0, 150.0 + 0.1, 5.0)
@@ -57,20 +77,10 @@ def main():
     print(f"{'true class':<16s} {'predicted':<16s} {'P(true)':>7s} {'rank':>4s}  "
           f"{'s/si/cl pred':<14s} {'s/si/cl true':<14s} "
           f"{'Ks pred':>8s} {'Ks true':>8s} {'nb':>4s} {'Ks in5-95%':>10s}")
-    for name in ORDER:
-        j = representative_layer(pool, name)
-        row = pool.loc[j]
-        theta = st.vg_theta(h, row.thetar, row.thetas, row.alpha_kpa, row.n)
-
-        # leave-one-out: drop this exact layer from the reference
-        loo = df[df.layer_id != row.layer_id].reset_index(drop=True)
-        ref = st.GshpReference(df=loo)
-        # The classifier must also be blind to the target layer.
-        clf = st.TextureGBM(df=loo)
-        # The target's own sample type, as a user with the metadata would pass.
-        res = st.estimate(h, theta, ref=ref, clf=clf,
-                          sample_type=row.sample_type)
-
+    with pool({"pool": pool_df, "df": df}) as ex:
+        futs = [ex.submit(one_class, name, h) for name in ORDER]
+    for name, f in zip(ORDER, futs):
+        row, res = f.result()
         probs = res["class_probabilities"]
         pred = res["texture_class"]
         p_true = probs.get(name, 0.0)

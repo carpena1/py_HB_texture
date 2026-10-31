@@ -48,11 +48,13 @@ Usage:  python verify_blend.py [layer|profile|source] [n_per_class] [n_mc]
 import os
 import sys
 
+# verify_common first: it pins BLAS/OpenMP threads before numpy loads.
+from verify_common import DATA, GROUP, mcnemar, n_jobs, pool
+
 import numpy as np
 import pandas as pd
 
 import swcc_texture as st
-from verify_common import GROUP, mcnemar
 
 H = np.arange(0.0, 150.0 + 0.1, 5.0)
 N_FOLDS = 5
@@ -63,6 +65,30 @@ CACHE = os.path.join("figures", "cache", "blend_probs_{}{}.csv")
 def vec(probs):
     """A class-probability dict as a vector over CLASSES."""
     return np.array([probs.get(c, 0.0) for c in CLASSES])
+
+
+def one_part(key, held, sel, n_mc, heads):
+    """Targets sel of one fold, in a worker: both models' probabilities."""
+    g, tg = DATA["g"], DATA["tg"]
+    train = g[~g[key].isin(held)].reset_index(drop=True)
+    fm = "heads" if heads else "vg"
+    ref = st.GshpReference(df=train, use_bd=True, feature_mode=fm)
+    clf = st.TextureGBM(df=train, covariates=["depth_cm", "bd"],
+                        feature_mode=fm)
+    pg, pk = [], []
+    for j in sel:
+        r = tg.iloc[j]
+        has_bd = bool(np.isfinite(r.bd))
+        res = st.estimate(H, st.vg_theta(H, r.thetar, r.thetas,
+                                         r.alpha_kpa, r.n),
+                          ref=ref if has_bd else
+                          st.GshpReference(df=train, feature_mode=fm),
+                          clf=clf, n_mc=n_mc,
+                          sample_type=r.sample_type, depth=r.depth_cm,
+                          bulk_density=r.bd if has_bd else None)
+        pg.append(vec(res["class_probabilities"]))
+        pk.append(vec(res["knn_class_probabilities"]))
+    return pg, pk
 
 
 def compute(design, n_per_class, n_mc, heads=False):
@@ -88,28 +114,23 @@ def compute(design, n_per_class, n_mc, heads=False):
 
     pg = np.full((len(tg), len(CLASSES)), np.nan)
     pk = np.full((len(tg), len(CLASSES)), np.nan)
-    for i, (key, held) in enumerate(folds, 1):
-        sel = np.where(tg[key].isin(held))[0]
-        if not len(sel):
-            continue
-        train = g[~g[key].isin(held)].reset_index(drop=True)
-        fm = "heads" if heads else "vg"
-        ref = st.GshpReference(df=train, use_bd=True, feature_mode=fm)
-        clf = st.TextureGBM(df=train, covariates=["depth_cm", "bd"],
-                            feature_mode=fm)
-        for j in sel:
-            r = tg.iloc[j]
-            has_bd = bool(np.isfinite(r.bd))
-            res = st.estimate(H, st.vg_theta(H, r.thetar, r.thetas,
-                                             r.alpha_kpa, r.n),
-                              ref=ref if has_bd else
-                              st.GshpReference(df=train, feature_mode=fm),
-                              clf=clf, n_mc=n_mc,
-                              sample_type=r.sample_type, depth=r.depth_cm,
-                              bulk_density=r.bd if has_bd else None)
-            pg[j] = vec(res["class_probabilities"])
-            pk[j] = vec(res["knn_class_probabilities"])
-        print(f"  fold {i}/{len(folds)}: {len(sel)} targets", flush=True)
+    # Few folds are split into parts so that every core has work; each part
+    # rebuilds its fold's models, which are the same in every part.
+    n_parts = -(-n_jobs() // len(folds))
+    with pool({"g": g, "tg": tg}) as ex:
+        futs = []
+        for key, held in folds:
+            sel = np.where(tg[key].isin(held))[0]
+            futs.append([(part, ex.submit(one_part, key, held, part, n_mc,
+                                          heads))
+                         for part in np.array_split(sel, n_parts) if len(part)])
+        for i, parts in enumerate(futs, 1):
+            if not parts:
+                continue
+            for part, f in parts:
+                pg[part], pk[part] = f.result()
+            print(f"  fold {i}/{len(folds)}: "
+                  f"{sum(len(p) for p, _ in parts)} targets", flush=True)
 
     out = pd.DataFrame({"layer_id": tg.layer_id, "source_db": tg.source_db,
                         "profile_id": tg.profile_id,

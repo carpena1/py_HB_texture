@@ -38,13 +38,15 @@ Usage:  python verify_ceiling.py [n_per_class] [cap_per_class] [--reference=NAME
 
 import sys
 
+# verify_common first: it pins BLAS/OpenMP threads before numpy loads.
+from verify_common import DATA, ORDER, pool
+
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import GroupKFold
 
 import swcc_texture as st
 from verify_groups import GROUP
-from verify_common import ORDER
 
 N_FOLDS = 5
 
@@ -90,15 +92,32 @@ def bracket(err, label, n_classes=12):
     return lo, hi
 
 
-def run(gshp, targets, tpos, groups, label):
+def one_fold(name, tr, sel, mean, std):
+    """1NN for one fold, in a worker."""
+    gshp, targets = DATA[name]
+    return one_nn(gshp.iloc[tr], targets[sel], mean, std)
+
+
+def run(ex, name, gshp, targets, tpos, groups):
+    """Submit every fold now; the returned function collects them."""
     mean, std = feats(gshp).mean(0), feats(gshp).std(0)
-    truth = targets.texture_class.to_numpy()
-    preds = np.empty(len(targets), dtype=object)
     gkf = GroupKFold(n_splits=N_FOLDS)
+    futs = []
     for tr, te in gkf.split(gshp, groups=groups):
         sel = np.isin(tpos, te)
         if sel.any():
-            preds[sel] = one_nn(gshp.iloc[tr], targets[sel], mean, std)
+            futs.append((sel, ex.submit(one_fold, name, tr, sel, mean, std)))
+
+    def collect():
+        preds = np.empty(len(targets), dtype=object)
+        for sel, f in futs:
+            preds[sel] = f.result()
+        return preds
+    return collect
+
+
+def report(preds, targets, label):
+    truth = targets.texture_class.to_numpy()
     ok = preds == truth
     print(f"\n{label}")
     bracket(1 - ok.mean(), "overall", 12)
@@ -130,6 +149,7 @@ def main():
     g["profile_id"] = g.profile_id.fillna("solo_" + g.layer_id.astype(str))
 
     sand = (g.texture_class == "sand").mean() * 100
+    priors = []
     for name, ref in ((f"NATURAL PRIOR ({ref_name} as-is, {sand:.0f} % sand)", g),
                       (f"BALANCED PRIOR (<= {cap}/class, the prior the tool "
                        f"assumes)",
@@ -139,12 +159,16 @@ def main():
         t = pd.concat([x.sample(min(len(x), n_per_class), random_state=1)
                        for _, x in ref.groupby("texture_class")])
         tpos = np.array([ref.index.get_loc(i) for i in t.index])
-        print("\n" + "=" * 66)
-        print(name + f"   (reference {len(ref)} layers, targets {len(t)})")
-        run(ref, t, tpos, ref.profile_id.to_numpy(),
-            "profile-grouped 5-fold")
-        run(ref, t, tpos, ref.source_db.to_numpy(),
-            "source-blocked (grouped by contributing laboratory)")
+        priors.append((name, ref, t, tpos))
+    with pool({name: (ref, t) for name, ref, t, _ in priors}) as ex:
+        pending = [(run(ex, name, ref, t, tpos, ref.profile_id.to_numpy()),
+                    run(ex, name, ref, t, tpos, ref.source_db.to_numpy()))
+                   for name, ref, t, tpos in priors]
+        for (name, ref, t, _), (prof, src) in zip(priors, pending):
+            print("\n" + "=" * 66)
+            print(name + f"   (reference {len(ref)} layers, targets {len(t)})")
+            report(prof(), t, "profile-grouped 5-fold")
+            report(src(), t, "source-blocked (grouped by contributing laboratory)")
 
 
 if __name__ == "__main__":

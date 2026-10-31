@@ -36,6 +36,9 @@ Folds run in parallel (verify_common.map_folds).
 import os
 import sys
 
+# verify_common first: it pins BLAS/OpenMP threads before numpy loads.
+from verify_common import GROUP, map_folds
+
 import numpy as np
 import pandas as pd
 from scipy.stats import spearmanr
@@ -43,7 +46,6 @@ from sklearn.linear_model import LinearRegression, LogisticRegression
 from sklearn.neighbors import BallTree
 
 import swcc_texture as st
-from verify_common import GROUP, map_folds
 
 H = np.arange(0.0, 150.0 + 0.1, 5.0)
 N_MC = 20

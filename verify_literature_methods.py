@@ -40,13 +40,15 @@ density supplied; figures/cache/predictive.csv from verify_predictive.py):
 Usage:  python verify_literature_methods.py
 """
 
+# verify_common first: it pins BLAS/OpenMP threads before numpy loads.
+from verify_common import GROUP
+
 import numpy as np
 import pandas as pd
 from scipy.stats import spearmanr, wilcoxon
 
 import ks_physical as kp
 import swcc_texture as st
-from verify_common import GROUP
 
 RHO_G_MU = kp.DENSITY * kp.GRAVITY / kp.VISCOSITY         # 1/(m s)
 C_CPA = 53.5

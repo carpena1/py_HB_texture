@@ -25,6 +25,9 @@ Usage:  python verify_fractions.py [--cov] [n_mc]
 import importlib
 import sys
 
+# verify_common first: it pins BLAS/OpenMP threads before numpy loads.
+from verify_common import DATA, pool
+
 import numpy as np
 import pandas as pd
 from scipy.stats import wilcoxon
@@ -33,6 +36,38 @@ import swcc_texture as st
 
 SETS = {"babaeian_az": "Arizona", "willard": "Laikipia", "boorowa": "Boorowa",
         "babaeian_zanjanrood": "Zanjanrood", "armas": "Canary"}
+
+
+def one_set(name, use_cov, n_mc):
+    """One external set in a worker: |error| rows for both fraction
+    methods, or None when its table is not built here."""
+    m = importlib.import_module("prepare_" + name)
+    try:
+        tab = pd.read_csv(m.OUT)
+    except FileNotFoundError:
+        return None
+    g = DATA["g"]
+    ref_df = g[~g.layer_id.isin(tab.layer_id)].reset_index(drop=True)
+    ref = st.GshpReference(df=ref_df, use_bd=use_cov)
+    clf = st.TextureGBM(df=ref_df, fractions=True,
+                        covariates=["depth_cm", "bd"] if use_cov else [])
+    pts = m.measured_points()
+    rows = {"knn": [], "gbm": []}
+    for r in tab.itertuples():
+        if r.layer_id not in pts:
+            continue
+        if use_cov and not (np.isfinite(r.bd) and np.isfinite(r.depth_cm)):
+            continue
+        h, th = pts[r.layer_id]
+        res = st.estimate(h, th, ref=ref, clf=clf, n_mc=n_mc,
+                          sample_type=r.sample_type,
+                          depth=r.depth_cm if use_cov else None,
+                          bulk_density=r.bd if use_cov else None)
+        truth = np.array([r.sand, r.silt, r.clay])
+        for k, key in (("knn", "fractions"), ("gbm", "fractions_gbm")):
+            rows[k].append(np.abs(np.array(
+                [res[key][c] for c in ("sand", "silt", "clay")]) - truth))
+    return rows
 
 
 def main():
@@ -45,33 +80,14 @@ def main():
                                                for c in ("sand", "silt", "clay"))
           + "   mean")
     tot = {"knn": [], "gbm": []}
-    for name, label in SETS.items():
-        m = importlib.import_module("prepare_" + name)
-        try:
-            tab = pd.read_csv(m.OUT)
-        except FileNotFoundError:
+    with pool({"g": g}) as ex:
+        futs = [ex.submit(one_set, name, use_cov, n_mc) for name in SETS]
+    for (name, label), f in zip(SETS.items(), futs):
+        rows = f.result()
+        if rows is None:
+            m = importlib.import_module("prepare_" + name)
             print(f"{label:12s}    -   ({m.OUT} not built here)")
             continue
-        ref_df = g[~g.layer_id.isin(tab.layer_id)].reset_index(drop=True)
-        ref = st.GshpReference(df=ref_df, use_bd=use_cov)
-        clf = st.TextureGBM(df=ref_df, fractions=True,
-                            covariates=["depth_cm", "bd"] if use_cov else [])
-        pts = m.measured_points()
-        rows = {"knn": [], "gbm": []}
-        for r in tab.itertuples():
-            if r.layer_id not in pts:
-                continue
-            if use_cov and not (np.isfinite(r.bd) and np.isfinite(r.depth_cm)):
-                continue
-            h, th = pts[r.layer_id]
-            res = st.estimate(h, th, ref=ref, clf=clf, n_mc=n_mc,
-                              sample_type=r.sample_type,
-                              depth=r.depth_cm if use_cov else None,
-                              bulk_density=r.bd if use_cov else None)
-            truth = np.array([r.sand, r.silt, r.clay])
-            for k, key in (("knn", "fractions"), ("gbm", "fractions_gbm")):
-                rows[k].append(np.abs(np.array(
-                    [res[key][c] for c in ("sand", "silt", "clay")]) - truth))
         if not rows["knn"]:
             print(f"{label:12s}    0   (no soil carries both depth and bulk "
                   f"density)")

@@ -21,12 +21,14 @@ Usage:  python verify_holdout.py [n_per_class] [n_mc]
 
 import sys
 
+# verify_common first: it pins BLAS/OpenMP threads before numpy loads.
+from verify_common import DATA, GROUP, mcnemar, merge, pool
+
 import numpy as np
 import pandas as pd
 from scipy.stats import spearmanr
 
 import swcc_texture as st
-from verify_common import GROUP, mcnemar
 
 H = np.arange(0.0, 150.0 + 0.1, 5.0)
 N_FOLDS = 5
@@ -56,6 +58,22 @@ def run(train, tg, sel, out, n_mc):
             out["ks_cov"][j] = (k["median_cmh"], k["p5_cmh"], k["p95_cmh"])
 
 
+def empty(n):
+    return {"cls": np.empty(n, object), "knn": np.empty(n, object),
+            "ks": np.full((n, 3), np.nan), "cls_cov": np.empty(n, object),
+            "ks_cov": np.full((n, 3), np.nan)}
+
+
+def one_fold(col, held, n_mc):
+    """One fold in a worker: its rows of the result."""
+    g, tg = DATA["g"], DATA["tg"]
+    sel = np.where(tg[col].isin(held).to_numpy())[0]
+    out = empty(len(tg))
+    if len(sel):
+        run(g[~g[col].isin(held)], tg, sel, out, n_mc)
+    return sel, out
+
+
 def main():
     args = [a for a in sys.argv[1:] if not a.startswith("--")]
     n_per_class = int(args[0]) if args else 150
@@ -80,17 +98,17 @@ def main():
     truth = tg.texture_class.to_numpy()
     obs = tg.ksat_cmh.to_numpy(float)
     res = {}
-    for name, folds in designs.items():
-        n = len(tg)
-        out = {"cls": np.empty(n, object), "knn": np.empty(n, object),
-               "ks": np.full((n, 3), np.nan), "cls_cov": np.empty(n, object),
-               "ks_cov": np.full((n, 3), np.nan)}
-        for col, held in folds:
-            sel = np.where(tg[col].isin(held).to_numpy())[0]
-            if len(sel):
-                run(g[~g[col].isin(held)], tg, sel, out, n_mc)
-        res[name] = out
-        print(f"  {name} done", flush=True)
+    with pool({"g": g, "tg": tg}) as ex:
+        futs = {name: [ex.submit(one_fold, col, held, n_mc)
+                       for col, held in folds]
+                for name, folds in designs.items()}
+        for name in designs:
+            out = empty(len(tg))
+            for f in futs[name]:
+                sel, part = f.result()
+                merge(out, part, sel)
+            res[name] = out
+            print(f"  {name} done", flush=True)
 
     grp = lambda p, m=slice(None): np.array(
         [GROUP[x] == GROUP[t] for x, t in zip(p, truth[m])])

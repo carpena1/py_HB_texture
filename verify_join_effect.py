@@ -24,18 +24,24 @@ no harm, nothing significant. Exact class +0.87 pp for a new site
 (p=0.092) and -0.29 (p=0.694); Ks median |log10 error| +0.0009 dex with
 107 of 1,660 predictions changed at all (Wilcoxon p=0.872). Admitted.
 
+Every fold of every arm runs as its own task on all cores. estimate() seeds
+its own generator and the classifier has a fixed random_state, so the answers
+are the same as a serial run.
+
 Usage:  python verify_join_effect.py <candidate> [n_per_class] [n_mc]
           <candidate>  a name in swcc_texture.REFERENCE_SETS, e.g. lebrija
 """
 import os
 import sys
 
+# verify_common first: it pins BLAS/OpenMP threads before numpy loads.
+from verify_common import COLS, DATA, mcnemar, n_jobs, pool
+
 import numpy as np
 import pandas as pd
 from scipy.stats import wilcoxon
 
 import swcc_texture as st
-from verify_common import mcnemar, COLS
 from verify_groups import GROUP
 
 H = np.concatenate([[0.0], np.logspace(-1, np.log10(1500.0), 25)])
@@ -55,24 +61,39 @@ def prep(d):
     return d
 
 
-def score(ref_df, tg, folds, col, n_mc, clf=True):
+def _fold(arm, tname, col, held, n_mc, clf):
     """One reference (and classifier) per fold, not per target."""
-    pred = np.empty(len(tg), dtype=object)
-    ks = np.full(len(tg), np.nan)
-    for held in folds:
-        sel = np.where(tg[col].isin(held).to_numpy())[0]
-        if not len(sel):
-            continue
-        train = ref_df[~ref_df[col].isin(held)]
-        ref = st.GshpReference(df=train[REF_COLS].reset_index(drop=True))
-        model = st.TextureGBM(df=train.reset_index(drop=True)) if clf else None
-        for j in sel:
-            r = tg.iloc[j]
-            out = st.estimate(H, curve(r), ref=ref, n_mc=n_mc, clf=model,
-                              sample_type=r.sample_type)
-            pred[j] = out["texture_class"]
-            ks[j] = out["ksat"]["median_cmh"]
-    return pred, ks
+    ref_df, tg = DATA[arm], DATA[tname]
+    sel = np.where(tg[col].isin(held).to_numpy())[0]
+    if not len(sel):
+        return sel, [], []
+    train = ref_df[~ref_df[col].isin(held)]
+    ref = st.GshpReference(df=train[REF_COLS].reset_index(drop=True))
+    model = st.TextureGBM(df=train.reset_index(drop=True)) if clf else None
+    pred, ks = [], []
+    for j in sel:
+        r = tg.iloc[j]
+        out = st.estimate(H, curve(r), ref=ref, n_mc=n_mc, clf=model,
+                          sample_type=r.sample_type)
+        pred.append(out["texture_class"])
+        ks.append(out["ksat"]["median_cmh"])
+    return sel, pred, ks
+
+
+def score(pool, arm, tname, n, folds, col, n_mc, clf=True):
+    """Submit every fold now; the returned function collects them."""
+    futs = [pool.submit(_fold, arm, tname, col, held, n_mc, clf)
+            for held in folds]
+
+    def collect():
+        pred = np.empty(n, dtype=object)
+        ks = np.full(n, np.nan)
+        for f in futs:
+            sel, p, k = f.result()
+            pred[sel] = p
+            ks[sel] = k
+        return pred, ks
+    return collect
 
 
 def main():
@@ -106,12 +127,28 @@ def main():
         "new source": ("source_db", [{s} for s in sorted(tg.source_db.unique())]),
     }
     print(f"targets {len(tg)} ({n_per_class}/class), n_mc={n_mc}; "
-          f"{len(designs['new source'][1])} source folds\n", flush=True)
+          f"{len(designs['new source'][1])} source folds; "
+          f"{n_jobs()} workers\n", flush=True)
+
+    # Ks targets: kNN only, each target's source held out.
+    pool_ks = base[base.ksat_cmh.notna() & (base.ksat_cmh > 0)]
+    tk = pd.concat([g.sample(min(len(g), n_per_class), random_state=0)
+                    for _, g in pool_ks.groupby("texture_class")]
+                   ).reset_index(drop=True)
+
+    ex = pool({"without": base, "with": both, "tg": tg, "tk": tk})
+    pending = {(arm, design): score(ex, arm, "tg", len(tg), folds, col, n_mc)
+               for design, (col, folds) in designs.items()
+               for arm in ("without", "with")}
+    ks_folds = [{s} for s in sorted(tk.source_db.unique())]
+    pending_ks = {arm: score(ex, arm, "tk", len(tk), ks_folds, "source_db",
+                             n_mc, clf=False)
+                  for arm in ("without", "with")}
 
     res = {}
-    for design, (col, folds) in designs.items():
-        for arm, ref_df in (("without", base), ("with", both)):
-            res[(arm, design)] = score(ref_df, tg, folds, col, n_mc)
+    for design in designs:
+        for arm in ("without", "with"):
+            res[(arm, design)] = pending[(arm, design)]()
             p = res[(arm, design)][0]
             g = np.mean([GROUP[a] == GROUP[b] for a, b in zip(p, truth)])
             print(f"  {arm:<8s} {design:<11s} exact "
@@ -130,17 +167,11 @@ def main():
               f"(p={mcnemar(ga, gb):.3f})   answers changed "
               f"{int((pa != pb).sum())}/{len(truth)}")
 
-    # Ks: kNN only, each target's source held out.
-    pool = base[base.ksat_cmh.notna() & (base.ksat_cmh > 0)]
-    tk = pd.concat([g.sample(min(len(g), n_per_class), random_state=0)
-                    for _, g in pool.groupby("texture_class")]
-                   ).reset_index(drop=True)
     obs = np.log10(tk.ksat_cmh.to_numpy(float))
     print(f"\nKs: {len(tk)} targets with a measured Ks", flush=True)
     err = {}
-    for arm, ref_df in (("without", base), ("with", both)):
-        folds = [{s} for s in sorted(tk.source_db.unique())]
-        pred = score(ref_df, tk, folds, "source_db", n_mc, clf=False)[1]
+    for arm in ("without", "with"):
+        pred = pending_ks[arm]()[1]
         err[arm] = np.abs(np.log10(pred) - obs)
         ok = np.isfinite(err[arm])
         print(f"  {arm:<8s} median |log10 err| {np.median(err[arm][ok]):.4f} dex"
@@ -151,8 +182,11 @@ def main():
     print(f"  with minus without: median "
           f"{np.median(err['with'][ok]) - np.median(err['without'][ok]):+.4f} dex,"
           f" changed {int((d != 0).sum())}/{int(ok.sum())}"
+          f" (better {int((d < 0).sum())}, worse {int((d > 0).sum())};"
+          f" mean change {d.mean():+.4f} dex)"
           + (f", Wilcoxon p={wilcoxon(d[d != 0]).pvalue:.3f}"
              if (d != 0).any() else ""))
+    ex.shutdown()
 
 
 if __name__ == "__main__":

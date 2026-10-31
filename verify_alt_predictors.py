@@ -25,11 +25,13 @@ Usage:  python verify_alt_predictors.py [layer|profile|source] [n_per_class]
 
 import sys
 
+# verify_common first: it pins BLAS/OpenMP threads before numpy loads.
+from verify_common import DATA, GROUP, mcnemar, merge, n_jobs, pool
+
 import numpy as np
 import pandas as pd
 
 import swcc_texture as st
-from verify_common import GROUP, mcnemar
 
 H = np.arange(0.0, 150.0 + 0.1, 5.0)
 N_FOLDS = 5
@@ -77,6 +79,14 @@ def run(train, tg, sel, out, n_mc):
                 o["gbm"][j] = [res["fractions_gbm"][c]
                                for c in ("sand", "silt", "clay")]
                 o["ks"][j] = res["ksat"]["median_cmh"]
+
+
+def one_part(key, held, sel, n_mc):
+    """Targets sel of one fold, in a worker: their rows of every arm."""
+    g, tg = DATA["g"], DATA["tg"]
+    out = {(a, c): empty(len(tg)) for a in ARMS for c in (False, True)}
+    run(g[~g[key].isin(held)], tg, sel, out, n_mc)
+    return out
 
 
 def report(out, tg, truth, tfrac):
@@ -143,12 +153,22 @@ def main():
           f"n_mc={n_mc}", flush=True)
 
     out = {(a, c): empty(len(tg)) for a in ARMS for c in (False, True)}
-    for i, (key, held) in enumerate(fold_list, 1):
-        sel = np.where(tg[key].isin(held))[0]
-        if not len(sel):
-            continue
-        run(g[~g[key].isin(held)], tg, sel, out, n_mc)
-        print(f"  fold {i}/{len(fold_list)}: {len(sel)} targets", flush=True)
+    # Few folds are split into parts so that every core has work; each part
+    # rebuilds its fold's models, which are the same in every part.
+    n_parts = -(-n_jobs() // len(fold_list))
+    with pool({"g": g, "tg": tg}) as ex:
+        futs = []
+        for key, held in fold_list:
+            sel = np.where(tg[key].isin(held))[0]
+            futs.append([(part, ex.submit(one_part, key, held, part, n_mc))
+                         for part in np.array_split(sel, n_parts) if len(part)])
+        for i, parts in enumerate(futs, 1):
+            if not parts:
+                continue
+            for part, f in parts:
+                merge(out, f.result(), part)
+            print(f"  fold {i}/{len(fold_list)}: "
+                  f"{sum(len(p) for p, _ in parts)} targets", flush=True)
 
     report(out, tg, tg.texture_class.to_numpy(),
            tg[["sand", "silt", "clay"]].to_numpy())

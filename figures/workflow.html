@@ -179,7 +179,7 @@
     <p class="eyebrow">py_HB_texture</p>
     <h1>From measured retention curves to texture and&nbsp;K<sub>s</sub></h1>
     <p class="lead">
-      How fifteen source databases become one reference table. How one soil
+      How sixteen source databases become one reference table. How one soil
       water characteristic curve becomes a texture class and a conductivity
       estimate. And what each validation level proves.
     </p>
@@ -201,7 +201,7 @@
   </div>
 
   <figure>
-    <svg viewBox="0 0 1040 1522" role="img" aria-label="Fifteen source databases pass through per-source preparation scripts into derivative CSV tables; GSHP, KSSL, Hohenbrink, Zanjanrood, Arizona, the Canary Islands, the Yellow River Basin, the restricted EU-HYDI, Laikipia, the Andalusian soils and the Australian CSIRO cores (NatSoil and Boorowa), Fujii et al. (Japan, with Indonesia and Thailand) and Ksat-SSIR-DB (Brazil) form the default merged reference of 21,720 layers, with UNSODA and sDB added only in the all set.">
+    <svg viewBox="0 0 1040 1616" role="img" aria-label="Sixteen source databases pass through per-source preparation scripts into derivative CSV tables; GSHP (global), the restricted EU-HYDI (Europe), the Australian CSIRO cores (NatSoil and Boorowa), Ksat-SSIR-DB (Brazil), the Yellow River Basin (China), Hohenbrink (Germany), Zanjanrood (Iran), Fujii et al. (Japan, with Indonesia and Thailand), Laikipia (Kenya), the Canary Islands and the Andalusian soils (Spain), and KSSL, Arizona and Kansas (USA) form the default merged reference of 21,876 layers, with UNSODA and sDB added only in the all set.">
       <defs>
         <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
           <path d="M 0 1 L 9 5 L 0 9 z" fill="currentColor"/>
@@ -233,195 +233,215 @@
         <text x="268" y="118" font-size="11" fill="currentColor">&#945; m&#8315;&#185; &#8594; kPa&#8315;&#185;   &#183;   K<tspan baseline-shift="sub" font-size="8">s</tspan> cm/d &#8594; cm/h</text>
 
         <!-- KSSL -->
-        <rect x="16" y="142" width="184" height="78" rx="3" fill="none" stroke="currentColor" opacity=".85"/>
-        <text x="28" y="164" font-size="13" font-weight="600" fill="currentColor">NCSS / KSSL (USA)</text>
-        <text x="28" y="182" font-size="11" fill="var(--muted)">USDA&#8211;NRCS, 5.4 GB</text>
-        <text x="28" y="198" font-size="11" fill="var(--muted)">~420,000 layers</text>
-        <text x="28" y="212" font-size="11" fill="var(--muted)">gravimetric %, no K<tspan baseline-shift="sub" font-size="8">s</tspan></text>
-        <rect x="256" y="142" width="300" height="78" rx="3" fill="var(--sunken)" stroke="currentColor" opacity=".85"/>
-        <text x="268" y="162" font-size="11.5" font-family="IBM Plex Mono, monospace" fill="var(--accent)">prepare_kssl.py</text>
-        <text x="268" y="180" font-size="11" fill="currentColor">need &#8805;5 tensions + particle-size analysis</text>
-        <text x="268" y="195" font-size="11" fill="currentColor">w% &#215; bulk density &#8594; volumetric &#952;</text>
-        <text x="268" y="212" font-size="11" fill="var(--accent)">add saturation anchor &#952;(0) = 0.95 &#215; porosity</text>
+        <rect x="16" y="1082" width="184" height="78" rx="3" fill="none" stroke="currentColor" opacity=".85"/>
+        <text x="28" y="1104" font-size="13" font-weight="600" fill="currentColor">NCSS / KSSL (USA)</text>
+        <text x="28" y="1122" font-size="11" fill="var(--muted)">USDA&#8211;NRCS, 5.4 GB</text>
+        <text x="28" y="1138" font-size="11" fill="var(--muted)">~420,000 layers</text>
+        <text x="28" y="1152" font-size="11" fill="var(--muted)">gravimetric %, no K<tspan baseline-shift="sub" font-size="8">s</tspan></text>
+        <rect x="256" y="1082" width="300" height="78" rx="3" fill="var(--sunken)" stroke="currentColor" opacity=".85"/>
+        <text x="268" y="1102" font-size="11.5" font-family="IBM Plex Mono, monospace" fill="var(--accent)">prepare_kssl.py</text>
+        <text x="268" y="1120" font-size="11" fill="currentColor">need &#8805;5 tensions + particle-size analysis</text>
+        <text x="268" y="1135" font-size="11" fill="currentColor">w% &#215; bulk density &#8594; volumetric &#952;</text>
+        <text x="268" y="1152" font-size="11" fill="var(--accent)">add saturation anchor &#952;(0) = 0.95 &#215; porosity</text>
 
         <!-- Hohenbrink -->
-        <rect x="16" y="236" width="184" height="78" rx="3" fill="none" stroke="currentColor" opacity=".85"/>
-        <text x="28" y="258" font-size="13" font-weight="600" fill="currentColor">Hohenbrink (Germany)</text>
-        <text x="28" y="276" font-size="11" fill="var(--muted)">et al. 2023, ESSD</text>
-        <text x="28" y="292" font-size="11" fill="var(--muted)">572 German cores</text>
-        <text x="28" y="306" font-size="11" fill="var(--muted)">HYPROP + WP4 + KSAT</text>
-        <rect x="256" y="236" width="300" height="78" rx="3" fill="var(--sunken)" stroke="currentColor" opacity=".85"/>
-        <text x="268" y="256" font-size="11.5" font-family="IBM Plex Mono, monospace" fill="var(--accent)">prepare_hohenbrink.py</text>
-        <text x="268" y="274" font-size="11" fill="currentColor">pF &#8594; kPa   &#183;   k cm/d &#8594; cm/h</text>
-        <text x="268" y="291" font-size="11" fill="var(--accent)">bin in pF, one median point per bin</text>
-        <text x="268" y="306" font-size="11" fill="var(--muted)">(else 199 wet points outvote 3 dry ones)</text>
+        <rect x="16" y="518" width="184" height="78" rx="3" fill="none" stroke="currentColor" opacity=".85"/>
+        <text x="28" y="540" font-size="13" font-weight="600" fill="currentColor">Hohenbrink (Germany)</text>
+        <text x="28" y="558" font-size="11" fill="var(--muted)">et al. 2023, ESSD</text>
+        <text x="28" y="574" font-size="11" fill="var(--muted)">572 German cores</text>
+        <text x="28" y="588" font-size="11" fill="var(--muted)">HYPROP + WP4 + KSAT</text>
+        <rect x="256" y="518" width="300" height="78" rx="3" fill="var(--sunken)" stroke="currentColor" opacity=".85"/>
+        <text x="268" y="538" font-size="11.5" font-family="IBM Plex Mono, monospace" fill="var(--accent)">prepare_hohenbrink.py</text>
+        <text x="268" y="556" font-size="11" fill="currentColor">pF &#8594; kPa   &#183;   k cm/d &#8594; cm/h</text>
+        <text x="268" y="573" font-size="11" fill="var(--accent)">bin in pF, one median point per bin</text>
+        <text x="268" y="588" font-size="11" fill="var(--muted)">(else 199 wet points outvote 3 dry ones)</text>
 
         <!-- EU-HYDI -->
-        <rect x="16" y="330" width="184" height="78" rx="3" fill="none" stroke="currentColor" opacity=".85"/>
-        <text x="28" y="352" font-size="13" font-weight="600" fill="currentColor">EU-HYDI (Europe)</text>
-        <text x="28" y="370" font-size="11" fill="var(--muted)">Weynants et al. 2013</text>
-        <text x="28" y="386" font-size="11" fill="var(--muted)">18,682 samples, 18 countries</text>
-        <text x="28" y="400" font-size="11" fill="currentColor">consortium-restricted</text>
-        <rect x="256" y="330" width="300" height="78" rx="3" fill="var(--sunken)" stroke="currentColor" opacity=".85"/>
-        <text x="268" y="350" font-size="11.5" font-family="IBM Plex Mono, monospace" fill="var(--accent)">prepare_euhydi.py</text>
-        <text x="268" y="368" font-size="11" fill="currentColor">need &#8805;5 reliable points + USDA fractions</text>
-        <text x="268" y="383" font-size="11" fill="currentColor">cm &#8594; kPa   &#183;   K at h = 0, saturated methods only</text>
-        <text x="268" y="400" font-size="11" fill="var(--accent)">bin in pF; sum raw size classes where empty</text>
+        <rect x="16" y="142" width="184" height="78" rx="3" fill="none" stroke="currentColor" opacity=".85"/>
+        <text x="28" y="164" font-size="13" font-weight="600" fill="currentColor">EU-HYDI (Europe)</text>
+        <text x="28" y="182" font-size="11" fill="var(--muted)">Weynants et al. 2013</text>
+        <text x="28" y="198" font-size="11" fill="var(--muted)">18,682 samples, 18 countries</text>
+        <text x="28" y="212" font-size="11" fill="currentColor">consortium-restricted</text>
+        <rect x="256" y="142" width="300" height="78" rx="3" fill="var(--sunken)" stroke="currentColor" opacity=".85"/>
+        <text x="268" y="162" font-size="11.5" font-family="IBM Plex Mono, monospace" fill="var(--accent)">prepare_euhydi.py</text>
+        <text x="268" y="180" font-size="11" fill="currentColor">need &#8805;5 reliable points + USDA fractions</text>
+        <text x="268" y="195" font-size="11" fill="currentColor">cm &#8594; kPa   &#183;   K at h = 0, saturated methods only</text>
+        <text x="268" y="212" font-size="11" fill="var(--accent)">bin in pF; sum raw size classes where empty</text>
 
         <!-- Zanjanrood -->
-        <rect x="16" y="424" width="184" height="78" rx="3" fill="none" stroke="currentColor" opacity=".85"/>
-        <text x="28" y="446" font-size="13" font-weight="600" fill="currentColor">Zanjanrood (Iran)</text>
-        <text x="28" y="464" font-size="11" fill="var(--muted)">Babaeian et al. 2015</text>
-        <text x="28" y="480" font-size="11" fill="var(--muted)">173 samples, 0&#8211;30 cm</text>
-        <text x="28" y="494" font-size="11" fill="var(--muted)">cores + sieved dry end</text>
-        <rect x="256" y="424" width="300" height="78" rx="3" fill="var(--sunken)" stroke="currentColor" opacity=".85"/>
-        <text x="268" y="444" font-size="11.5" font-family="IBM Plex Mono, monospace" fill="var(--accent)">prepare_babaeian_zanjanrood.py</text>
-        <text x="268" y="462" font-size="11" fill="currentColor">refit vG to measured points, cm &#8594; kPa</text>
-        <text x="268" y="479" font-size="11" fill="currentColor">need a point wetter than 330 cm</text>
-        <text x="268" y="494" font-size="11" fill="var(--muted)">K<tspan baseline-shift="sub" font-size="8">s</tspan> on repacked samples, used as intact</text>
+        <rect x="16" y="612" width="184" height="78" rx="3" fill="none" stroke="currentColor" opacity=".85"/>
+        <text x="28" y="634" font-size="13" font-weight="600" fill="currentColor">Zanjanrood (Iran)</text>
+        <text x="28" y="652" font-size="11" fill="var(--muted)">Babaeian et al. 2015</text>
+        <text x="28" y="668" font-size="11" fill="var(--muted)">173 samples, 0&#8211;30 cm</text>
+        <text x="28" y="682" font-size="11" fill="var(--muted)">cores + sieved dry end</text>
+        <rect x="256" y="612" width="300" height="78" rx="3" fill="var(--sunken)" stroke="currentColor" opacity=".85"/>
+        <text x="268" y="632" font-size="11.5" font-family="IBM Plex Mono, monospace" fill="var(--accent)">prepare_babaeian_zanjanrood.py</text>
+        <text x="268" y="650" font-size="11" fill="currentColor">refit vG to measured points, cm &#8594; kPa</text>
+        <text x="268" y="667" font-size="11" fill="currentColor">need a point wetter than 330 cm</text>
+        <text x="268" y="682" font-size="11" fill="var(--muted)">K<tspan baseline-shift="sub" font-size="8">s</tspan> on repacked samples, used as intact</text>
 
                 <!-- Laikipia -->
-        <rect x="16" y="518" width="184" height="78" rx="3" fill="none" stroke="currentColor" opacity=".85"/>
-        <text x="28" y="540" font-size="13" font-weight="600" fill="currentColor">Laikipia (Kenya)</text>
-        <text x="28" y="558" font-size="11" fill="var(--muted)">Willard et al. 2026, HydroShare</text>
-        <text x="28" y="574" font-size="11" fill="var(--muted)">70 cores, 35 fields</text>
-        <text x="28" y="588" font-size="11" fill="currentColor">the project&#8217;s own data</text>
-        <rect x="256" y="518" width="300" height="78" rx="3" fill="var(--sunken)" stroke="currentColor" opacity=".85"/>
-        <text x="268" y="538" font-size="11.5" font-family="IBM Plex Mono, monospace" fill="var(--accent)">prepare_willard.py</text>
-        <text x="268" y="556" font-size="11" fill="currentColor">published curves (HydroShare)</text>
-        <text x="268" y="573" font-size="11" fill="var(--accent)">density follows shrinkage, cap 1.6</text>
-        <text x="268" y="588" font-size="11" fill="var(--muted)">16 dispersed samples left out</text>
+        <rect x="16" y="800" width="184" height="78" rx="3" fill="none" stroke="currentColor" opacity=".85"/>
+        <text x="28" y="822" font-size="13" font-weight="600" fill="currentColor">Laikipia (Kenya)</text>
+        <text x="28" y="840" font-size="11" fill="var(--muted)">Willard et al. 2026, HydroShare</text>
+        <text x="28" y="856" font-size="11" fill="var(--muted)">70 cores, 35 fields</text>
+        <text x="28" y="870" font-size="11" fill="currentColor">the project&#8217;s own data</text>
+        <rect x="256" y="800" width="300" height="78" rx="3" fill="var(--sunken)" stroke="currentColor" opacity=".85"/>
+        <text x="268" y="820" font-size="11.5" font-family="IBM Plex Mono, monospace" fill="var(--accent)">prepare_willard.py</text>
+        <text x="268" y="838" font-size="11" fill="currentColor">published curves (HydroShare)</text>
+        <text x="268" y="855" font-size="11" fill="var(--accent)">density follows shrinkage, cap 1.6</text>
+        <text x="268" y="870" font-size="11" fill="var(--muted)">16 dispersed samples left out</text>
 
         <!-- Arizona -->
-        <rect x="16" y="612" width="184" height="78" rx="3" fill="none" stroke="currentColor" opacity=".85"/>
-        <text x="28" y="634" font-size="13" font-weight="600" fill="currentColor">Arizona (USA)</text>
-        <text x="28" y="652" font-size="11" fill="var(--muted)">E. Babaeian, shared data</text>
-        <text x="28" y="668" font-size="11" fill="var(--muted)">21 samples, sand to clay</text>
-        <text x="28" y="682" font-size="11" fill="currentColor">no coordinates</text>
-        <rect x="256" y="612" width="300" height="78" rx="3" fill="var(--sunken)" stroke="currentColor" opacity=".85"/>
-        <text x="268" y="632" font-size="11.5" font-family="IBM Plex Mono, monospace" fill="var(--accent)">prepare_babaeian_az.py</text>
-        <text x="268" y="650" font-size="11" fill="currentColor">refit vG to points up to 1500 kPa</text>
-        <text x="268" y="667" font-size="11" fill="var(--accent)">interpolate a low 500 cm reading (3 samples)</text>
-        <text x="268" y="682" font-size="11" fill="var(--muted)">the file's own vG fits not used</text>
+        <rect x="16" y="1176" width="184" height="78" rx="3" fill="none" stroke="currentColor" opacity=".85"/>
+        <text x="28" y="1198" font-size="13" font-weight="600" fill="currentColor">Arizona (USA)</text>
+        <text x="28" y="1216" font-size="11" fill="var(--muted)">E. Babaeian, shared data</text>
+        <text x="28" y="1232" font-size="11" fill="var(--muted)">21 samples, sand to clay</text>
+        <text x="28" y="1246" font-size="11" fill="currentColor">no coordinates</text>
+        <rect x="256" y="1176" width="300" height="78" rx="3" fill="var(--sunken)" stroke="currentColor" opacity=".85"/>
+        <text x="268" y="1196" font-size="11.5" font-family="IBM Plex Mono, monospace" fill="var(--accent)">prepare_babaeian_az.py</text>
+        <text x="268" y="1214" font-size="11" fill="currentColor">refit vG to points up to 1500 kPa</text>
+        <text x="268" y="1231" font-size="11" fill="var(--accent)">interpolate a low 500 cm reading (3 samples)</text>
+        <text x="268" y="1246" font-size="11" fill="var(--muted)">the file's own vG fits not used</text>
         <!-- Canary -->
-        <rect x="16" y="706" width="184" height="78" rx="3" fill="none" stroke="currentColor" opacity=".85"/>
-        <text x="28" y="728" font-size="13" font-weight="600" fill="currentColor">Canary Islands (Spain)</text>
-        <text x="28" y="746" font-size="11" fill="var(--muted)">Armas Espinel 2013</text>
-        <text x="28" y="762" font-size="11" fill="var(--muted)">66 cores, andic soils</text>
-        <text x="28" y="776" font-size="11" fill="currentColor">thesis, Tenerife</text>
-        <rect x="256" y="706" width="300" height="78" rx="3" fill="var(--sunken)" stroke="currentColor" opacity=".85"/>
-        <text x="268" y="726" font-size="11.5" font-family="IBM Plex Mono, monospace" fill="var(--accent)">prepare_armas.py</text>
-        <text x="268" y="744" font-size="11" fill="currentColor">points read from the thesis's vector figures</text>
-        <text x="268" y="761" font-size="11" fill="var(--accent)">checked against its tables and vG fits</text>
-        <text x="268" y="776" font-size="11" fill="var(--muted)">resin-dispersed fractions kept alongside</text>
+        <rect x="16" y="894" width="184" height="78" rx="3" fill="none" stroke="currentColor" opacity=".85"/>
+        <text x="28" y="916" font-size="13" font-weight="600" fill="currentColor">Canary Islands (Spain)</text>
+        <text x="28" y="934" font-size="11" fill="var(--muted)">Armas Espinel 2013</text>
+        <text x="28" y="950" font-size="11" fill="var(--muted)">66 cores, andic soils</text>
+        <text x="28" y="964" font-size="11" fill="currentColor">thesis, Tenerife</text>
+        <rect x="256" y="894" width="300" height="78" rx="3" fill="var(--sunken)" stroke="currentColor" opacity=".85"/>
+        <text x="268" y="914" font-size="11.5" font-family="IBM Plex Mono, monospace" fill="var(--accent)">prepare_armas.py</text>
+        <text x="268" y="932" font-size="11" fill="currentColor">points read from the thesis's vector figures</text>
+        <text x="268" y="949" font-size="11" fill="var(--accent)">checked against its tables and vG fits</text>
+        <text x="268" y="964" font-size="11" fill="var(--muted)">resin-dispersed fractions kept alongside</text>
 
         <!-- Yellow River -->
-        <rect x="16" y="800" width="184" height="78" rx="3" fill="none" stroke="currentColor" opacity=".85"/>
-        <text x="28" y="822" font-size="13" font-weight="600" fill="currentColor">Yellow River (China)</text>
-        <text x="28" y="840" font-size="11" fill="var(--muted)">Tong et al. 2024, PANGAEA</text>
-        <text x="28" y="856" font-size="11" fill="var(--muted)">1,035 curves, 475 sites</text>
-        <text x="28" y="870" font-size="11" fill="currentColor">centrifuge; laser texture</text>
-        <rect x="256" y="800" width="300" height="78" rx="3" fill="var(--sunken)" stroke="currentColor" opacity=".85"/>
-        <text x="268" y="820" font-size="11.5" font-family="IBM Plex Mono, monospace" fill="var(--accent)">prepare_tong.py</text>
-        <text x="268" y="838" font-size="11" fill="currentColor">only fits published: rebuild 1&#8211;1000 kPa</text>
-        <text x="268" y="855" font-size="11" fill="var(--accent)">add measured &#952;s at h = 0, refit</text>
-        <text x="268" y="870" font-size="11" fill="var(--muted)">&#945; m&#8315;&#185; &#8594; kPa&#8315;&#185; &#183; K<tspan baseline-shift="sub" font-size="8">s</tspan> cm/min &#8594; cm/h</text>
+        <rect x="16" y="424" width="184" height="78" rx="3" fill="none" stroke="currentColor" opacity=".85"/>
+        <text x="28" y="446" font-size="13" font-weight="600" fill="currentColor">Yellow River (China)</text>
+        <text x="28" y="464" font-size="11" fill="var(--muted)">Tong et al. 2024, PANGAEA</text>
+        <text x="28" y="480" font-size="11" fill="var(--muted)">1,035 curves, 475 sites</text>
+        <text x="28" y="494" font-size="11" fill="currentColor">centrifuge; laser texture</text>
+        <rect x="256" y="424" width="300" height="78" rx="3" fill="var(--sunken)" stroke="currentColor" opacity=".85"/>
+        <text x="268" y="444" font-size="11.5" font-family="IBM Plex Mono, monospace" fill="var(--accent)">prepare_tong.py</text>
+        <text x="268" y="462" font-size="11" fill="currentColor">only fits published: rebuild 1&#8211;1000 kPa</text>
+        <text x="268" y="479" font-size="11" fill="var(--accent)">add measured &#952;s at h = 0, refit</text>
+        <text x="268" y="494" font-size="11" fill="var(--muted)">&#945; m&#8315;&#185; &#8594; kPa&#8315;&#185; &#183; K<tspan baseline-shift="sub" font-size="8">s</tspan> cm/min &#8594; cm/h</text>
 
         <!-- Andalusia -->
-<rect x="16" y="894" width="184" height="78" rx="3" fill="none" stroke="currentColor" opacity=".85"/>
-<text x="28" y="916" font-size="13" font-weight="600" fill="currentColor">Andalusia (Spain)</text>
-<text x="28" y="934" font-size="11" fill="var(--muted)">K. Vanderlinden, IFAPA</text>
-<text x="28" y="950" font-size="11" fill="var(--muted)">122 curves, four sites</text>
-<text x="28" y="964" font-size="11" fill="currentColor">distributed</text>
-<rect x="256" y="894" width="300" height="78" rx="3" fill="var(--sunken)" stroke="currentColor" opacity=".85"/>
-<text x="268" y="914" font-size="11.5" font-family="IBM Plex Mono, monospace" fill="var(--accent)">prepare_andalusia.py</text>
-<text x="268" y="932" font-size="11" fill="currentColor">gravimetric &#215; ring density (Setenil)</text>
-<text x="268" y="949" font-size="11" fill="var(--accent)">Tomejil, Lebrija: density follows shrinkage</text>
-<text x="268" y="964" font-size="11" fill="var(--muted)">points to 1500 kPa; Do&#241;ana sands</text>
-<rect x="596" y="894" width="196" height="78" rx="3" fill="none" stroke="var(--accent)"/>
-<text x="608" y="918" font-size="9" font-family="IBM Plex Mono, monospace" fill="var(--accent)">setenil+tomejil+lebrija+donana</text>
-<text x="608" y="938" font-size="13" font-weight="600" fill="currentColor">122</text>
-<text x="608" y="958" font-size="11" fill="var(--muted)">44 with K<tspan baseline-shift="sub" font-size="8">s</tspan></text>
-<g stroke="currentColor" fill="none" opacity=".55"><line x1="200" y1="933" x2="252" y2="933" marker-end="url(#ar)"/></g>
-<g stroke="var(--accent)" fill="none">
-<line x1="556" y1="933" x2="592" y2="933" marker-end="url(#ara)"/>
-<line x1="792" y1="933" x2="844" y2="933" marker-end="url(#ara)"/>
-</g>
-<!-- Australia -->
 <rect x="16" y="988" width="184" height="78" rx="3" fill="none" stroke="currentColor" opacity=".85"/>
-<text x="28" y="1010" font-size="13" font-weight="600" fill="currentColor">CSIRO (Australia)</text>
-<text x="28" y="1028" font-size="11" fill="var(--muted)">NatSoil API + Boorowa Farm</text>
-<text x="28" y="1044" font-size="11" fill="var(--muted)">224 + 57 cores</text>
-<text x="28" y="1058" font-size="11" fill="currentColor">CC BY 4.0 / BY-NC-SA</text>
+<text x="28" y="1010" font-size="13" font-weight="600" fill="currentColor">Andalusia (Spain)</text>
+<text x="28" y="1028" font-size="11" fill="var(--muted)">K. Vanderlinden, IFAPA</text>
+<text x="28" y="1044" font-size="11" fill="var(--muted)">122 curves, four sites</text>
+<text x="28" y="1058" font-size="11" fill="currentColor">distributed</text>
 <rect x="256" y="988" width="300" height="78" rx="3" fill="var(--sunken)" stroke="currentColor" opacity=".85"/>
-<text x="268" y="1008" font-size="11.5" font-family="IBM Plex Mono, monospace" fill="var(--accent)">prepare_natsoil.py</text>
-<text x="268" y="1026" font-size="11" fill="currentColor">texture to USDA 50 &#181;m limit (Sedigraph,</text>
-<text x="268" y="1043" font-size="11" fill="var(--accent)">sieve, or interpolated); coordinates fixed</text>
-<text x="268" y="1058" font-size="11" fill="var(--muted)">replaces GSHP&#8217;s Australian rows</text>
+<text x="268" y="1008" font-size="11.5" font-family="IBM Plex Mono, monospace" fill="var(--accent)">prepare_andalusia.py</text>
+<text x="268" y="1026" font-size="11" fill="currentColor">gravimetric &#215; ring density (Setenil)</text>
+<text x="268" y="1043" font-size="11" fill="var(--accent)">Tomejil, Lebrija: density follows shrinkage</text>
+<text x="268" y="1058" font-size="11" fill="var(--muted)">points to 1500 kPa; Do&#241;ana sands</text>
 <rect x="596" y="988" width="196" height="78" rx="3" fill="none" stroke="var(--accent)"/>
-<text x="608" y="1012" font-size="9" font-family="IBM Plex Mono, monospace" fill="var(--accent)">natsoil+boorowa_reference</text>
-<text x="608" y="1032" font-size="13" font-weight="600" fill="currentColor">281</text>
-<text x="608" y="1052" font-size="11" fill="var(--muted)">105 with K<tspan baseline-shift="sub" font-size="8">s</tspan> &#183; Boorowa local</text>
+<text x="608" y="1012" font-size="9" font-family="IBM Plex Mono, monospace" fill="var(--accent)">setenil+tomejil+lebrija+donana</text>
+<text x="608" y="1032" font-size="13" font-weight="600" fill="currentColor">122</text>
+<text x="608" y="1052" font-size="11" fill="var(--muted)">44 with K<tspan baseline-shift="sub" font-size="8">s</tspan></text>
 <g stroke="currentColor" fill="none" opacity=".55"><line x1="200" y1="1027" x2="252" y2="1027" marker-end="url(#ar)"/></g>
 <g stroke="var(--accent)" fill="none">
 <line x1="556" y1="1027" x2="592" y2="1027" marker-end="url(#ara)"/>
 <line x1="792" y1="1027" x2="844" y2="1027" marker-end="url(#ara)"/>
 </g>
-<!-- Japan and Southeast Asia -->
-<rect x="16" y="1082" width="184" height="78" rx="3" fill="none" stroke="currentColor" opacity=".85"/>
-<text x="28" y="1104" font-size="13" font-weight="600" fill="currentColor">Fujii et al. (Japan)</text>
-<text x="28" y="1122" font-size="11" fill="var(--muted)">Dryad 2023; with Indonesia,</text>
-<text x="28" y="1138" font-size="11" fill="var(--muted)">Thailand: 59 cores, 23 sites</text>
-<text x="28" y="1152" font-size="11" fill="currentColor">CC0 public domain</text>
-<rect x="256" y="1082" width="300" height="78" rx="3" fill="var(--sunken)" stroke="currentColor" opacity=".85"/>
-<text x="268" y="1102" font-size="11.5" font-family="IBM Plex Mono, monospace" fill="var(--accent)">prepare_fujii.py</text>
-<text x="268" y="1120" font-size="11" fill="currentColor">points to pF 4.2; pF 5.5 and 7 dropped</text>
-<text x="268" y="1137" font-size="11" fill="var(--accent)">sheets joined on site and depth</text>
-<text x="268" y="1152" font-size="11" fill="var(--muted)">class re-derived from the fractions</text>
-<rect x="596" y="1082" width="196" height="78" rx="3" fill="none" stroke="var(--accent)"/>
-<text x="608" y="1106" font-size="11" font-family="IBM Plex Mono, monospace" fill="var(--accent)">fujii_reference</text>
-<text x="608" y="1126" font-size="13" font-weight="600" fill="currentColor">59</text>
-<text x="608" y="1146" font-size="11" fill="var(--muted)">51 with K<tspan baseline-shift="sub" font-size="8">s</tspan></text>
-<g stroke="currentColor" fill="none" opacity=".55"><line x1="200" y1="1121" x2="252" y2="1121" marker-end="url(#ar)"/></g>
+<!-- Australia -->
+<rect x="16" y="236" width="184" height="78" rx="3" fill="none" stroke="currentColor" opacity=".85"/>
+<text x="28" y="258" font-size="13" font-weight="600" fill="currentColor">CSIRO (Australia)</text>
+<text x="28" y="276" font-size="11" fill="var(--muted)">NatSoil API + Boorowa Farm</text>
+<text x="28" y="292" font-size="11" fill="var(--muted)">224 + 57 cores</text>
+<text x="28" y="306" font-size="11" fill="currentColor">CC BY 4.0 / BY-NC-SA</text>
+<rect x="256" y="236" width="300" height="78" rx="3" fill="var(--sunken)" stroke="currentColor" opacity=".85"/>
+<text x="268" y="256" font-size="11.5" font-family="IBM Plex Mono, monospace" fill="var(--accent)">prepare_natsoil.py</text>
+<text x="268" y="274" font-size="11" fill="currentColor">texture to USDA 50 &#181;m limit (Sedigraph,</text>
+<text x="268" y="291" font-size="11" fill="var(--accent)">sieve, or interpolated); coordinates fixed</text>
+<text x="268" y="306" font-size="11" fill="var(--muted)">replaces GSHP&#8217;s Australian rows</text>
+<rect x="596" y="236" width="196" height="78" rx="3" fill="none" stroke="var(--accent)"/>
+<text x="608" y="260" font-size="9" font-family="IBM Plex Mono, monospace" fill="var(--accent)">natsoil+boorowa_reference</text>
+<text x="608" y="280" font-size="13" font-weight="600" fill="currentColor">281</text>
+<text x="608" y="300" font-size="11" fill="var(--muted)">105 with K<tspan baseline-shift="sub" font-size="8">s</tspan> &#183; Boorowa local</text>
+<g stroke="currentColor" fill="none" opacity=".55"><line x1="200" y1="275" x2="252" y2="275" marker-end="url(#ar)"/></g>
 <g stroke="var(--accent)" fill="none">
-<line x1="556" y1="1121" x2="592" y2="1121" marker-end="url(#ara)"/>
-<line x1="792" y1="1121" x2="844" y2="1121" marker-end="url(#ara)"/>
+<line x1="556" y1="275" x2="592" y2="275" marker-end="url(#ara)"/>
+<line x1="792" y1="275" x2="844" y2="275" marker-end="url(#ara)"/>
+</g>
+<!-- Japan and Southeast Asia -->
+<rect x="16" y="706" width="184" height="78" rx="3" fill="none" stroke="currentColor" opacity=".85"/>
+<text x="28" y="728" font-size="13" font-weight="600" fill="currentColor">Fujii et al. (Japan)</text>
+<text x="28" y="746" font-size="11" fill="var(--muted)">Dryad 2023; with Indonesia,</text>
+<text x="28" y="762" font-size="11" fill="var(--muted)">Thailand: 59 cores, 23 sites</text>
+<text x="28" y="776" font-size="11" fill="currentColor">CC0 public domain</text>
+<rect x="256" y="706" width="300" height="78" rx="3" fill="var(--sunken)" stroke="currentColor" opacity=".85"/>
+<text x="268" y="726" font-size="11.5" font-family="IBM Plex Mono, monospace" fill="var(--accent)">prepare_fujii.py</text>
+<text x="268" y="744" font-size="11" fill="currentColor">points to pF 4.2; pF 5.5 and 7 dropped</text>
+<text x="268" y="761" font-size="11" fill="var(--accent)">sheets joined on site and depth</text>
+<text x="268" y="776" font-size="11" fill="var(--muted)">class re-derived from the fractions</text>
+<rect x="596" y="706" width="196" height="78" rx="3" fill="none" stroke="var(--accent)"/>
+<text x="608" y="730" font-size="11" font-family="IBM Plex Mono, monospace" fill="var(--accent)">fujii_reference</text>
+<text x="608" y="750" font-size="13" font-weight="600" fill="currentColor">59</text>
+<text x="608" y="770" font-size="11" fill="var(--muted)">51 with K<tspan baseline-shift="sub" font-size="8">s</tspan></text>
+<g stroke="currentColor" fill="none" opacity=".55"><line x1="200" y1="745" x2="252" y2="745" marker-end="url(#ar)"/></g>
+<g stroke="var(--accent)" fill="none">
+<line x1="556" y1="745" x2="592" y2="745" marker-end="url(#ara)"/>
+<line x1="792" y1="745" x2="844" y2="745" marker-end="url(#ara)"/>
 </g>
 <!-- Brazil -->
-<rect x="16" y="1176" width="184" height="78" rx="3" fill="none" stroke="currentColor" opacity=".85"/>
-<text x="28" y="1198" font-size="13" font-weight="600" fill="currentColor">Ksat-SSIR-DB (Brazil)</text>
-<text x="28" y="1216" font-size="11" fill="var(--muted)">Ottoni et al. 2025, SGB</text>
-<text x="28" y="1232" font-size="11" fill="var(--muted)">2,579 rows; 215 with a curve</text>
-<text x="28" y="1246" font-size="11" fill="currentColor">public database</text>
-<rect x="256" y="1176" width="300" height="78" rx="3" fill="var(--sunken)" stroke="currentColor" opacity=".85"/>
-<text x="268" y="1196" font-size="11.5" font-family="IBM Plex Mono, monospace" fill="var(--accent)">prepare_ksatssir.py</text>
-<text x="268" y="1214" font-size="11" fill="currentColor">all five points: 0, 6, 10, 33, 1500 kPa</text>
-<text x="268" y="1231" font-size="11" fill="var(--accent)">100 rows at HYBRAS v1 sites left out</text>
-<text x="268" y="1246" font-size="11" fill="var(--muted)">lab K<tspan baseline-shift="sub" font-size="8">s</tspan> on rings only, mm/h &#8594; cm/h</text>
-<rect x="596" y="1176" width="196" height="78" rx="3" fill="none" stroke="var(--accent)"/>
-<text x="608" y="1200" font-size="11" font-family="IBM Plex Mono, monospace" fill="var(--accent)">ksatssir_reference</text>
-<text x="608" y="1220" font-size="13" font-weight="600" fill="currentColor">115</text>
-<text x="608" y="1240" font-size="11" fill="var(--muted)">95 with K<tspan baseline-shift="sub" font-size="8">s</tspan></text>
-<g stroke="currentColor" fill="none" opacity=".55"><line x1="200" y1="1215" x2="252" y2="1215" marker-end="url(#ar)"/></g>
+<rect x="16" y="330" width="184" height="78" rx="3" fill="none" stroke="currentColor" opacity=".85"/>
+<text x="28" y="352" font-size="13" font-weight="600" fill="currentColor">Ksat-SSIR-DB (Brazil)</text>
+<text x="28" y="370" font-size="11" fill="var(--muted)">Ottoni et al. 2025, SGB</text>
+<text x="28" y="386" font-size="11" fill="var(--muted)">2,579 rows; 215 with a curve</text>
+<text x="28" y="400" font-size="11" fill="currentColor">public database</text>
+<rect x="256" y="330" width="300" height="78" rx="3" fill="var(--sunken)" stroke="currentColor" opacity=".85"/>
+<text x="268" y="350" font-size="11.5" font-family="IBM Plex Mono, monospace" fill="var(--accent)">prepare_ksatssir.py</text>
+<text x="268" y="368" font-size="11" fill="currentColor">all five points: 0, 6, 10, 33, 1500 kPa</text>
+<text x="268" y="385" font-size="11" fill="var(--accent)">100 rows at HYBRAS v1 sites left out</text>
+<text x="268" y="400" font-size="11" fill="var(--muted)">lab K<tspan baseline-shift="sub" font-size="8">s</tspan> on rings only, mm/h &#8594; cm/h</text>
+<rect x="596" y="330" width="196" height="78" rx="3" fill="none" stroke="var(--accent)"/>
+<text x="608" y="354" font-size="11" font-family="IBM Plex Mono, monospace" fill="var(--accent)">ksatssir_reference</text>
+<text x="608" y="374" font-size="13" font-weight="600" fill="currentColor">115</text>
+<text x="608" y="394" font-size="11" fill="var(--muted)">95 with K<tspan baseline-shift="sub" font-size="8">s</tspan></text>
+<g stroke="currentColor" fill="none" opacity=".55"><line x1="200" y1="369" x2="252" y2="369" marker-end="url(#ar)"/></g>
 <g stroke="var(--accent)" fill="none">
-<line x1="556" y1="1215" x2="592" y2="1215" marker-end="url(#ara)"/>
-<line x1="792" y1="1215" x2="844" y2="1215" marker-end="url(#ara)"/>
+<line x1="556" y1="369" x2="592" y2="369" marker-end="url(#ara)"/>
+<line x1="792" y1="369" x2="844" y2="369" marker-end="url(#ara)"/>
+</g>
+<!-- Kansas -->
+<rect x="16" y="1270" width="184" height="78" rx="3" fill="none" stroke="currentColor" opacity=".85"/>
+<text x="28" y="1292" font-size="13" font-weight="600" fill="currentColor">Kansas (USA)</text>
+<text x="28" y="1310" font-size="11" fill="var(--muted)">Parker et al. 2022, SSSAJ</text>
+<text x="28" y="1326" font-size="11" fill="var(--muted)">320 cores, 40 stations</text>
+<text x="28" y="1340" font-size="11" fill="currentColor">public file, MIT licence</text>
+<rect x="256" y="1270" width="300" height="78" rx="3" fill="var(--sunken)" stroke="currentColor" opacity=".85"/>
+<text x="268" y="1290" font-size="11.5" font-family="IBM Plex Mono, monospace" fill="var(--accent)">prepare_kansas.py</text>
+<text x="268" y="1308" font-size="11" fill="currentColor">7 points, saturation to 1500 kPa</text>
+<text x="268" y="1325" font-size="11" fill="var(--accent)">K<tspan baseline-shift="sub" font-size="8">s</tspan> kept only with no lab flaw noted</text>
+<text x="268" y="1340" font-size="11" fill="var(--muted)">texture on one core per station and depth</text>
+<rect x="596" y="1270" width="196" height="78" rx="3" fill="none" stroke="var(--accent)"/>
+<text x="608" y="1294" font-size="11" font-family="IBM Plex Mono, monospace" fill="var(--accent)">kansas_reference</text>
+<text x="608" y="1314" font-size="13" font-weight="600" fill="currentColor">156</text>
+<text x="608" y="1334" font-size="11" fill="var(--muted)">126 with K<tspan baseline-shift="sub" font-size="8">s</tspan></text>
+<g stroke="currentColor" fill="none" opacity=".55"><line x1="200" y1="1309" x2="252" y2="1309" marker-end="url(#ar)"/></g>
+<g stroke="var(--accent)" fill="none">
+<line x1="556" y1="1309" x2="592" y2="1309" marker-end="url(#ara)"/>
+<line x1="792" y1="1309" x2="844" y2="1309" marker-end="url(#ara)"/>
 </g>
 <!-- UNSODA -->
-        <rect x="16" y="1270" width="184" height="58" rx="3" fill="none" stroke="currentColor" opacity=".5"/>
-        <text x="28" y="1292" font-size="13" font-weight="600" fill="currentColor" opacity=".75">UNSODA 2.0 (worldwide)</text>
-        <text x="28" y="1310" font-size="11" fill="var(--muted)">790 soils</text>
-        <rect x="256" y="1270" width="300" height="58" rx="3" fill="var(--sunken)" stroke="currentColor" opacity=".5"/>
-        <text x="268" y="1290" font-size="11.5" font-family="IBM Plex Mono, monospace" fill="var(--muted)">prepare_unsoda.py</text>
-        <text x="268" y="1308" font-size="11" fill="var(--muted)">fit vG to measured points, cm &#8594; kPa</text>
+        <rect x="16" y="1364" width="184" height="58" rx="3" fill="none" stroke="currentColor" opacity=".5"/>
+        <text x="28" y="1386" font-size="13" font-weight="600" fill="currentColor" opacity=".75">UNSODA 2.0 (worldwide)</text>
+        <text x="28" y="1404" font-size="11" fill="var(--muted)">790 soils</text>
+        <rect x="256" y="1364" width="300" height="58" rx="3" fill="var(--sunken)" stroke="currentColor" opacity=".5"/>
+        <text x="268" y="1384" font-size="11.5" font-family="IBM Plex Mono, monospace" fill="var(--muted)">prepare_unsoda.py</text>
+        <text x="268" y="1402" font-size="11" fill="var(--muted)">fit vG to measured points, cm &#8594; kPa</text>
 
         <!-- sDB -->
-        <rect x="16" y="1344" width="184" height="58" rx="3" fill="none" stroke="currentColor" opacity=".5"/>
-        <text x="28" y="1366" font-size="13" font-weight="600" fill="currentColor" opacity=".75">sDB (Belgium)</text>
-        <text x="28" y="1384" font-size="11" fill="var(--muted)">PANGAEA, CC-BY-3.0</text>
-        <rect x="256" y="1344" width="300" height="58" rx="3" fill="var(--sunken)" stroke="currentColor" opacity=".5"/>
-        <text x="268" y="1364" font-size="11.5" font-family="IBM Plex Mono, monospace" fill="var(--muted)">prepare_sdb.py</text>
-        <text x="268" y="1382" font-size="11" fill="var(--muted)">fit vG to measured points</text>
+        <rect x="16" y="1438" width="184" height="58" rx="3" fill="none" stroke="currentColor" opacity=".5"/>
+        <text x="28" y="1460" font-size="13" font-weight="600" fill="currentColor" opacity=".75">sDB (Belgium)</text>
+        <text x="28" y="1478" font-size="11" fill="var(--muted)">PANGAEA, CC-BY-3.0</text>
+        <rect x="256" y="1438" width="300" height="58" rx="3" fill="var(--sunken)" stroke="currentColor" opacity=".5"/>
+        <text x="268" y="1458" font-size="11.5" font-family="IBM Plex Mono, monospace" fill="var(--muted)">prepare_sdb.py</text>
+        <text x="268" y="1476" font-size="11" fill="var(--muted)">fit vG to measured points</text>
 
         <!-- derivative tables -->
         <g font-size="11" font-family="IBM Plex Mono, monospace">
@@ -430,124 +450,124 @@
           <text x="608" y="92" font-size="13" font-family="IBM Plex Sans, sans-serif" font-weight="600" fill="currentColor">9,900</text>
           <text x="608" y="112" font-size="11" font-family="IBM Plex Sans, sans-serif" fill="var(--muted)">6,552 with K<tspan baseline-shift="sub" font-size="8">s</tspan></text>
 
-          <rect x="596" y="142" width="196" height="78" rx="3" fill="none" stroke="var(--accent)"/>
-          <text x="608" y="166" fill="var(--accent)">kssl_reference</text>
-          <text x="608" y="186" font-size="13" font-family="IBM Plex Sans, sans-serif" font-weight="600" fill="currentColor">2,530</text>
-          <text x="608" y="206" font-size="11" font-family="IBM Plex Sans, sans-serif" fill="var(--muted)">0 with K<tspan baseline-shift="sub" font-size="8">s</tspan></text>
-
-          <rect x="596" y="236" width="196" height="78" rx="3" fill="none" stroke="var(--accent)"/>
-          <text x="608" y="260" fill="var(--accent)">hohenbrink_reference</text>
-          <text x="608" y="280" font-size="13" font-family="IBM Plex Sans, sans-serif" font-weight="600" fill="currentColor">560</text>
-          <text x="608" y="300" font-size="11" font-family="IBM Plex Sans, sans-serif" fill="var(--muted)">402 with K<tspan baseline-shift="sub" font-size="8">s</tspan></text>
-
-          <rect x="596" y="330" width="196" height="78" rx="3" fill="none" stroke="var(--accent)"/>
-          <text x="608" y="354" fill="var(--accent)">euhydi_reference</text>
-          <text x="608" y="374" font-size="13" font-family="IBM Plex Sans, sans-serif" font-weight="600" fill="currentColor">6,797</text>
-          <text x="608" y="394" font-size="11" font-family="IBM Plex Sans, sans-serif" fill="var(--muted)">2,704 with K<tspan baseline-shift="sub" font-size="8">s</tspan> &#183; not distributed</text>
-
-          <rect x="596" y="424" width="196" height="78" rx="3" fill="none" stroke="var(--accent)"/>
-          <text x="608" y="448" fill="var(--accent)" font-size="10">babaeian_zanjanrood_reference</text>
-          <text x="608" y="468" font-size="13" font-family="IBM Plex Sans, sans-serif" font-weight="600" fill="currentColor">169</text>
-          <text x="608" y="488" font-size="11" font-family="IBM Plex Sans, sans-serif" fill="var(--muted)">169 with K<tspan baseline-shift="sub" font-size="8">s</tspan></text>
+          <rect x="596" y="1082" width="196" height="78" rx="3" fill="none" stroke="var(--accent)"/>
+          <text x="608" y="1106" fill="var(--accent)">kssl_reference</text>
+          <text x="608" y="1126" font-size="13" font-family="IBM Plex Sans, sans-serif" font-weight="600" fill="currentColor">2,530</text>
+          <text x="608" y="1146" font-size="11" font-family="IBM Plex Sans, sans-serif" fill="var(--muted)">0 with K<tspan baseline-shift="sub" font-size="8">s</tspan></text>
 
           <rect x="596" y="518" width="196" height="78" rx="3" fill="none" stroke="var(--accent)"/>
-          <text x="608" y="542" fill="var(--accent)">willard_reference</text>
-          <text x="608" y="562" font-size="13" font-family="IBM Plex Sans, sans-serif" font-weight="600" fill="currentColor">70</text>
-          <text x="608" y="582" font-size="11" font-family="IBM Plex Sans, sans-serif" fill="var(--muted)">26 with K<tspan baseline-shift="sub" font-size="8">s</tspan> (Saturo)</text>
+          <text x="608" y="542" fill="var(--accent)">hohenbrink_reference</text>
+          <text x="608" y="562" font-size="13" font-family="IBM Plex Sans, sans-serif" font-weight="600" fill="currentColor">560</text>
+          <text x="608" y="582" font-size="11" font-family="IBM Plex Sans, sans-serif" fill="var(--muted)">402 with K<tspan baseline-shift="sub" font-size="8">s</tspan></text>
+
+          <rect x="596" y="142" width="196" height="78" rx="3" fill="none" stroke="var(--accent)"/>
+          <text x="608" y="166" fill="var(--accent)">euhydi_reference</text>
+          <text x="608" y="186" font-size="13" font-family="IBM Plex Sans, sans-serif" font-weight="600" fill="currentColor">6,797</text>
+          <text x="608" y="206" font-size="11" font-family="IBM Plex Sans, sans-serif" fill="var(--muted)">2,704 with K<tspan baseline-shift="sub" font-size="8">s</tspan> &#183; not distributed</text>
+
           <rect x="596" y="612" width="196" height="78" rx="3" fill="none" stroke="var(--accent)"/>
-          <text x="608" y="636" fill="var(--accent)">babaeian_az_reference</text>
-          <text x="608" y="656" font-size="13" font-family="IBM Plex Sans, sans-serif" font-weight="600" fill="currentColor">21</text>
-          <text x="608" y="676" font-size="11" font-family="IBM Plex Sans, sans-serif" fill="var(--muted)">21 with K<tspan baseline-shift="sub" font-size="8">s</tspan></text>
-          <rect x="596" y="706" width="196" height="78" rx="3" fill="none" stroke="var(--accent)"/>
-          <text x="608" y="730" fill="var(--accent)">armas_reference</text>
-          <text x="608" y="750" font-size="13" font-family="IBM Plex Sans, sans-serif" font-weight="600" fill="currentColor">66</text>
-          <text x="608" y="770" font-size="11" font-family="IBM Plex Sans, sans-serif" fill="var(--muted)">62 with K<tspan baseline-shift="sub" font-size="8">s</tspan></text>
+          <text x="608" y="636" fill="var(--accent)" font-size="10">babaeian_zanjanrood_reference</text>
+          <text x="608" y="656" font-size="13" font-family="IBM Plex Sans, sans-serif" font-weight="600" fill="currentColor">169</text>
+          <text x="608" y="676" font-size="11" font-family="IBM Plex Sans, sans-serif" fill="var(--muted)">169 with K<tspan baseline-shift="sub" font-size="8">s</tspan></text>
+
           <rect x="596" y="800" width="196" height="78" rx="3" fill="none" stroke="var(--accent)"/>
-          <text x="608" y="824" fill="var(--accent)">tong_reference</text>
-          <text x="608" y="844" font-size="13" font-family="IBM Plex Sans, sans-serif" font-weight="600" fill="currentColor">1,030</text>
-          <text x="608" y="864" font-size="11" font-family="IBM Plex Sans, sans-serif" fill="var(--muted)">1,015 with K<tspan baseline-shift="sub" font-size="8">s</tspan></text>
+          <text x="608" y="824" fill="var(--accent)">willard_reference</text>
+          <text x="608" y="844" font-size="13" font-family="IBM Plex Sans, sans-serif" font-weight="600" fill="currentColor">70</text>
+          <text x="608" y="864" font-size="11" font-family="IBM Plex Sans, sans-serif" fill="var(--muted)">26 with K<tspan baseline-shift="sub" font-size="8">s</tspan> (Saturo)</text>
+          <rect x="596" y="1176" width="196" height="78" rx="3" fill="none" stroke="var(--accent)"/>
+          <text x="608" y="1200" fill="var(--accent)">babaeian_az_reference</text>
+          <text x="608" y="1220" font-size="13" font-family="IBM Plex Sans, sans-serif" font-weight="600" fill="currentColor">21</text>
+          <text x="608" y="1240" font-size="11" font-family="IBM Plex Sans, sans-serif" fill="var(--muted)">21 with K<tspan baseline-shift="sub" font-size="8">s</tspan></text>
+          <rect x="596" y="894" width="196" height="78" rx="3" fill="none" stroke="var(--accent)"/>
+          <text x="608" y="918" fill="var(--accent)">armas_reference</text>
+          <text x="608" y="938" font-size="13" font-family="IBM Plex Sans, sans-serif" font-weight="600" fill="currentColor">66</text>
+          <text x="608" y="958" font-size="11" font-family="IBM Plex Sans, sans-serif" fill="var(--muted)">62 with K<tspan baseline-shift="sub" font-size="8">s</tspan></text>
+          <rect x="596" y="424" width="196" height="78" rx="3" fill="none" stroke="var(--accent)"/>
+          <text x="608" y="448" fill="var(--accent)">tong_reference</text>
+          <text x="608" y="468" font-size="13" font-family="IBM Plex Sans, sans-serif" font-weight="600" fill="currentColor">1,030</text>
+          <text x="608" y="488" font-size="11" font-family="IBM Plex Sans, sans-serif" fill="var(--muted)">1,015 with K<tspan baseline-shift="sub" font-size="8">s</tspan></text>
 
-          <rect x="596" y="1270" width="196" height="58" rx="3" fill="none" stroke="currentColor" opacity=".5"/>
-          <text x="608" y="1292" fill="var(--muted)">unsoda_reference</text>
-          <text x="608" y="1312" font-size="13" font-family="IBM Plex Sans, sans-serif" font-weight="600" fill="var(--muted)">581</text>
+          <rect x="596" y="1364" width="196" height="58" rx="3" fill="none" stroke="currentColor" opacity=".5"/>
+          <text x="608" y="1386" fill="var(--muted)">unsoda_reference</text>
+          <text x="608" y="1406" font-size="13" font-family="IBM Plex Sans, sans-serif" font-weight="600" fill="var(--muted)">581</text>
 
-          <rect x="596" y="1344" width="196" height="58" rx="3" fill="none" stroke="currentColor" opacity=".5"/>
-          <text x="608" y="1366" fill="var(--muted)">sdb_reference</text>
-          <text x="608" y="1386" font-size="13" font-family="IBM Plex Sans, sans-serif" font-weight="600" fill="var(--muted)">165</text>
+          <rect x="596" y="1438" width="196" height="58" rx="3" fill="none" stroke="currentColor" opacity=".5"/>
+          <text x="608" y="1460" fill="var(--muted)">sdb_reference</text>
+          <text x="608" y="1480" font-size="13" font-family="IBM Plex Sans, sans-serif" font-weight="600" fill="var(--muted)">165</text>
         </g>
 
         <!-- reference sets -->
-        <rect x="848" y="48" width="176" height="1206" rx="3" fill="var(--accent-w)" stroke="var(--accent)"/>
+        <rect x="848" y="48" width="176" height="1300" rx="3" fill="var(--accent-w)" stroke="var(--accent)"/>
         <text x="862" y="72" font-size="11.5" font-family="IBM Plex Mono, monospace" fill="var(--accent)">merged</text>
         <text x="862" y="90" font-size="10.5" font-family="IBM Plex Mono, monospace" fill="var(--muted)">(default)</text>
-        <text x="862" y="130" font-size="28" font-weight="600" fill="currentColor">21,720</text>
+        <text x="862" y="130" font-size="28" font-weight="600" fill="currentColor">21,876</text>
         <text x="862" y="152" font-size="11" fill="var(--muted)">layers</text>
-        <text x="862" y="182" font-size="11" fill="currentColor">11,246 carry a measured</text>
+        <text x="862" y="182" font-size="11" fill="currentColor">11,372 carry a measured</text>
         <text x="862" y="197" font-size="11" fill="currentColor">saturated conductivity</text>
-        <text x="862" y="226" font-size="11" fill="var(--muted)">7,862 European layers</text>
-        <text x="862" y="241" font-size="11" fill="var(--muted)">(900 + 483 + 6,479)</text>
+        <text x="862" y="226" font-size="11" fill="var(--muted)">7,844 European layers</text>
+        <text x="862" y="241" font-size="11" fill="var(--muted)">(1,365 public + 6,479)</text>
         <text x="862" y="270" font-size="11" fill="var(--muted)">12 USDA classes;</text>
         <text x="862" y="285" font-size="11" fill="var(--muted)">sand is 21 % of rows,</text>
         <text x="862" y="300" font-size="11" fill="var(--muted)">silt under 0.4 %</text>
         <text x="862" y="336" font-size="11" fill="currentColor">Without the restricted</text>
         <text x="862" y="351" font-size="11" fill="currentColor">EU-HYDI and Boorowa</text>
         <text x="862" y="366" font-size="11" fill="currentColor">tables, merged:</text>
-        <text x="862" y="381" font-size="11" fill="currentColor">the 14,866</text>
+        <text x="862" y="381" font-size="11" fill="currentColor">the 15,022</text>
         <text x="862" y="396" font-size="11" fill="var(--muted)">(--reference public)</text>
 
-        <rect x="848" y="1270" width="176" height="132" rx="3" fill="none" stroke="currentColor" opacity=".5"/>
-        <text x="862" y="1292" font-size="11.5" font-family="IBM Plex Mono, monospace" fill="var(--muted)">all</text>
-        <text x="862" y="1322" font-size="20" font-weight="600" fill="var(--muted)">22,466</text>
-        <text x="862" y="1346" font-size="11" fill="var(--muted)">adds UNSODA and sDB;</text>
-        <text x="862" y="1361" font-size="11" fill="var(--muted)">both largely duplicated</text>
-        <text x="862" y="1376" font-size="11" fill="var(--muted)">inside GSHP already,</text>
-        <text x="862" y="1391" font-size="11" fill="var(--muted)">so not in the default</text>
+        <rect x="848" y="1364" width="176" height="132" rx="3" fill="none" stroke="currentColor" opacity=".5"/>
+        <text x="862" y="1386" font-size="11.5" font-family="IBM Plex Mono, monospace" fill="var(--muted)">all</text>
+        <text x="862" y="1416" font-size="20" font-weight="600" fill="var(--muted)">22,622</text>
+        <text x="862" y="1440" font-size="11" fill="var(--muted)">adds UNSODA and sDB;</text>
+        <text x="862" y="1455" font-size="11" fill="var(--muted)">both largely duplicated</text>
+        <text x="862" y="1470" font-size="11" fill="var(--muted)">inside GSHP already,</text>
+        <text x="862" y="1485" font-size="11" fill="var(--muted)">so not in the default</text>
       </g>
 
       <g stroke="currentColor" fill="none" opacity=".55">
         <line x1="200" y1="87"  x2="252" y2="87"  marker-end="url(#ar)"/>
-        <line x1="200" y1="181" x2="252" y2="181" marker-end="url(#ar)"/>
-        <line x1="200" y1="275" x2="252" y2="275" marker-end="url(#ar)"/>
-        <line x1="200" y1="369" x2="252" y2="369" marker-end="url(#ar)"/>
-        <line x1="200" y1="463" x2="252" y2="463" marker-end="url(#ar)"/>
+        <line x1="200" y1="1121" x2="252" y2="1121" marker-end="url(#ar)"/>
         <line x1="200" y1="557" x2="252" y2="557" marker-end="url(#ar)"/>
+        <line x1="200" y1="181" x2="252" y2="181" marker-end="url(#ar)"/>
         <line x1="200" y1="651" x2="252" y2="651" marker-end="url(#ar)"/>
-        <line x1="200" y1="745" x2="252" y2="745" marker-end="url(#ar)"/>
         <line x1="200" y1="839" x2="252" y2="839" marker-end="url(#ar)"/>
-        <line x1="200" y1="1299" x2="252" y2="1299" marker-end="url(#ar)" opacity=".6"/>
-        <line x1="200" y1="1373" x2="252" y2="1373" marker-end="url(#ar)" opacity=".6"/>
+        <line x1="200" y1="1215" x2="252" y2="1215" marker-end="url(#ar)"/>
+        <line x1="200" y1="933" x2="252" y2="933" marker-end="url(#ar)"/>
+        <line x1="200" y1="463" x2="252" y2="463" marker-end="url(#ar)"/>
+        <line x1="200" y1="1393" x2="252" y2="1393" marker-end="url(#ar)" opacity=".6"/>
+        <line x1="200" y1="1467" x2="252" y2="1467" marker-end="url(#ar)" opacity=".6"/>
       </g>
       <g stroke="var(--accent)" fill="none">
         <line x1="556" y1="87"  x2="592" y2="87"  marker-end="url(#ara)"/>
-        <line x1="556" y1="181" x2="592" y2="181" marker-end="url(#ara)"/>
-        <line x1="556" y1="275" x2="592" y2="275" marker-end="url(#ara)"/>
-        <line x1="556" y1="369" x2="592" y2="369" marker-end="url(#ara)"/>
-        <line x1="556" y1="463" x2="592" y2="463" marker-end="url(#ara)"/>
+        <line x1="556" y1="1121" x2="592" y2="1121" marker-end="url(#ara)"/>
         <line x1="556" y1="557" x2="592" y2="557" marker-end="url(#ara)"/>
+        <line x1="556" y1="181" x2="592" y2="181" marker-end="url(#ara)"/>
         <line x1="556" y1="651" x2="592" y2="651" marker-end="url(#ara)"/>
-        <line x1="556" y1="745" x2="592" y2="745" marker-end="url(#ara)"/>
         <line x1="556" y1="839" x2="592" y2="839" marker-end="url(#ara)"/>
+        <line x1="556" y1="1215" x2="592" y2="1215" marker-end="url(#ara)"/>
+        <line x1="556" y1="933" x2="592" y2="933" marker-end="url(#ara)"/>
+        <line x1="556" y1="463" x2="592" y2="463" marker-end="url(#ara)"/>
         <line x1="792" y1="87"  x2="844" y2="87"  marker-end="url(#ara)"/>
-        <line x1="792" y1="181" x2="844" y2="181" marker-end="url(#ara)"/>
-        <line x1="792" y1="275" x2="844" y2="275" marker-end="url(#ara)"/>
-        <line x1="792" y1="369" x2="844" y2="369" marker-end="url(#ara)"/>
-        <line x1="792" y1="463" x2="844" y2="463" marker-end="url(#ara)"/>
+        <line x1="792" y1="1121" x2="844" y2="1121" marker-end="url(#ara)"/>
         <line x1="792" y1="557" x2="844" y2="557" marker-end="url(#ara)"/>
+        <line x1="792" y1="181" x2="844" y2="181" marker-end="url(#ara)"/>
         <line x1="792" y1="651" x2="844" y2="651" marker-end="url(#ara)"/>
-        <line x1="792" y1="745" x2="844" y2="745" marker-end="url(#ara)"/>
         <line x1="792" y1="839" x2="844" y2="839" marker-end="url(#ara)"/>
+        <line x1="792" y1="1215" x2="844" y2="1215" marker-end="url(#ara)"/>
+        <line x1="792" y1="933" x2="844" y2="933" marker-end="url(#ara)"/>
+        <line x1="792" y1="463" x2="844" y2="463" marker-end="url(#ara)"/>
       </g>
       <g stroke="currentColor" fill="none" opacity=".4">
-        <line x1="556" y1="1299" x2="592" y2="1299" marker-end="url(#ar)"/>
-        <line x1="556" y1="1373" x2="592" y2="1373" marker-end="url(#ar)"/>
-        <line x1="792" y1="1299" x2="844" y2="1299" marker-end="url(#ar)"/>
-        <line x1="792" y1="1373" x2="844" y2="1373" marker-end="url(#ar)"/>
+        <line x1="556" y1="1393" x2="592" y2="1393" marker-end="url(#ar)"/>
+        <line x1="556" y1="1467" x2="592" y2="1467" marker-end="url(#ar)"/>
+        <line x1="792" y1="1393" x2="844" y2="1393" marker-end="url(#ar)"/>
+        <line x1="792" y1="1467" x2="844" y2="1467" marker-end="url(#ar)"/>
       </g>
 
-      <rect x="256" y="1426" width="768" height="76" rx="3" fill="none" stroke="currentColor" opacity=".35" stroke-dasharray="3 3"/>
-      <text x="270" y="1448" font-size="11.5" font-family="IBM Plex Mono, monospace" fill="currentColor" opacity=".8">free_m.py &#8212; shared by every preparation script</text>
-      <text x="270" y="1468" font-size="11" font-family="IBM Plex Sans, sans-serif" fill="var(--muted)">Also writes an unconstrained companion fit (&#952;r, &#952;s, &#945;, n, m) alongside the</text>
-      <text x="270" y="1485" font-size="11" font-family="IBM Plex Sans, sans-serif" fill="var(--muted)">Mualem one, refitting measured points where a source ships them.</text>
+      <rect x="256" y="1520" width="768" height="76" rx="3" fill="none" stroke="currentColor" opacity=".35" stroke-dasharray="3 3"/>
+      <text x="270" y="1542" font-size="11.5" font-family="IBM Plex Mono, monospace" fill="currentColor" opacity=".8">free_m.py &#8212; shared by every preparation script</text>
+      <text x="270" y="1562" font-size="11" font-family="IBM Plex Sans, sans-serif" fill="var(--muted)">Also writes an unconstrained companion fit (&#952;r, &#952;s, &#945;, n, m) alongside the</text>
+      <text x="270" y="1579" font-size="11" font-family="IBM Plex Sans, sans-serif" fill="var(--muted)">Mualem one, refitting measured points where a source ships them.</text>
     </svg>
     <figcaption>
       Each source needs a different correction before its curves are
@@ -573,11 +593,11 @@
       public. The Yellow River curves are published only as fits, so they are
       rebuilt from 1 to 1000 kPa and refitted. The Canary points are read
       from the vector figures of the thesis and checked against its own
-      tables. The two newest sources are public too: Fujii et al. (Japan and
-      Southeast Asia, CC0) and Ksat-SSIR-DB (Brazil). In Ksat-SSIR-DB, 100
-      rows from three theses sit at HYBRAS v1 sites that GSHP already holds,
-      so they are left out. A checkout without the restricted tables runs on
-      the public 14,866.
+      tables. The three newest sources are public too: Fujii et al. (Japan and
+      Southeast Asia, CC0), Ksat-SSIR-DB (Brazil) and the Kansas Mesonet (MIT
+      licence). In Ksat-SSIR-DB, 100 rows from three theses sit at HYBRAS v1
+      sites that GSHP already holds, so they are left out. A checkout without
+      the restricted tables runs on the public 15,022.
     </figcaption>
   </figure>
 
@@ -603,16 +623,17 @@
       America, and almost half of it came from one Florida contributor.
       EU-HYDI (Weynants et al. 2013), shared for this work under consortium
       terms, adds 6,797 European layers from 21 laboratories in 16 countries.
-      It takes Europe from 1,261 layers to 7,740 (7,862 with the Andalusian
+      It takes Europe from 1,243 layers to 7,722 (7,844 with the Andalusian
       soils that joined later). In October 2026, Fujii et al. and
       Ksat-SSIR-DB added 51 georeferenced layers in Japan, Thailand and
       Indonesia and 115 in Brazil, two regions where the reference is
-      thin.
+      thin. The Kansas Mesonet added 156 cores from 40 stations in the US
+      Great Plains, with K<sub>s</sub> measured on the same core.
     </p>
   </div>
 
   <figure>
-    <svg viewBox="0 12 1040 547" role="img" aria-label="Equal Earth map of 21,061 georeferenced reference layers, binned into 2-degree cells with circle area proportional to count. Europe holds 7,862 layers, up from 1,383 before EU-HYDI, Boorowa was added.">
+    <svg viewBox="0 12 1040 547" role="img" aria-label="Equal Earth map of 21,217 georeferenced reference layers, binned into 2-degree cells with circle area proportional to count. Europe holds 7,844 layers, up from 1,365 before EU-HYDI, Boorowa was added.">
       <g fill="none" stroke="currentColor" stroke-width=".5" opacity=".16">
         <path d="M71.5 435.1L81.6 435.1L91.7 435.1L101.8 435.1L111.8 435.1L121.9 435.1L132.0 435.1L142.1 435.1L152.2 435.1L162.2 435.1L172.3 435.1L182.4 435.1L192.5 435.1L202.5 435.1L212.6 435.1L222.7 435.1L232.8 435.1L242.9 435.1L252.9 435.1L263.0 435.1L273.1 435.1L283.2 435.1L293.2 435.1L303.3 435.1L313.4 435.1L323.5 435.1L333.6 435.1L343.6 435.1L353.7 435.1L363.8 435.1L373.9 435.1L383.9 435.1L394.0 435.1L404.1 435.1L414.2 435.1L424.3 435.1L434.3 435.1L444.4 435.1L454.5 435.1L464.6 435.1L474.6 435.1L484.7 435.1L494.8 435.1L504.9 435.1L515.0 435.1L525.0 435.1L535.1 435.1L545.2 435.1L555.3 435.1L565.4 435.1L575.4 435.1L585.5 435.1L595.6 435.1L605.7 435.1L615.7 435.1L625.8 435.1L635.9 435.1L646.0 435.1L656.1 435.1L666.1 435.1L676.2 435.1L686.3 435.1L696.4 435.1L706.4 435.1L716.5 435.1L726.6 435.1L736.7 435.1L746.8 435.1L756.8 435.1L766.9 435.1L777.0 435.1L787.1 435.1L797.1 435.1L807.2 435.1L817.3 435.1L827.4 435.1L837.5 435.1L847.5 435.1L857.6 435.1L867.7 435.1L877.8 435.1L887.8 435.1L897.9 435.1L908.0 435.1L918.1 435.1L928.2 435.1L938.2 435.1L948.3 435.1L958.4 435.1L968.5 435.1"/>
         <path d="M14.0 290.3L25.4 290.3L36.7 290.3L48.1 290.3L59.5 290.3L70.9 290.3L82.2 290.3L93.6 290.3L105.0 290.3L116.3 290.3L127.7 290.3L139.1 290.3L150.4 290.3L161.8 290.3L173.2 290.3L184.6 290.3L195.9 290.3L207.3 290.3L218.7 290.3L230.0 290.3L241.4 290.3L252.8 290.3L264.2 290.3L275.5 290.3L286.9 290.3L298.3 290.3L309.6 290.3L321.0 290.3L332.4 290.3L343.8 290.3L355.1 290.3L366.5 290.3L377.9 290.3L389.2 290.3L400.6 290.3L412.0 290.3L423.3 290.3L434.7 290.3L446.1 290.3L457.5 290.3L468.8 290.3L480.2 290.3L491.6 290.3L502.9 290.3L514.3 290.3L525.7 290.3L537.1 290.3L548.4 290.3L559.8 290.3L571.2 290.3L582.5 290.3L593.9 290.3L605.3 290.3L616.7 290.3L628.0 290.3L639.4 290.3L650.8 290.3L662.1 290.3L673.5 290.3L684.9 290.3L696.2 290.3L707.6 290.3L719.0 290.3L730.4 290.3L741.7 290.3L753.1 290.3L764.5 290.3L775.8 290.3L787.2 290.3L798.6 290.3L810.0 290.3L821.3 290.3L832.7 290.3L844.1 290.3L855.4 290.3L866.8 290.3L878.2 290.3L889.6 290.3L900.9 290.3L912.3 290.3L923.7 290.3L935.0 290.3L946.4 290.3L957.8 290.3L969.1 290.3L980.5 290.3L991.9 290.3L1003.3 290.3L1014.6 290.3L1026.0 290.3"/>
@@ -920,20 +941,20 @@
         <circle cx="271.8" cy="129.5" r="3.32"/>
         <circle cx="253.2" cy="182.9" r="1.60"/>
         <circle cx="258.2" cy="169.0" r="2.24"/>
-        <circle cx="263.8" cy="155.4" r="3.16"/>
-        <circle cx="266.8" cy="148.8" r="5.29"/>
+        <circle cx="263.8" cy="155.4" r="4.53"/>
+        <circle cx="266.8" cy="148.8" r="6.16"/>
         <circle cx="270.0" cy="142.2" r="4.36"/>
         <circle cx="273.2" cy="135.8" r="3.16"/>
         <circle cx="276.7" cy="129.5" r="2.92"/>
-        <circle cx="268.9" cy="155.4" r="2.65"/>
-        <circle cx="271.8" cy="148.8" r="5.34"/>
+        <circle cx="268.9" cy="155.4" r="3.87"/>
+        <circle cx="271.8" cy="148.8" r="6.36"/>
         <circle cx="278.1" cy="135.8" r="2.12"/>
         <circle cx="281.5" cy="129.5" r="5.20"/>
         <circle cx="288.6" cy="117.2" r="1.60"/>
         <circle cx="263.8" cy="182.9" r="3.87"/>
         <circle cx="266.1" cy="175.9" r="1.73"/>
-        <circle cx="273.9" cy="155.4" r="2.65"/>
-        <circle cx="276.8" cy="148.8" r="5.66"/>
+        <circle cx="273.9" cy="155.4" r="3.61"/>
+        <circle cx="276.8" cy="148.8" r="6.93"/>
         <circle cx="279.9" cy="142.2" r="7.07"/>
         <circle cx="283.0" cy="135.8" r="5.70"/>
         <circle cx="286.3" cy="129.5" r="3.67"/>
@@ -941,8 +962,8 @@
         <circle cx="269.1" cy="182.9" r="1.60"/>
         <circle cx="271.4" cy="175.9" r="3.16"/>
         <circle cx="273.8" cy="169.0" r="1.60"/>
-        <circle cx="279.0" cy="155.4" r="3.08"/>
-        <circle cx="281.8" cy="148.8" r="4.24"/>
+        <circle cx="279.0" cy="155.4" r="3.94"/>
+        <circle cx="281.8" cy="148.8" r="5.24"/>
         <circle cx="284.8" cy="142.2" r="4.69"/>
         <circle cx="287.9" cy="135.8" r="2.12"/>
         <circle cx="264.0" cy="226.4" r="1.87"/>
@@ -1388,9 +1409,9 @@
         <circle cx="958.7" cy="431.8" r="1.60"/>
       </g>
       <g font-family="IBM Plex Sans, sans-serif" font-size="11.5">
-        <path d="M473.3 60.9L476.7 60.9L480.0 60.9L483.4 60.9L486.7 60.9L490.1 60.9L493.4 60.9L496.8 60.9L500.1 60.9L503.5 60.9L506.8 60.9L510.2 60.9L513.5 60.9L516.9 60.9L520.2 60.9L523.6 60.9L526.9 60.9L530.3 60.9L533.7 60.9L537.0 60.9L540.4 60.9L543.7 60.9L547.1 60.9L550.4 60.9L553.8 60.9L557.1 60.9L560.5 60.9L563.8 60.9L567.2 60.9L570.5 60.9L573.9 60.9L577.2 60.9L580.6 60.9L583.9 60.9L587.3 60.9L590.7 60.9L594.0 60.9L597.4 60.9L600.7 60.9L604.1 60.9L604.1 60.9L605.5 63.9L607.0 67.1L608.6 70.5L610.2 74.1L611.7 77.8L613.3 81.7L614.9 85.7L616.4 89.9L618.0 94.2L619.5 98.7L621.0 103.3L622.5 107.9L623.9 112.7L625.3 117.6L626.7 122.6L628.0 127.7L629.3 132.9L630.5 138.1L631.7 143.5L632.8 148.9L634.0 154.4L635.0 159.9L636.0 165.6L636.0 165.6L631.4 165.6L626.8 165.6L622.2 165.6L617.5 165.6L612.9 165.6L608.3 165.6L603.6 165.6L599.0 165.6L594.4 165.6L589.8 165.6L585.1 165.6L580.5 165.6L575.9 165.6L571.2 165.6L566.6 165.6L562.0 165.6L557.4 165.6L552.7 165.6L548.1 165.6L543.5 165.6L538.8 165.6L534.2 165.6L529.6 165.6L525.0 165.6L520.3 165.6L515.7 165.6L511.1 165.6L506.4 165.6L501.8 165.6L497.2 165.6L492.6 165.6L487.9 165.6L483.3 165.6L478.7 165.6L474.0 165.6L469.4 165.6L464.8 165.6L460.2 165.6L455.5 165.6L455.5 165.6L456.1 159.9L456.7 154.4L457.3 148.9L458.0 143.5L458.6 138.1L459.3 132.9L460.0 127.7L460.7 122.6L461.5 117.6L462.3 112.7L463.1 107.9L463.9 103.3L464.7 98.7L465.6 94.2L466.4 89.9L467.3 85.7L468.2 81.7L469.0 77.8L469.9 74.1L470.8 70.5L471.6 67.1L472.5 63.9L473.3 60.9Z" fill="none" stroke="currentColor" stroke-width="1.1" stroke-dasharray="4 3" opacity=".75"/>
-        <text x="456" y="52" fill="currentColor" font-weight="600">Europe &#183; 1,383 &#8594; 7,862 layers</text>
-        <text x="636" y="182" text-anchor="end" fill="var(--muted)">37.3 % of the reference</text>
+        <path d="M473.3 60.9L476.7 60.9L480.0 60.9L483.4 60.9L486.7 60.9L490.1 60.9L493.4 60.9L496.8 60.9L500.1 60.9L503.5 60.9L506.8 60.9L510.2 60.9L513.5 60.9L516.9 60.9L520.2 60.9L523.6 60.9L526.9 60.9L530.3 60.9L533.7 60.9L537.0 60.9L540.4 60.9L543.7 60.9L547.1 60.9L550.4 60.9L553.8 60.9L557.1 60.9L560.5 60.9L563.8 60.9L567.2 60.9L570.5 60.9L573.9 60.9L577.2 60.9L580.6 60.9L583.9 60.9L587.3 60.9L590.7 60.9L594.0 60.9L597.4 60.9L600.7 60.9L604.1 60.9L604.1 60.9L605.4 63.7L606.8 66.7L608.3 69.8L609.7 73.1L611.2 76.5L612.7 80.1L614.2 83.9L615.6 87.7L617.1 91.7L618.5 95.7L619.9 99.9L621.3 104.2L622.7 108.6L624.0 113.1L625.3 117.7L626.6 122.3L627.8 127.1L629.0 131.9L630.2 136.8L631.3 141.8L632.4 146.8L633.5 151.9L634.5 157.1L634.5 157.1L629.9 157.1L625.3 157.1L620.8 157.1L616.2 157.1L611.6 157.1L607.1 157.1L602.5 157.1L597.9 157.1L593.4 157.1L588.8 157.1L584.3 157.1L579.7 157.1L575.1 157.1L570.6 157.1L566.0 157.1L561.4 157.1L556.9 157.1L552.3 157.1L547.7 157.1L543.2 157.1L538.6 157.1L534.0 157.1L529.5 157.1L524.9 157.1L520.3 157.1L515.8 157.1L511.2 157.1L506.6 157.1L502.1 157.1L497.5 157.1L492.9 157.1L488.4 157.1L483.8 157.1L479.2 157.1L474.7 157.1L470.1 157.1L465.5 157.1L461.0 157.1L456.4 157.1L456.4 157.1L457.0 151.9L457.6 146.8L458.2 141.8L458.8 136.8L459.4 131.9L460.1 127.1L460.8 122.3L461.5 117.7L462.2 113.1L463.0 108.6L463.7 104.2L464.5 99.9L465.3 95.7L466.1 91.7L466.9 87.7L467.7 83.9L468.5 80.1L469.3 76.5L470.1 73.1L471.0 69.8L471.8 66.7L472.5 63.7L473.3 60.9Z" fill="none" stroke="currentColor" stroke-width="1.1" stroke-dasharray="4 3" opacity=".75"/>
+        <text x="456" y="52" fill="currentColor" font-weight="600">Europe &#183; 1,365 &#8594; 7,844 layers</text>
+        <text x="612" y="191" text-anchor="end" fill="var(--muted)">37.0 % of the reference</text>
       </g>
       <g font-family="IBM Plex Sans, sans-serif" font-size="11" fill="currentColor">
         <line x1="302" y1="192" x2="302" y2="228" stroke="currentColor" opacity=".55"/>
@@ -1410,6 +1431,8 @@
         <text x="830" y="208">Yellow River Basin 1,030</text>
         <line x1="279" y1="149" x2="238" y2="120" stroke="currentColor" opacity=".55"/>
         <text x="234" y="116" text-anchor="end">KSSL, across the US 2,263</text>
+        <line x1="268" y1="154" x2="210" y2="190" stroke="currentColor" opacity=".55"/>
+        <text x="206" y="196" text-anchor="end">Kansas Mesonet 156</text>
         <line x1="321" y1="308" x2="300" y2="318" stroke="currentColor" opacity=".55"/>
         <text x="296" y="322" text-anchor="end">Ksat-SSIR-DB (Brazil) 115</text>
         <line x1="849" y1="297" x2="878" y2="318" stroke="currentColor" opacity=".55"/>
@@ -1427,7 +1450,7 @@
       </g>
       <g font-family="IBM Plex Sans, sans-serif" font-size="11.5" fill="currentColor">
         <circle cx="640" cy="515" r="6" fill="var(--accent)" fill-opacity=".45" stroke="var(--accent)"/>
-        <text x="654" y="519">Public reference &#183; 14,525 georeferenced layers</text>
+        <text x="654" y="519">Public reference &#183; 14,681 georeferenced layers</text>
         <circle cx="640" cy="537" r="6" fill="var(--add)" fill-opacity=".5" stroke="var(--add)"/>
         <text x="654" y="541">EU-HYDI, Boorowa &#183; +6,536</text>
       </g>
@@ -1435,14 +1458,14 @@
     <figcaption>
       Equal Earth projection, so circle areas compare across latitudes.
       Samples are binned into 2&#176; cells, and circle area is proportional
-      to the number of layers. Teal is the public reference: 14,525 of its
-      14,866 layers carry coordinates. (UNSODA and sDB publish none, the 21
+      to the number of layers. Teal is the public reference: 14,681 of its
+      15,022 layers carry coordinates. (UNSODA and sDB publish none, the 21
       Arizona soils have none, 30 of the 70 Laikipia soils, from large farms,
       have none, and 6 of the Fujii horizons have none.) Orange-red is
       EU-HYDI (6,479 of 6,797 layers georeferenced) and the 57 CSIRO Boorowa
       cores. The 122 Andalusian curves (Setenil, Tomejil, Lebrija and
-      Do&#241;ana), the Laikipia soils and the Fujii and Ksat-SSIR-DB layers
-      are part of the public reference. EU-HYDI is consortium-restricted, and
+      Do&#241;ana), the Laikipia soils and the Fujii, Ksat-SSIR-DB and Kansas
+      Mesonet layers are part of the public reference. EU-HYDI is consortium-restricted, and
       Boorowa is for non-commercial use only. Both are part of the default
       reference wherever their tables have been built locally. They are never
       distributed, and they appear here only as cell counts. 3 layers south of
@@ -1454,31 +1477,36 @@
   <div class="col">
     <table>
       <thead>
-        <tr><th>Region</th><th class="num">Public reference</th><th class="num">Default reference</th><th class="num">Added</th></tr>
+        <tr><th>Region</th><th class="num">Public tables (fresh clone)</th><th class="num">Default reference (all tables)</th><th class="num">Restricted tables (EU-HYDI, Boorowa)</th></tr>
       </thead>
       <tbody>
-        <tr><td>North America</td><td class="num">9,258</td><td class="num">9,258</td><td class="num">+0</td></tr>
-        <tr><td>Europe</td><td class="num">1,383</td><td class="num">7,862</td><td class="num">+6,479</td></tr>
-        <tr><td>Asia</td><td class="num">2,421</td><td class="num">2,704</td><td class="num">+283</td></tr>
+        <tr><td>North America</td><td class="num">9,414</td><td class="num">9,414</td><td class="num">+0</td></tr>
+        <tr><td>Europe</td><td class="num">1,365</td><td class="num">7,844</td><td class="num">+6,479</td></tr>
+        <tr><td>Asia</td><td class="num">2,218</td><td class="num">2,218</td><td class="num">+0</td></tr>
         <tr><td>South America</td><td class="num">754</td><td class="num">754</td><td class="num">+0</td></tr>
-        <tr><td>Africa</td><td class="num">777</td><td class="num">789</td><td class="num">+12</td></tr>
+        <tr><td>Africa</td><td class="num">688</td><td class="num">688</td><td class="num">+0</td></tr>
         <tr><td>Australasia</td><td class="num">239</td><td class="num">296</td><td class="num">+57</td></tr>
-        <tr><td><strong>Georeferenced</strong></td><td class="num">14,525</td><td class="num">21,061</td><td class="num">+6,536</td></tr>
+        <tr><td>Antarctica</td><td class="num">3</td><td class="num">3</td><td class="num">+0</td></tr>
+        <tr><td><strong>Georeferenced</strong></td><td class="num">14,681</td><td class="num">21,217</td><td class="num">+6,536</td></tr>
+        <tr><td>No coordinates</td><td class="num">341</td><td class="num">659</td><td class="num">+318</td></tr>
+        <tr><td><strong>Total (as in Fig. 1)</strong></td><td class="num">15,022</td><td class="num">21,876</td><td class="num">+6,854</td></tr>
       </tbody>
     </table>
     <p>
-      Europe goes from 9.5 % of the georeferenced reference to 37.3 %, and the
+      Europe goes from 9.3 % of the georeferenced reference to 37.0 %, and the
       Nordic gap is largely closed. In Europe above 58&#176;N, the reference
       now holds 1,333 layers, against 160 before; 199 of them are above
       62&#176;N, against 22. EU-HYDI cannot fill the south. Greece and most of
       Spain contributed only two retention points per sample (field capacity
       and wilting point). That is too few to fit a curve, so Spain, Greece and
       the Balkans stay thin. Florida still supplies 27 % of all georeferenced
-      layers. The regional boxes overlap slightly at their edges: the Asia box
-      takes in western Russia and Ukraine, and the Africa box takes in the far
-      south of Spain, where the Setenil rings sit. So the regions sum to a
-      little more than the total. East of 90&#176;E the Asia box reaches
-      11&#176;S, so that it counts Indonesia.
+      layers. Each layer is counted in one region only, so the regions add up
+      to the georeferenced total. Europe is counted north of 36.5&#176;N and
+      west of 45&#176;E. This keeps Sicily, southern Spain and western Russia
+      in Europe and leaves Tunisia and Iraq out. East of Suez, Africa stops at
+      29.5&#176;N, so Israel, Lebanon and Syria count as Asia. Asia reaches
+      180&#176;E, for Kamchatka, and east of 90&#176;E it reaches 11&#176;S,
+      for Indonesia. Three layers lie in Antarctica.
     </p>
 
     <h3 style="margin-top:34px">What the European data does for accuracy</h3>
@@ -1723,7 +1751,7 @@
       Paired on the same 1,680 test soils (150 per class, every silt) that
       carry depth and bulk density, predicted as the shipped tool runs them
       (<span class="m">verify_holdout.py</span>, October 2026, on the
-      reference before Fujii and Ksat-SSIR-DB joined). The Cover &amp; Hart
+      reference before Fujii, Ksat-SSIR-DB and Kansas joined). The Cover &amp; Hart
       (1967) bound brackets the Bayes error from the nearest-neighbour error,
       so it does not depend on a model. About 54 % exact class within the
       reference's distribution, and 44 % against an unseen laboratory, is the
@@ -1832,7 +1860,8 @@
       (2023), EU-HYDI (Weynants et al. 2013), Babaeian et al. (2015; Arizona, shared
       data), Armas-Espinel (2013), Tong et al. (2024), Willard et al. (2026, HydroShare),
       Vanderlinden et al. (2017, 2021), Fujii et al. (2023, Dryad), Ottoni et al.
-      (2025, Ksat-SSIR-DB), UNSODA 2.0, sDB (Vereecken et al. 2017).
+      (2025, Ksat-SSIR-DB), Parker et al. (2022, Kansas Mesonet), UNSODA 2.0,
+      sDB (Vereecken et al. 2017).
       Code and data: github.com/carpena1/py_HB_texture
     </footer>
   </div>

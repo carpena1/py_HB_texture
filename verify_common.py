@@ -5,7 +5,15 @@ development-history scripts archived in dev/.
 """
 
 import os
+from concurrent.futures import ProcessPoolExecutor
 from math import comb
+
+# One BLAS/OpenMP thread per process: the classifier otherwise starts ~16
+# OpenMP threads and the pool workers fight over the cores. Scripts import
+# this module before numpy, so the setting takes hold; workers inherit it.
+for _v in ("OMP_NUM_THREADS", "OPENBLAS_NUM_THREADS", "MKL_NUM_THREADS",
+           "VECLIB_MAXIMUM_THREADS"):
+    os.environ.setdefault(_v, "1")
 
 import numpy as np
 
@@ -54,6 +62,29 @@ def map_folds(fn, folds, *args, threads=1, jobs=None):
         return [fn(f, *args) for f in folds]
     with parallel_config(backend="loky", inner_max_num_threads=threads):
         return Parallel(n_jobs=jobs)(delayed(fn)(f, *args) for f in folds)
+
+
+DATA = {}   # in a pool worker: the tables pool() sent
+
+
+def _init(data):
+    DATA.update(data)
+
+
+def pool(data):
+    """A process pool on every core. `data`, a dict of the large tables,
+    reaches each worker once, as DATA, instead of once per task."""
+    return ProcessPoolExecutor(n_jobs(), initializer=_init, initargs=(data,))
+
+
+def merge(out, part, sel):
+    """Copy rows `sel` of a task's result into `out` (arrays, or dicts of
+    them, nested as the script keeps them)."""
+    if isinstance(out, dict):
+        for k in out:
+            merge(out[k], part[k], sel)
+    else:
+        out[sel] = part[sel]
 
 
 def europe_mask(df):

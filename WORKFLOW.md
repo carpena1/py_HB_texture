@@ -2,7 +2,7 @@
 
 # From measured retention curves to texture and K<sub>s</sub>
 
-How fifteen source databases become one reference table. How one soil water
+How sixteen source databases become one reference table. How one soil water
 characteristic curve becomes a texture class and a conductivity estimate. And
 what each validation level proves.
 
@@ -36,11 +36,11 @@ that follows shrinkage. Their tables are distributed with K. Vanderlinden's
 agreement. The Arizona, Canary Islands and Yellow River tables are public. The
 Yellow River curves are published only as fits, so they are rebuilt from 1 to
 1000 kPa and refitted. The Canary points are read from the vector figures of
-the thesis and checked against its own tables. The two newest sources are
-public too: Fujii et al. (Japan and Southeast Asia, CC0) and Ksat-SSIR-DB
-(Brazil). In Ksat-SSIR-DB, 100 rows from three theses sit at HYBRAS v1 sites
-that GSHP already holds, so they are left out. A checkout without the
-restricted tables runs on the public 14,866.
+the thesis and checked against its own tables. The three newest sources are
+public too: Fujii et al. (Japan and Southeast Asia, CC0), Ksat-SSIR-DB
+(Brazil) and the Kansas Mesonet (MIT licence). In Ksat-SSIR-DB, 100 rows from
+three theses sit at HYBRAS v1 sites that GSHP already holds, so they are left
+out. A checkout without the restricted tables runs on the public 15,022.
 
 | Column | Meaning |
 |---|---|
@@ -57,49 +57,56 @@ Coverage explains why several findings in this project point the same way.
 Before EU-HYDI, three quarters of the reference sat in North America, and
 almost half of it came from one Florida contributor. EU-HYDI (Weynants et al.
 2013), shared for this work under consortium terms, adds 6,797 European layers
-from 21 laboratories in 16 countries. It takes Europe from 1,261 layers to
-7,740 (7,862 with the Andalusian soils that joined later). In October 2026,
+from 21 laboratories in 16 countries. It takes Europe from 1,243 layers to
+7,722 (7,844 with the Andalusian soils that joined later). In October 2026,
 Fujii et al. and Ksat-SSIR-DB added 51 georeferenced layers in Japan, Thailand
-and Indonesia and 115 in Brazil, two regions where the reference is thin.
+and Indonesia and 115 in Brazil, two regions where the reference is thin. The
+Kansas Mesonet added 156 cores from 40 stations in the US Great Plains, with
+K<sub>s</sub> measured on the same core.
 
 ![Coverage map of the reference](figures/fig2_coverage_map.svg)
 
 *Figure 2.* Equal Earth projection, so circle areas compare across latitudes.
 Samples are binned into 2° cells, and circle area is proportional to the
-number of layers. Teal is the public reference: 14,525 of its 14,866 layers
+number of layers. Teal is the public reference: 14,681 of its 15,022 layers
 carry coordinates. (UNSODA and sDB publish none, the 21 Arizona soils have
 none, 30 of the 70 Laikipia soils, from large farms, have none, and 6 of the
 Fujii horizons have none.) Orange-red is EU-HYDI (6,479 of 6,797 layers
 georeferenced) and the 57 CSIRO Boorowa cores. The 122 Andalusian curves
-(Setenil, Tomejil, Lebrija and Doñana), the Laikipia soils and the Fujii and
-Ksat-SSIR-DB layers are part of the public reference. EU-HYDI is
-consortium-restricted, and Boorowa is for non-commercial use only. Both are
-part of the default reference wherever their tables have been built locally.
-They are never distributed, and they appear here only as cell counts. 3 layers
-south of 58°S, in Antarctica, fall outside the mapped area and are not drawn.
-Land outline: Natural Earth 110 m, public domain.
+(Setenil, Tomejil, Lebrija and Doñana), the Laikipia soils and the Fujii,
+Ksat-SSIR-DB and Kansas Mesonet layers are part of the public reference.
+EU-HYDI is consortium-restricted, and Boorowa is for non-commercial use only.
+Both are part of the default reference wherever their tables have been built
+locally. They are never distributed, and they appear here only as cell counts.
+3 layers south of 58°S, in Antarctica, fall outside the mapped area and are
+not drawn. Land outline: Natural Earth 110 m, public domain.
 
-| Region | Public reference | Default reference | Added |
+| Region | Public tables (fresh clone) | Default reference (all tables) | Restricted tables (EU-HYDI, Boorowa) |
 |---|---:|---:|---:|
-| North America | 9,258 | 9,258 | +0 |
-| Europe | 1,383 | 7,862 | +6,479 |
-| Asia | 2,421 | 2,704 | +283 |
+| North America | 9,414 | 9,414 | +0 |
+| Europe | 1,365 | 7,844 | +6,479 |
+| Asia | 2,218 | 2,218 | +0 |
 | South America | 754 | 754 | +0 |
-| Africa | 777 | 789 | +12 |
+| Africa | 688 | 688 | +0 |
 | Australasia | 239 | 296 | +57 |
-| **Georeferenced** | 14,525 | 21,061 | +6,536 |
+| Antarctica | 3 | 3 | +0 |
+| **Georeferenced** | 14,681 | 21,217 | +6,536 |
+| No coordinates | 341 | 659 | +318 |
+| **Total (as in Fig. 1)** | 15,022 | 21,876 | +6,854 |
 
-Europe goes from 9.5 % of the georeferenced reference to 37.3 %, and the
+Europe goes from 9.3 % of the georeferenced reference to 37.0 %, and the
 Nordic gap is largely closed. In Europe above 58°N, the reference now holds
 1,333 layers, against 160 before; 199 of them are above 62°N, against 22.
 EU-HYDI cannot fill the south. Greece and most of Spain contributed only two
 retention points per sample (field capacity and wilting point). That is too
 few to fit a curve, so Spain, Greece and the Balkans stay thin. Florida still
-supplies 27 % of all georeferenced layers. The regional boxes overlap slightly
-at their edges: the Asia box takes in western Russia and Ukraine, and the
-Africa box takes in the far south of Spain, where the Setenil rings sit. So
-the regions sum to a little more than the total. East of 90°E the Asia box
-reaches 11°S, so that it counts Indonesia.
+supplies 27 % of all georeferenced layers. Each layer is counted in one region
+only, so the regions add up to the georeferenced total. Europe is counted
+north of 36.5°N and west of 45°E. This keeps Sicily, southern Spain and
+western Russia in Europe and leaves Tunisia and Iraq out. East of Suez, Africa
+stops at 29.5°N, so Israel, Lebanon and Syria count as Asia. Asia reaches
+180°E, for Kamchatka, and east of 90°E it reaches 11°S, for Indonesia. Three
+layers lie in Antarctica.
 
 ### What the European data does for accuracy
 
@@ -182,15 +189,15 @@ source should expect.
 
 *Figure 4.* Paired on the same 1,680 test soils (150 per class, every silt)
 that carry depth and bulk density, predicted as the shipped tool runs them
-(`verify_holdout.py`, October 2026, on the reference before Fujii and
-Ksat-SSIR-DB joined). The Cover & Hart (1967) bound brackets the Bayes error
-from the nearest-neighbour error, so it does not depend on a model. About 54 %
-exact class within the reference's distribution, and 44 % against an unseen
-laboratory, is the hard limit for *any* method that uses the four van
-Genuchten parameters alone. The gap between 29 % and that limit is what better
-data can still buy. Depth and bulk density are further inputs, so the bound
-does not cover them. They raise the score most where the laboratory is already
-in the reference.
+(`verify_holdout.py`, October 2026, on the reference before Fujii,
+Ksat-SSIR-DB and Kansas joined). The Cover & Hart (1967) bound brackets the
+Bayes error from the nearest-neighbour error, so it does not depend on a
+model. About 54 % exact class within the reference's distribution, and 44 %
+against an unseen laboratory, is the hard limit for *any* method that uses the
+four van Genuchten parameters alone. The gap between 29 % and that limit is
+what better data can still buy. Depth and bulk density are further inputs, so
+the bound does not cover them. They raise the score most where the laboratory
+is already in the reference.
 
 Each verification script tests one link in the chain. `verify_carsel_parrish`
 and `verify_rosetta` test against foreign parameter sets. `verify_gshp` tests
@@ -263,5 +270,5 @@ Reference counts as of the merged default, 31 October 2026. Sources: GSHP
 (Weynants et al. 2013), Babaeian et al. (2015; Arizona, shared data),
 Armas-Espinel (2013), Tong et al. (2024), Willard et al. (2026, HydroShare),
 Vanderlinden et al. (2017, 2021), Fujii et al. (2023, Dryad), Ottoni et al.
-(2025, Ksat-SSIR-DB), UNSODA 2.0, sDB (Vereecken et al. 2017). Code and data:
-github.com/carpena1/py_HB_texture
+(2025, Ksat-SSIR-DB), Parker et al. (2022, Kansas Mesonet), UNSODA 2.0, sDB
+(Vereecken et al. 2017). Code and data: github.com/carpena1/py_HB_texture

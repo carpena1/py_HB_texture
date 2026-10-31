@@ -28,12 +28,14 @@ Usage:  python verify_covariates.py [n_per_class] [n_mc] [--designs=layer,profil
 
 import sys
 
+# verify_common first: it pins BLAS/OpenMP threads before numpy loads.
+from verify_common import DATA, GROUP, europe_mask, mcnemar, merge, pool
+
 import numpy as np
 import pandas as pd
 from scipy.stats import spearmanr, wilcoxon
 
 import swcc_texture as st
-from verify_common import GROUP, europe_mask, mcnemar
 
 H = np.concatenate([[0.0], np.logspace(-1, np.log10(1500.0), 25)])
 N_FOLDS = 5
@@ -91,16 +93,34 @@ def run(train, targets, idx, out, n_mc):
             out[a]["ks"][j] = (k["median_cmh"], k["p5_cmh"], k["p95_cmh"])
 
 
-def predict(df, tg, folds, n_mc):
-    n = len(tg)
-    out = {a: {"cls": np.empty(n, object), "frac": np.full(n, np.nan),
-               "ks": np.full((n, 3), np.nan)} for a in ARMS}
-    for col, held in folds:
-        sel = np.where(tg[col].isin(held).to_numpy())[0]
-        if len(sel):
-            run(df[~df[col].isin(held)], tg, sel, out, n_mc)
-            print(f"  ... {len(sel)} targets done", flush=True)
-    return out
+def empty(n):
+    return {a: {"cls": np.empty(n, object), "frac": np.full(n, np.nan),
+                "ks": np.full((n, 3), np.nan)} for a in ARMS}
+
+
+def one_fold(col, held, n_mc):
+    """One fold in a worker: its rows of every arm's result."""
+    df, tg = DATA["df"], DATA["tg"]
+    sel = np.where(tg[col].isin(held).to_numpy())[0]
+    out = empty(len(tg))
+    if len(sel):
+        run(df[~df[col].isin(held)], tg, sel, out, n_mc)
+    return sel, out
+
+
+def predict(ex, tg, folds, n_mc):
+    """Submit every fold now; the returned function collects them."""
+    futs = [ex.submit(one_fold, col, held, n_mc) for col, held in folds]
+
+    def collect():
+        out = empty(len(tg))
+        for f in futs:
+            sel, part = f.result()
+            if len(sel):
+                merge(out, part, sel)
+                print(f"  ... {len(sel)} targets done", flush=True)
+        return out
+    return collect
 
 
 def report(title, tg, out):
@@ -142,9 +162,9 @@ def main():
     df = load()
     print(f"reference: {len(df)} layers; depth {df.depth_cm.notna().mean()*100:.1f} %, "
           f"bulk density {df.bd.notna().mean()*100:.1f} %")
-    pool = df[df.depth_cm.notna() & df.bd.notna()]
+    pool_df = df[df.depth_cm.notna() & df.bd.notna()]
     tg = pd.concat([g.sample(min(len(g), n_per_class), random_state=0)
-                    for _, g in pool.groupby("texture_class")]).reset_index(drop=True)
+                    for _, g in pool_df.groupby("texture_class")]).reset_index(drop=True)
     print(f"targets: {len(tg)} with depth and bulk density, {n_per_class}/class, "
           f"{tg.source_db.nunique()} laboratories; n_mc={n_mc}")
 
@@ -163,13 +183,17 @@ def main():
     designs = {k: v for k, v in designs.items() if k in pick}
     eu = europe_mask(tg).to_numpy()
     und = (tg.sample_type == "undisturbed").to_numpy()
+    ex = pool({"df": df, "tg": tg})
+    pending = {name: predict(ex, tg, folds, n_mc)
+               for name, folds in designs.items()}
     for name, folds in designs.items():
         print(f"\n--- {name} folds ---", flush=True)
-        out = predict(df, tg, folds, n_mc)
+        out = pending[name]()
         for label, m in (("all", np.ones(len(tg), bool)), ("European", eu),
                          ("non-European", ~eu), ("undisturbed", und)):
             sub = {a: {k: v[m] for k, v in d.items()} for a, d in out.items()}
             report(f"{name} folds, {label} targets", tg[m], sub)
+    ex.shutdown()
 
 
 if __name__ == "__main__":

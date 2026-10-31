@@ -25,12 +25,14 @@ Usage:  python verify_andic_knn.py [n_per_class] [seed]
 
 import sys
 
+# verify_common first: it pins BLAS/OpenMP threads before numpy loads.
+from verify_common import DATA, GROUP, mcnemar, merge, n_jobs, pool
+
 import numpy as np
 import pandas as pd
 
 import ksat_metrics as km
 import swcc_texture as st
-from verify_common import GROUP, mcnemar
 from scipy.stats import wilcoxon
 
 K = 30
@@ -87,21 +89,40 @@ def knn(ref, a_ref, t, a_t, excluded, arm):
     return votes.idxmax(), frac, ks
 
 
-def run(ref_df, ref, a_ref, tg, key, extra):
+def empty(n):
+    return {a: dict(cls=np.empty(n, object), frac=np.full((n, 3), np.nan),
+                    ks=np.full(n, np.nan)) for a in ARMS}
+
+
+def run(ex, tg, key, extra):
+    """Submit the targets in parts now; the returned function collects them."""
     n = len(tg) + (len(extra) if extra is not None else 0)
-    out = {a: dict(cls=np.empty(n, object), frac=np.full((n, 3), np.nan),
-                   ks=np.full(n, np.nan)) for a in ARMS}
     allt = pd.concat([tg, extra]) if extra is not None else tg
-    a_all = andic_code(allt)
     groups = np.array(sorted(tg[key].unique()))
     np.random.default_rng(SEED).shuffle(groups)
     # One source out at a time: 5 folds of sources can hold out every andic
     # source with a measured Ks at once (Campania and the Canary Islands).
     chunks = ([[g] for g in groups] if key == "source_db"
               else list(np.array_split(groups, N_FOLDS)))
-    for j in range(n):
+    futs = [(js, ex.submit(one_part, key, js, chunks, len(tg)))
+            for js in np.array_split(np.arange(n), n_jobs())]
+
+    def collect():
+        out = empty(n)
+        for js, f in futs:
+            merge(out, f.result(), js)
+        return allt, out
+    return collect
+
+
+def one_part(key, js, chunks, n_tg):
+    """Targets js (positions in the target table) in a worker."""
+    ref_df, ref, a_ref, allt = DATA["ref_df"], DATA["ref"], DATA["a_ref"], DATA[key]
+    a_all = andic_code(allt)
+    out = empty(len(allt))
+    for j in js:
         t = allt.iloc[j]
-        if j < len(tg):
+        if j < n_tg:
             chunk = next(c for c in chunks if t[key] in set(c))
             excl = ref_df[key].isin(chunk).to_numpy()
         else:
@@ -109,7 +130,7 @@ def run(ref_df, ref, a_ref, tg, key, extra):
         for arm in ARMS:
             c, f, k = knn(ref, a_ref, t, a_all[j], excl, arm)
             out[arm]["cls"][j], out[arm]["frac"][j], out[arm]["ks"][j] = c, f, k
-    return allt, out
+    return out
 
 
 def report(title, allt, out, mask):
@@ -166,9 +187,16 @@ def main():
     print(f"reference {len(ref_df)}; andic soils in it {int(a_ref.sum())}; "
           f"targets {volc.sum()} volcanic + {len(ctrl)} controls"
           + (f" + {len(extra)} Canary" if extra is not None else ""))
-    for key, name in (("profile_id", "profile folds (source in the reference)"),
-                      ("source_db", "leave-one-source-out (new source)")):
-        allt, out = run(ref_df, ref, a_ref, tg, key, extra if key == "source_db" else None)
+    designs = (("profile_id", "profile folds (source in the reference)"),
+               ("source_db", "leave-one-source-out (new source)"))
+    allts = {key: pd.concat([tg, extra])
+             if key == "source_db" and extra is not None else tg
+             for key, _ in designs}
+    ex = pool({"ref_df": ref_df, "ref": ref, "a_ref": a_ref, **allts})
+    pending = [run(ex, tg, key, extra if key == "source_db" else None)
+               for key, _ in designs]
+    for (key, name), collect in zip(designs, pending):
+        allt, out = collect()
         v = allt.volcanic.isin(["known", "probable"]).to_numpy()
         a = allt.andic.isin(["yes", "likely"]).to_numpy()
         print(f"\n=== {name} ===")
@@ -182,6 +210,7 @@ def main():
         if key == "source_db" and extra is not None:
             c = np.r_[np.zeros(len(tg), bool), np.ones(len(extra), bool)]
             report("Canary (not in the reference)", allt, out, c)
+    ex.shutdown()
 
 
 if __name__ == "__main__":

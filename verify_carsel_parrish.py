@@ -16,6 +16,9 @@ Checks per class:
 
 import csv
 
+# verify_common first: it pins BLAS/OpenMP threads before numpy loads.
+from verify_common import DATA, pool
+
 import numpy as np
 
 import swcc_texture as st
@@ -65,6 +68,11 @@ def reference_counts():
     return n_ref, n_ks
 
 
+def one_class(cur):
+    """One class in a worker, against the shared reference and classifier."""
+    return st.estimate(cur["h"], cur["theta"], ref=DATA["ref"], clf=DATA["clf"])
+
+
 def main():
     names, curves, ks_true = load_benchmark()
     centroids = st.usda_centroids()
@@ -79,9 +87,10 @@ def main():
           f"{'predicted':<16s} {'P(true)':>7s} {'rank':>4s}  "
           f"{'sand/silt/clay pred':<20s} {'centroid':<15s} "
           f"{'Ks pred':>8s} {'Ks true':>8s} {'nb':>4s} {'in5-95%':>7s}")
-    for name in names:
-        cur = curves[name]
-        res = st.estimate(cur["h"], cur["theta"], ref=ref, clf=clf)
+    with pool({"ref": ref, "clf": clf}) as ex:
+        futs = [ex.submit(one_class, curves[name]) for name in names]
+    for name, f in zip(names, futs):
+        res = f.result()
         probs = res["class_probabilities"]
         pred = res["texture_class"]
         p_true = probs.get(name, 0.0)

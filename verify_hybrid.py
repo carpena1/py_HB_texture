@@ -22,19 +22,47 @@ Usage:  python verify_hybrid.py [n_per_class] [n_mc] [--reference=NAME] [--block
 
 import sys
 
+# verify_common first: it pins BLAS/OpenMP threads before numpy loads.
+from verify_common import DATA, mcnemar, n_jobs, pool
+
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import GroupKFold
 
 import ksat_metrics as km
 import swcc_texture as st
-from verify_common import mcnemar
 from verify_groups import GROUP
 from verify_common import prf
 from verify_common import COLS, ORDER
 
 H = np.arange(0.0, 150.0 + 0.1, 5.0)
 N_FOLDS = 5
+
+
+def one_part(tr_idx, idx, n_mc):
+    """Targets idx (positions in tsel) of one fold, in a worker."""
+    g, tsel = DATA["g"], DATA["tsel"]
+    train = g.iloc[tr_idx]
+    ref = st.GshpReference(df=g[COLS + ["sample_type"]].reset_index(drop=True))
+    mask = np.ones(len(g), dtype=bool)
+    mask[tr_idx] = False
+    ref.set_excluded(mask)
+    clf = st.TextureGBM(df=train)
+
+    rows = []
+    for row in tsel.iloc[idx].itertuples():
+        theta = st.vg_theta(H, row.thetar, row.thetas, row.alpha_kpa, row.n)
+        # Each target's own sample type, as the tool uses it by default.
+        a = st.estimate(H, theta, ref=ref, n_mc=n_mc,
+                        sample_type=row.sample_type)
+        b = st.estimate(H, theta, ref=ref, n_mc=n_mc, clf=clf,
+                        sample_type=row.sample_type)
+        rows.append((a["texture_class"], b["texture_class"],
+                     next(iter(b["knn_class_probabilities"])),
+                     {m: (r["ksat"]["median_cmh"], r["ksat"]["p5_cmh"],
+                          r["ksat"]["p95_cmh"]) for m, r in (("knn", a),
+                                                            ("hyb", b))}))
+    return rows
 
 
 def main():
@@ -69,32 +97,21 @@ def main():
                   for s in np.unique(src)]
     else:
         splits = GroupKFold(n_splits=N_FOLDS).split(g, groups=g.profile_id)
-    for tr_idx, te_idx in splits:
-        sel = np.isin(tpos, te_idx)
-        if not sel.any():
-            continue
-        train = g.iloc[tr_idx]
-        ref = st.GshpReference(df=g[COLS + ["sample_type"]].reset_index(drop=True))
-        mask = np.ones(len(g), dtype=bool)
-        mask[tr_idx] = False
-        ref.set_excluded(mask)
-        clf = st.TextureGBM(df=train)
-
-        idx = np.where(sel)[0]
-        for j, row in zip(idx, tsel[sel].itertuples()):
-            theta = st.vg_theta(H, row.thetar, row.thetas, row.alpha_kpa, row.n)
-            # Each target's own sample type, as the tool uses it by default.
-            a = st.estimate(H, theta, ref=ref, n_mc=n_mc,
-                            sample_type=row.sample_type)
-            b = st.estimate(H, theta, ref=ref, n_mc=n_mc, clf=clf,
-                            sample_type=row.sample_type)
-            p_knn[j] = a["texture_class"]
-            p_hyb[j] = b["texture_class"]
-            p_2nd[j] = next(iter(b["knn_class_probabilities"]))
-            for m, r in (("knn", a), ("hyb", b)):
-                ks[m][j] = r["ksat"]["median_cmh"]
-                lo[m][j] = r["ksat"]["p5_cmh"]
-                hi[m][j] = r["ksat"]["p95_cmh"]
+    splits = list(splits)
+    # Few folds are split into parts so that every core has work; each part
+    # rebuilds its fold's models, which are the same in every part.
+    n_parts = -(-n_jobs() // len(splits))
+    with pool({"g": g, "tsel": tsel}) as ex:
+        futs = []
+        for tr_idx, te_idx in splits:
+            idx = np.where(np.isin(tpos, te_idx))[0]
+            futs += [(part, ex.submit(one_part, tr_idx, part, n_mc))
+                     for part in np.array_split(idx, n_parts) if len(part)]
+        for part, f in futs:
+            for j, (a, b, second, k) in zip(part, f.result()):
+                p_knn[j], p_hyb[j], p_2nd[j] = a, b, second
+                for m in ("knn", "hyb"):
+                    ks[m][j], lo[m][j], hi[m][j] = k[m]
 
     p_knn, p_hyb, p_2nd = (x.astype(str) for x in (p_knn, p_hyb, p_2nd))
     print(f"{'model':<12s} {'overall':>8s} {'macroR':>7s} {'macroP':>7s} "

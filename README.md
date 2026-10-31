@@ -7,8 +7,8 @@ result comes with an uncertainty range and the real reference soils it was
 matched to.
 
 The tool fits a van Genuchten curve (a standard equation for the retention
-curve) to the data. It then compares the curve with about 21,000 measured
-soil layers from 13 databases. It is built for curves measured on
+curve) to the data. It then compares the curve with about 22,000 measured
+soil layers from 14 databases. It is built for curves measured on
 undisturbed soil, typically by in-situ sensors. The reference can grow with
 your own lab-verified sites.
 
@@ -51,7 +51,7 @@ the most effective improvement measured. With a source's own soils in the
 reference, texture gains 5 points. Ks ranking (ρ, the rank correlation with
 measured Ks) goes from nearly useless (ρ = 0.10) to modest (ρ = 0.30). With
 those soils in, depth and bulk density supplied together add about 4 points
-more. It takes quantity. Among 21,000 reference soils, a handful of your own
+more. It takes quantity. Among 22,000 reference soils, a handful of your own
 changes nothing; about 20 begin to help and 50 clearly do (see "Is it
 predictive?").
 
@@ -179,7 +179,7 @@ consortium. The CSIRO Boorowa soils have a CC BY-NC-SA licence that does not
 allow redistribution here. Those who hold these data build the two tables
 (`data/euhydi_reference.csv`, `data/boorowa_reference.csv`) locally with
 `prepare_euhydi.py` and `prepare_boorowa.py`. These tables are not
-distributed. A fresh clone runs on the other tables (14,866 layers) and
+distributed. A fresh clone runs on the other tables (15,022 layers) and
 prints a note that says so. The Andalusian tables (Setenil, Tomejil,
 Lebrija, Doñana) are distributed with the agreement of K. Vanderlinden
 (IFAPA). Their raw files stay local. The Laikipia table is built from the project team's published dataset
@@ -396,7 +396,7 @@ old one. The file is git-ignored, so your data stays private. The more of
 your texture range the verified sites cover, the better: a few sites per
 soil type are worth more than many of one. Expect a measurable gain from
 about 20 verified sites and a clear one from 50 (see "Is it predictive?").
-With the default reference, the 21,000 soils around them outvote a handful.
+With the default reference, the 22,000 soils around them outvote a handful.
 
 ## How it works
 
@@ -453,7 +453,8 @@ every other number identical.
 | CSIRO Boorowa Farm, NSW, Australia (2025) | 57 | 0 | 25 intact, 32 repacked | **CC BY-NC-SA, not distributed** |
 | Japan, Indonesia, Thailand and Canada (Fujii et al. 2023, Dryad) | 59 | 51 | undisturbed | CC0, committed |
 | Brazil, Ksat-SSIR-DB (Ottoni et al. 2025), without the HYBRAS v1 sites | 115 | 95 | 83 undisturbed, 32 unknown | public database, committed |
-| **default reference** | **21,720** | **11,246** | | |
+| Kansas Mesonet, USA (Parker et al. 2022) | 156 | 126 | undisturbed | MIT licence, committed |
+| **default reference** | **21,876** | **11,372** | | |
 
 Each source gets its own `prepare_*.py`, because each ships something
 different, and each needed a correction before its curves were comparable:
@@ -638,12 +639,28 @@ different, and each needed a correction before its curves were comparable:
   laboratory value on undisturbed rings (95 rows). As a new source the set
   reads 52.2 % exact (always answering "clay": 53.0 %), and 57.4 % with its
   own soils in the reference.
+- **Kansas Mesonet** (Parker et al. 2022, public file with QA/QC corrections,
+  MIT licence; `prepare_kansas.py`; pointed out by A. Patrignani): 320
+  undisturbed cores from 40 Mesonet stations, two cores at each of 5, 10, 20
+  and 50 cm. Retention is measured on the same core from saturation to 1500
+  kPa (seven points). The saturation point is dropped where the file's QA/QC
+  log says the core swelled. Texture (hydrometer) was measured on only one
+  core per station and depth, so only those 156 cores enter the table. Ks
+  comes from a constant-head permeameter on the same core. It is kept only
+  where the laboratory noted no flaw (no gap at the ring, no flow along roots
+  or cracks): 126 cores. As a new source the set reads poorly (20–26 % exact;
+  always answering "silty clay loam": 32.7 %). Seven points leave θr loosely
+  fitted, and the draws from the fit spread too far; the fitted curve alone
+  reads 42 % exact.
 
-Both sets joined the default on 2026-10-31. `verify_join_effect.py` on 1,733
-reference soils finds no harm to the rest. For Fujii: +0.7 pp exact for a
-new site (p = 0.33) and +0.6 pp for a new source (p = 0.44); Ks +0.0015 dex
-(p = 0.25). For Ksat-SSIR-DB: −0.7 pp for a new site (p = 0.39) and −0.1 pp
-for a new source (p = 1.00); Ks slightly better (−0.0094 dex, p = 0.005).
+All three sets joined the default on 2026-10-31. `verify_join_effect.py` on
+1,733 reference soils finds no harm to the rest. For Fujii: +0.7 pp exact
+for a new site (p = 0.33) and +0.6 pp for a new source (p = 0.44); Ks
++0.0015 dex (p = 0.25). For Ksat-SSIR-DB: −0.7 pp for a new site (p = 0.39)
+and −0.1 pp for a new source (p = 1.00); Ks slightly better (−0.0094 dex,
+p = 0.005). For Kansas: +0.2 pp for a new site (p = 0.81) and −0.3 pp for a
+new source (p = 0.74); Ks better for 394 of 1,667 targets and worse for 241
+(−0.0098 dex, p < 0.001).
 
 **Sample type** (`sample_type`, with its evidence in `sample_type_source`) is
 set by how the wet end of each curve was measured: an intact core for the wet
@@ -654,46 +671,49 @@ table per sample, the KSSL method codes and the Hohenbrink data description.
 Florida's soils (5,735 layers), which GSHP lists as unknown, are undisturbed.
 One of the dataset's authors recalls the rings for conductivity and water
 release being taken in the field for each horizon, without repacking. In the
-default reference: 18,854 undisturbed, 1,613 disturbed, 1,253 unknown. Of
-the 11,246 layers with a measured Ks, 11,168 are undisturbed, only 45
+default reference: 19,010 undisturbed, 1,613 disturbed, 1,253 unknown. Of
+the 11,372 layers with a measured Ks, 11,294 are undisturbed, only 45
 disturbed and 33 unknown.
 
-**Coverage.** 21,061 layers carry coordinates (`figures/fig2_coverage_map.png`).
-North America holds 9,258, Europe 7,862 (37 %), Asia 2,704 (1,030 of them in
+**Coverage.** 21,217 layers carry coordinates (`figures/fig2_coverage_map.png`).
+Each layer is counted in one region only. North America holds 9,414 (156
+from the Kansas Mesonet), Europe 7,844 (37 %; north of 36.5° N, with
+Sicily, southern Spain and western Russia), Asia 2,218 (1,030 of them in
 the Yellow River Basin, 51 in Japan and Southeast Asia), South America 754
-(115 from Ksat-SSIR-DB), Africa 789 (with the Canary Islands) and
-Australasia 296. Florida alone supplies 27 %. Southern Europe and the
+(115 from Ksat-SSIR-DB), Africa 688 (with the Canary Islands),
+Australasia 296 and Antarctica 3. Florida alone supplies 27 %. Southern Europe and the
 Balkans remain thin.
 
 **Texture classes.** The classes are far from balanced
 (`figures/fig5_texture_classes.png`): sand outnumbers silt 56 to 1, and
 Florida alone supplies 79 % of the sand (3,657 of 4,640 layers). The
-restricted tables supply most of the silty clay (56 %) and 40 % of the silt
-loam; the Yellow River Basin adds 732 silt loams and 22 of the 83 silts.
-Ks is measured for 80 % of sandy soils but for about a third of silty ones.
+restricted tables supply more than half of the silty clay (54 %) and 39 % of
+the silt loam; the Yellow River Basin adds 732 silt loams and 22 of the 83
+silts. Ks is measured for 80 % of sandy soils but for just over a third of
+silty ones.
 
 | group | class | layers | share | with Ks | distributed | restricted |
 |---|---|---|---|---|---|---|
-| Sandy | sand | 4,640 | 21.4 % | 4,024 | 4,071 | 569 |
-| | loamy sand | 1,468 | 6.8 % | 853 | 996 | 472 |
-| Loamy | sandy loam | 3,863 | 17.8 % | 1,747 | 2,342 | 1,521 |
-| | loam | 1,931 | 8.9 % | 532 | 1,213 | 718 |
-| | sandy clay loam | 1,352 | 6.2 % | 795 | 1,125 | 227 |
-| | clay loam | 1,049 | 4.8 % | 391 | 677 | 372 |
+| Sandy | sand | 4,640 | 21.2 % | 4,024 | 4,071 | 569 |
+| | loamy sand | 1,468 | 6.7 % | 853 | 996 | 472 |
+| Loamy | sandy loam | 3,875 | 17.7 % | 1,759 | 2,354 | 1,521 |
+| | loam | 1,939 | 8.9 % | 540 | 1,221 | 718 |
+| | sandy clay loam | 1,353 | 6.2 % | 795 | 1,126 | 227 |
+| | clay loam | 1,066 | 4.9 % | 407 | 694 | 372 |
 | Silty | silt | 83 | 0.4 % | 48 | 69 | 14 |
-| | silt loam | 3,354 | 15.4 % | 1,333 | 2,015 | 1,339 |
-| | silty clay loam | 1,332 | 6.1 % | 328 | 731 | 601 |
+| | silt loam | 3,391 | 15.5 % | 1,364 | 2,052 | 1,339 |
+| | silty clay loam | 1,383 | 6.3 % | 370 | 782 | 601 |
 | Clayey | sandy clay | 197 | 0.9 % | 119 | 183 | 14 |
-| | silty clay | 641 | 3.0 % | 192 | 284 | 357 |
-| | clay | 1,810 | 8.3 % | 884 | 1,160 | 650 |
+| | silty clay | 666 | 3.0 % | 206 | 309 | 357 |
+| | clay | 1,815 | 8.3 % | 887 | 1,165 | 650 |
 
 | texture group | layers | share | with Ks | distributed | restricted |
 |---|---|---|---|---|---|
-| Sandy | 6,108 | 28.1 % | 4,877 (80 %) | 5,067 | 1,041 |
-| Loamy | 8,195 | 37.7 % | 3,465 (42 %) | 5,357 | 2,838 |
-| Silty | 4,769 | 22.0 % | 1,709 (36 %) | 2,815 | 1,954 |
-| Clayey | 2,648 | 12.2 % | 1,195 (45 %) | 1,627 | 1,021 |
-| **total** | **21,720** | | **11,246** | **14,866** | **6,854** |
+| Sandy | 6,108 | 27.9 % | 4,877 (80 %) | 5,067 | 1,041 |
+| Loamy | 8,233 | 37.6 % | 3,501 (43 %) | 5,395 | 2,838 |
+| Silty | 4,857 | 22.2 % | 1,782 (37 %) | 2,903 | 1,954 |
+| Clayey | 2,678 | 12.2 % | 1,212 (45 %) | 1,657 | 1,021 |
+| **total** | **21,876** | | **11,372** | **15,022** | **6,854** |
 
 The neighbour vote weights each class by the inverse of its count and the
 classifier uses balanced class weights, so neither favours sand for being
@@ -983,7 +1003,7 @@ density (`--bulk-density`) tightens the first row to 0.36 dex (×2.3), with
 nearest reference layers that carry a measured Ks (`swcc_texture.KS_K`).
 Until 2026-10 it came from the 30 nearest layers of any kind, and only those
 with a Ks voted. That was about 14, because about half the reference
-layers have no measured Ks (10,474 of 21,720; KSSL, with 2,530, is the
+layers have no measured Ks (10,504 of 21,876; KSSL, with 2,530, is the
 largest source without any). A search of Ks-bearing layers only, at 30, cut the median error for a
 new source from 0.77 to 0.72 dex (p = 3e-12). 15 such neighbours scored the
 same as the old lookup. So what helps is the number of votes, not their
@@ -1001,7 +1021,7 @@ are unchanged. They still come from the 30 nearest layers of any kind.
 
 An undisturbed sample takes Ks only from undisturbed neighbours. That rule
 follows soil physics, because intact soil keeps its macropores. But it
-changes little in practice, since 11,168 of the 11,246 reference layers with
+changes little in practice, since 11,294 of the 11,372 reference layers with
 a measured Ks are undisturbed. The paired error is the same either way (0.61
 against 0.61 dex for a new source, p=0.90; 0.44 against 0.44 with the source
 in the reference, p=0.19). Telling the classifier the type barely moves
@@ -1229,7 +1249,7 @@ laboratory in the reference is worth +5 points. That is what
 input: `prepare_gshp.py`, `prepare_kssl.py`, `prepare_hohenbrink.py`,
 `prepare_babaeian_zanjanrood.py`, `prepare_babaeian_az.py`,
 `prepare_armas.py`, `prepare_tong.py`, `prepare_natsoil.py`, `prepare_boorowa.py`, `prepare_nj_ssir26.py`, `prepare_andalusia.py`, `prepare_euhydi.py`, `prepare_willard.py`,
-`prepare_fujii.py`, `prepare_ksatssir.py`, `prepare_kansas.py` (an independent test set, not in the default),
+`prepare_fujii.py`, `prepare_ksatssir.py`, `prepare_kansas.py`,
 `prepare_unsoda.py`, `prepare_sdb.py`; `prepare_volcanic.py` (the volcanic and andic fields);
 `free_m.py` (an unconstrained companion fit written alongside the Mualem
 one).

@@ -49,13 +49,15 @@ import itertools
 import os
 import sys
 
+# verify_common first: it pins BLAS/OpenMP threads before numpy loads.
+from verify_common import DATA, GROUP, map_folds, n_jobs, pool
+
 import numpy as np
 import pandas as pd
 from scipy.stats import spearmanr
 from sklearn.ensemble import HistGradientBoostingClassifier, HistGradientBoostingRegressor
 
 import swcc_texture as st
-from verify_common import GROUP, map_folds
 
 H = np.arange(0.0, 150.0 + 0.1, 5.0)
 CACHE = os.path.join("figures", "cache", "predictive.csv")
@@ -144,13 +146,24 @@ def metrics(d):
     return m
 
 
+def boot_part(draws):
+    """Metrics for a run of bootstrap resamples, in a worker."""
+    return [metrics(DATA["d"].loc[ii]) for ii in draws]
+
+
 def boot(d, n=N_BOOT, seed=1):
-    """Bootstrap over sources: list of metric dicts."""
+    """Bootstrap over sources: list of metric dicts. The resamples are drawn
+    here, in the serial order of the generator, and scored on every core."""
     rng = np.random.default_rng(seed)
     srcs = d.source.unique()
     by = {s: d.index[d.source == s] for s in srcs}
-    return pd.DataFrame([metrics(d.loc[np.concatenate([by[s] for s in rng.choice(srcs, len(srcs))])])
-                         for _ in range(n)])
+    draws = [np.concatenate([by[s] for s in rng.choice(srcs, len(srcs))])
+             for _ in range(n)]
+    k = -(-n // n_jobs())
+    with pool({"d": d}) as ex:
+        parts = list(ex.map(boot_part,
+                            [draws[i:i + k] for i in range(0, n, k)]))
+    return pd.DataFrame([m for part in parts for m in part])
 
 
 def ci(b, col):

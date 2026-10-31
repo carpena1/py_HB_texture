@@ -8,8 +8,8 @@ https://soilwater.github.io/kansas-soil-props/ (repository soilwater/
 kansas-soil-props, MIT licence); A. Patrignani pointed us to it (2026-10-30).
 
 Reads data/kansas_raw/kansas_mesonet_soil_database_summary_2026.xlsx and
-writes data/kansas_reference.csv. Under test as an independent set
-(verify_external.py kansas): it is not in any reference set the tool uses.
+writes data/kansas_reference.csv. In the default reference since 2026-10-31,
+after verify_external.py kansas and verify_join_effect.py kansas.
 
 What is used, per the file's metadata tab and Parker et al. (2022):
   * 320 undisturbed cores (Eijkelkamp ring sampler) from 40 Mesonet stations,
