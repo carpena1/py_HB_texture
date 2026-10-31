@@ -12,29 +12,26 @@ applied to two vertisols: Laikipia (Kenya) and Tomejil (Andalusia, Spain).
 | `vertisols_memo.html` | its source (print to PDF with headless Chrome) |
 | `tomejil_shrinkage_vs_laikipia.png` / `.pdf` | the two soils side by side (curves, densities, how much the conversion changes θ) |
 | `make_vertisol_figure.py` | draws that figure |
-| `laikipia_shrinkage_example_WL_3LT07414.png` | the first, Laikipia-only example |
 | `donana_shrinkage_check.png` / `.pdf`, `make_donana_check.py` | the contrast: the Doñana sands go through the same conversion unchanged |
-| `Vertisol_calc.xlsx` | the memo's worked example for WL_3LT07414, step by step in a spreadsheet |
-| `test_caps.py`, `test_caps_results.csv` | texture and Ks of both soils as a new source under caps 1.4, 1.6, 1.75 and a per-sample cap; Laikipia's curves come from `prepare_willard.scaled_curve()`, the conversion this memo develops |
+| `test_caps.py`, `test_caps_results.csv` | texture and Ks of both soils as a new source under caps 1.4, 1.6, 1.75 and a per-sample cap; Laikipia's curves are the published ones, so its cap 1.6 row is the tool's own table |
 
 The conversion: `w = θ / BD`, `BD(w) = min(cap, 1/(1/2.65 + w))`, `θ = w · BD(w)`
-(normal shrinkage up to the shrinkage limit). The memo and figure use cap 1.75
-g/cm³, the median oven-dry clod density of KSSL Vertisols with clay 45–65 % and
-33 kPa density below 1.25; 1.6 (Tomejil's dry density) gives the same texture
-results (`test_caps.py`, results in `test_caps_results.csv`).
+(normal shrinkage up to the shrinkage limit). The cap differs by soil:
 
-What the tool's reference uses now:
+- **Laikipia:** 1.6 g/cm³, as in the published dataset (Willard et al. 2026,
+  HydroShare, doi:10.4211/hs.99080b48206e4b2c82e716516d463a61). The memo uses
+  the published gravimetric curves and the core's KALRO density, and its
+  converted curves equal the published volumetric series, which the tool's
+  reference holds (`prepare_willard.py`).
+- **Tomejil:** 1.75 g/cm³, the median oven-dry clod density of KSSL
+  Vertisols with clay 45–65 % and 33 kPa density below 1.25, in
+  `prepare_andalusia.py` (`shrinkage_bd`, `TOMEJIL_BD_MAX`).
 
-- **Tomejil:** this conversion with cap 1.75, in `prepare_andalusia.py`
-  (`shrinkage_bd`, `TOMEJIL_BD_MAX`).
-- **Laikipia:** since 2026-10-16, the authors' own revised curves
-  (L. Willard), converted with normal shrinkage up to 1.6 g/cm³, as the
-  Scientific Data paper publishes them (`prepare_willard.py`, `REVISED_COL`).
-  The conversion in this memo (cap 1.75 on the rescaled curve) is kept as
-  `prepare_willard.scaled_curve()`, which `test_caps.py` uses. So the memo
-  documents how the correction was developed, not the final Laikipia table.
+Caps of 1.6 and 1.75 give the same texture results for both soils
+(`test_caps.py`, results in `test_caps_results.csv`).
 
-Both datasets are now distributed (Laikipia, the project team's own data,
-since 2026-10-31; Andalusia with K. Vanderlinden's agreement), so this folder
-is public. The scripts read raw files that stay local (`data/willard_raw/`,
-`data/andalusia_raw/`); run them from the repository root.
+Both datasets are distributed (Laikipia published by the project team;
+Andalusia with K. Vanderlinden's agreement), so this folder is public. The
+scripts read data kept outside the repository: the Laikipia soils folder
+downloaded from HydroShare into `data/willard_raw/hydroshare/`, and
+`data/andalusia_raw/`. Run them from the repository root.

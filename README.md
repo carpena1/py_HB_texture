@@ -169,8 +169,9 @@ allow redistribution here. Their tables (`data/euhydi_reference.csv`,
 `prepare_boorowa.py` by those who hold the data and are not distributed. A
 fresh clone runs on the other tables (14,692 layers) and prints a note saying
 so. The Andalusian tables (Setenil, Tomejil, Lebrija, Doñana) are distributed
-with the agreement of K. Vanderlinden (IFAPA), and the Laikipia table is the
-project team's own; the raw files of both stay local.
+with the agreement of K. Vanderlinden (IFAPA), and their raw files stay
+local. The Laikipia table is built from the project team's published dataset
+(Willard et al. 2026, HydroShare), which `prepare_willard.py` reads.
 
 ## Usage
 
@@ -429,7 +430,7 @@ every other number identical.
 | Yellow River Basin, China (Tong et al. 2024) | 1,030 | 1,015 | undisturbed | committed |
 | Australia, CSIRO NatSoil: Forrest et al. (1985) and Geeves et al. (1995) cores | 224 | 105 | undisturbed | CC BY 4.0, committed |
 | EU-HYDI (Weynants et al. 2013), 21 laboratories, 16 countries | 6,797 | 2,704 | per sample | **restricted, never distributed** |
-| Laikipia, central Kenya (Willard et al., under review) | 70 | 26 | undisturbed | committed |
+| Laikipia, central Kenya (Willard et al. 2026, HydroShare) | 70 | 26 | undisturbed | CC BY 4.0, committed |
 | Setenil, Andalusia, Spain (K. Vanderlinden, IFAPA) | 44 | 44 | undisturbed | committed |
 | Tomejil vertisol, Andalusia, Spain (Vanderlinden et al. 2021) | 54 | 0 | undisturbed | committed |
 | Lebrija marsh clay, Andalusia, Spain (K. Vanderlinden, IFAPA) | 7 | 0 | undisturbed | committed |
@@ -509,30 +510,29 @@ different, and each needed a correction before its curves were comparable:
   but is used as undisturbed: predicted from the rest of the reference before
   the merge, it came out at the right level (`verify_external.py`).
 - **Laikipia** clays (66 of 70 samples) on the northern slopes of Mount Kenya
-  were measured on a sandbox to 10 kPa and pressure plates beyond. The
-  reference takes the authors' revised curves (L. Willard, 2026-10-16, as
-  the Scientific Data paper publishes them): water from the laboratory's wet
-  masses, made volumetric with a density that follows the water content by
-  normal shrinkage up to 1.6 g/cm³, since these are vertic clays (see
-  *Tomejil* below for the model). The 16 samples the authors flag for
-  dispersion, whose hydrometer clay is underestimated, are left out. The
-  bulk-density column is the density at 33 kPa on that shrinkage curve
-  (median 1.47; the wet core density, 1.08, is kept as `bd_core`). As a new
-  source the tool reads 93 % of the samples to the exact class and 98.5 % of
-  the clays as clay, with 46 % clay predicted against 54 % measured; always
-  answering "clay" scores 94 %, so the set mainly shows that the curves read
-  as clay. With depth and bulk density 89 % (four clays read as loam; n.s.,
-  p=0.38). On the same 70 samples the earlier conversions read 76 % (one
-  density per sample) and 89 % (shrinkage capped at 1.75 on a rescaled
-  curve), and the authors' alternative column `wet_mass_shrink_group95` 47 %.
-  Ks was measured only in the field, in the dry season, when these clays
-  were cracked; the Saturo dual-head infiltrometer value (26 samples, median
-  14 cm/h) is the set's Ks, and the modified Philip–Dunne permeameter (median
-  53 cm/h, dominated by cracks) and mini-disk (3.0 cm/h) values stay in the
-  table outside the reference. As a new source the kNN Ks is low (median
-  1.0 cm/h, within 10× for 54 %), while the capillary-bundle estimate is
-  within 10× for 92 % (median ratio 0.35); with the set's own sites in the
-  reference the kNN reaches ×3.0, 81 % within 10×.
+  come from the published dataset of Willard et al. (2026, HydroShare). The
+  reference takes its modeled volumetric curves, 13 points from pF 0 to 4.2.
+  The authors measured the curves as gravimetric water and made them
+  volumetric with a density that follows the water content: normal shrinkage
+  from the core's KALRO density, capped at 1.6 g/cm³, since these are vertic
+  clays (see *Tomejil* below, and `Vertisol_shrinkage/`). Two caveats from the
+  dataset stay with the curves: the wet end of 18 samples is short of
+  saturation, and pF 2.85–4.2 were measured on repacked soil. The 16 samples
+  the authors flag for possibly incomplete dispersion, whose clay may be
+  underestimated, are left out. The bulk-density column is the modeled
+  density at 33 kPa (median 1.46; the core density, 1.07, is kept as
+  `bd_core`). As a new source the tool reads 94 % of the samples to the exact
+  class, with or without depth and bulk density, and every clay as clay; it
+  predicts 46 % clay against 54 % measured. Always answering "clay" also
+  scores 94 %, so the set mainly shows that the curves read as clay; with one
+  density instead of the shrinking one, only 54 % do. Ks was measured only in
+  the field, in the dry season, when these clays were cracked. The SATURO
+  dual-head infiltrometer (26 samples, median 14 cm/h) is the set's Ks. The
+  modified Philip–Dunne permeameter (median 52 cm/h, dominated by cracks) and
+  the mini-disk infiltrometer (3.5 cm/h) stay in the table, outside the
+  reference. As a new source the kNN Ks is low (median 0.85 cm/h, within 10×
+  for 54 %), while the capillary-bundle estimate is within 10× for 92 %. With
+  the set's own sites in the reference the kNN reaches ×3.0 (81 % within 10×).
 - **Australia** (CSIRO NatSoil, `prepare_natsoil.py`): GSHP's 768
   Australian intact-core layers are rebuilt from the CSIRO National Soil Site
   Database (public API, CC BY 4.0), because GSHP gives most of them no
@@ -612,7 +612,7 @@ default reference: 18,551 undisturbed, 1,581 disturbed, 1,221 unknown. Of
 the 11,061 layers with a measured Ks, 10,995 are undisturbed and only 45
 disturbed.
 
-**Coverage.** 20,897 layers carry coordinates (`figures/fig2_coverage_map.png`).
+**Coverage.** 20,893 layers carry coordinates (`figures/fig2_coverage_map.png`).
 North America holds 9,256, Europe 7,862 (38 %), Asia 2,653 (1,030 of them in
 the Yellow River Basin), South America 639, Africa 742 (with the Canary
 Islands) and Australasia 296; Florida alone supplies 27 %. Southern Europe and the Balkans remain thin.
@@ -1314,9 +1314,10 @@ SVGs from it, so edit the page and rerun the script; and
 - Weynants, M. et al. (2013). European HYdropedological Data Inventory
   (EU-HYDI). EUR 26053 EN, Publications Office of the European Union.
   doi:10.2788/5936. Restricted to consortium members.
-- Willard, L.L., Muñoz-Carpena, R., Venort, T., Gitonga, J., Maltais-Landry,
-  G., Caylor, K.K. and Palm, C.A. A high-resolution comprehensive database to
-  evaluate agricultural impacts at edge of savanna in Kenya. Under review,
+- Willard, L., Muñoz-Carpena, R., Venort, T., Gitonga, J., Maltais-Landry,
+  G., Caylor, K. and Palm, C. (2026). A multi-domain field dataset to
+  evaluate agricultural impacts at the edge of a Kenyan savanna. HydroShare,
+  doi:10.4211/hs.99080b48206e4b2c82e716516d463a61. Data descriptor in review,
   *Scientific Data*.
 
 ## License
@@ -1340,6 +1341,6 @@ curves are unpublished. When they are used, cite Vanderlinden et al. (2017,
 2021) for Tomejil and acknowledge projects RTA2006-00058-C03-02,
 AGL2009-12936-C03-03, AGL2012-40128-C03-03 and AGL2015-65036-C3-3-R for the
 rest. The Laikipia table (`data/willard_reference.csv`) holds the project
-team's own measurements; cite Willard et al. (under review). Its raw files,
-which carry exact site locations, are not distributed. EU-HYDI data and
+team's own measurements, published under CC BY 4.0; cite Willard et al.
+(2026), doi:10.4211/hs.99080b48206e4b2c82e716516d463a61. EU-HYDI data and
 anything derived from it at sample level are not part of this repository.

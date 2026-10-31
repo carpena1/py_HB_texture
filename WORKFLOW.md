@@ -60,9 +60,9 @@ from 21 laboratories in 16 countries and takes Europe from 1,261 layers to
 
 *Figure 2.* Equal Earth projection, so circle areas compare across latitudes.
 Samples are binned into 2° cells, with circle area proportional to the number
-of layers. Teal is the public reference (14,361 of its 14,692 layers carry
+of layers. Teal is the public reference (14,357 of its 14,692 layers carry
 coordinates; UNSODA and sDB publish none, the 21 Arizona soils have none, and
-26 of the 70 Laikipia soils, from large farms, have none); orange-red is
+30 of the 70 Laikipia soils, from large farms, have none); orange-red is
 EU-HYDI (6,479 of 6,797 layers georeferenced) and the 57 CSIRO Boorowa cores.
 The 122 Andalusian curves (Setenil, Tomejil, Lebrija and Doñana) and the
 Laikipia soils are part of the public reference. EU-HYDI is
@@ -78,9 +78,9 @@ Natural Earth 110 m, public domain.
 | Europe | 1,383 | 7,862 | +6,479 |
 | Asia | 2,370 | 2,653 | +283 |
 | South America | 639 | 639 | +0 |
-| Africa | 781 | 793 | +12 |
+| Africa | 777 | 789 | +12 |
 | Australasia | 239 | 296 | +57 |
-| **Georeferenced** | 14,361 | 20,897 | +6,536 |
+| **Georeferenced** | 14,357 | 20,893 | +6,536 |
 
 Europe goes from 9.6 % of the georeferenced reference to 37.6 %, and the
 Nordic gap is largely closed: in Europe above 58°N the reference now holds
@@ -249,6 +249,6 @@ figures are in the README section *Is it predictive?* (`verify_predictive.py`,
 Reference counts as of the merged default, October 2026. Sources: GSHP (Gupta
 et al. 2022), NCSS/KSSL (USDA-NRCS), Hohenbrink et al. (2023), EU-HYDI
 (Weynants et al. 2013), Babaeian et al. (2015; Arizona, shared data),
-Armas-Espinel (2013), Tong et al. (2024), Willard et al. (under review),
+Armas-Espinel (2013), Tong et al. (2024), Willard et al. (2026, HydroShare),
 Vanderlinden et al. (2017, 2021), UNSODA 2.0, sDB (Vereecken et al. 2017).
 Code and data: github.com/carpena1/py_HB_texture

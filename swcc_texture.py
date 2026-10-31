@@ -71,9 +71,10 @@ REFERENCE_SETS = {
     "kssl": ["kssl_reference.csv"],
     "hohenbrink": ["hohenbrink_reference.csv"],
     "euhydi": ["euhydi_reference.csv"],
-    # Laikipia, Kenya (Willard et al., under review; prepare_willard.py), the
-    # project's own data, distributed since 2026-10-31; in the default since
-    # 2026-09 after verify_external.py.
+    # Laikipia, Kenya (Willard et al. 2026, HydroShare,
+    # doi:10.4211/hs.99080b48206e4b2c82e716516d463a61; prepare_willard.py),
+    # the project's own published data; in the default since 2026-09 after
+    # verify_external.py.
     "willard": ["willard_reference.csv"],
     # Zanjanrood, Iran (Babaeian et al. 2015; prepare_babaeian_zanjanrood.py);
     # in the default since 2026-09 after verify_external.py.

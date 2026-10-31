@@ -82,12 +82,12 @@
                 <!-- Laikipia -->
         <rect x="16" y="518" width="184" height="78" rx="3" fill="none" stroke="#141A1D" opacity=".85"/>
         <text x="28" y="540" font-size="13" font-weight="600" fill="#141A1D">Laikipia (Kenya)</text>
-        <text x="28" y="558" font-size="11" fill="#5C6A70">Willard et al., under review</text>
+        <text x="28" y="558" font-size="11" fill="#5C6A70">Willard et al. 2026, HydroShare</text>
         <text x="28" y="574" font-size="11" fill="#5C6A70">70 cores, 35 fields</text>
         <text x="28" y="588" font-size="11" fill="#141A1D">the project&#8217;s own data</text>
         <rect x="256" y="518" width="300" height="78" rx="3" fill="#EAEEEC" stroke="#141A1D" opacity=".85"/>
         <text x="268" y="538" font-size="11.5" font-family="IBM Plex Mono, monospace" fill="#0E6E73">prepare_willard.py</text>
-        <text x="268" y="556" font-size="11" fill="#141A1D">authors&#8217; revised curves (L. Willard)</text>
+        <text x="268" y="556" font-size="11" fill="#141A1D">published curves (HydroShare)</text>
         <text x="268" y="573" font-size="11" fill="#0E6E73">density follows shrinkage, cap 1.6</text>
         <text x="268" y="588" font-size="11" fill="#5C6A70">16 dispersed samples left out</text>
 

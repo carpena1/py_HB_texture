@@ -41,7 +41,7 @@
 <body>
 <main>
 <h1>Converting vertisol retention curves with a shrinking bulk density: two examples</h1>
-<p class="sub">Laikipia (Kenya) and Tomejil (Andalusia, Spain) · py_HB_texture · R. Muñoz-Carpena, 12 October 2026</p>
+<p class="sub">Laikipia (Kenya) and Tomejil (Andalusia, Spain) · py_HB_texture · R. Muñoz-Carpena, 31 October 2026</p>
 
 <h2>Why</h2>
 <p>Retention curves are often measured as gravimetric water and made volumetric with one bulk density per
@@ -55,10 +55,10 @@ predicts from them.</p>
 <table>
 <thead><tr><th>Soil</th><th>Data</th><th>Clay</th><th>One density used</th><th>Worked example</th></tr></thead>
 <tbody>
-<tr><td>Laikipia, Kenya (vertic clays; Willard et al., under review)</td>
-<td>86 cores, volumetric as released, converted with each sample's own density</td>
-<td class="n">median 52 %</td><td>the sample's own (median 1.05 g/cm³)</td>
-<td>WL_3LT07414: clay 58 %, sand 28 %, silt 14 %, density 1.055 g/cm³</td></tr>
+<tr><td>Laikipia, Kenya (vertic clays; Willard et al. 2026, HydroShare)</td>
+<td>70 cores, gravimetric as published (the 16 samples flagged for incomplete dispersion left out)</td>
+<td class="n">median 55 %</td><td>the core's KALRO density (median 1.07 g/cm³)</td>
+<td>WL_3LT07414: clay 58 %, sand 28 %, silt 14 %, density 1.07 g/cm³</td></tr>
 <tr><td>Tomejil, Carmona, Spain (Chromic Haploxerert; Vanderlinden et al. 2017, 2021)</td>
 <td>54 rings, 0–5 cm, gravimetric; no density per ring</td>
 <td class="n">56 %</td><td>the tillage treatment's mean: 1.085 (conventional) or 1.125 g/cm³ (direct drill; Ordóñez Fernández et al. 2007)</td>
@@ -68,17 +68,20 @@ predicts from them.</p>
 
 <h2>Steps, at each measured suction</h2>
 <ol>
-<li>Gravimetric water: <code>w = θ / BD₁</code>, with BD₁ the one density above (Tomejil's curves are already gravimetric, so this step only applies to Laikipia). The standard mass–volume relation, with water density 1 g/cm³ (Hillel 1998).</li>
+<li>Gravimetric water: <code>w = θ / BD₁</code>, with BD₁ the one density above. Both soils' curves are already gravimetric as published, so w is taken directly; the standard mass–volume relation, with water density 1 g/cm³ (Hillel 1998), links it to the one-density curve <code>θ₁ = w · BD₁</code>.</li>
 <li>Specific volume under normal shrinkage, where the soil loses volume equal to the water it loses:
 <code>v = 1/ρs + w</code>, with ρs = 2.65 g/cm³, the conventional mineral particle density (Blake and Hartge 1986)
 (cm³ of soil per g of solids). This is the saturation line of the shrinkage curve, the "normal" phase of Haines
 (1923) and Stirk (1954), in the specific-volume form of McGarry and Malafant (1987); Bronswijk (1988) used it to
 model swelling clays.</li>
-<li>Bulk density: <code>BD = min(1.75, 1/v)</code>. The cap stands for the density at which shrinkage stops (here
-w = 1/1.75 − 1/2.65 = 0.194). 1.75 g/cm³ is the median oven-dry clod density of US Vertisols like these two (KSSL;
+<li>Bulk density: <code>BD = min(cap, 1/v)</code>. The cap stands for the density at which shrinkage stops. For
+Laikipia it is 1.6 g/cm³ (shrinkage limit w = 1/1.6 − 1/2.65 = 0.248), the value of the published volumetric series
+(Willard et al. 2026), which is also the dry-end density reported for the Tomejil vertisol (Vanderlinden et al. 2021).
+For Tomejil it is 1.75 g/cm³ (w = 0.194), the median oven-dry clod density of US Vertisols like these two (KSSL;
 clay 45–65 %, clod density at 33 kPa below 1.25 g/cm³; 1.54–1.90 for the middle 80 %; Soil Survey Staff 2014a and
-the KSSL database). The dry-end density reported for the Tomejil vertisol, 1.6 g/cm³ (Vanderlinden et al. 2021),
-is a more conservative alternative and gives the same texture results (see <em>How general is the cap?</em> below). This step is a simplification of ours: measured shrinkage
+the KSSL database). Both caps give the same texture results (see <em>How general is the cap?</em> below). Where
+the soil is wetter than the core was dense, 1/v is below BD₁: the core had swollen, and the conversion lowers θ.
+This step is a simplification: measured shrinkage
 curves have structural, normal, residual and zero phases (Mitchell 1992; Groenevelt and Grant 2001; Peng and Horn
 2005; Cornelis et al. 2006), and in the residual phase air enters and shrinkage slows. Here normal shrinkage runs
 up to the cap and then stops, with no residual phase, and the cap is not measured on each soil.</li>
@@ -87,25 +90,28 @@ The one-density curve is <code>θ₁ = w · BD₁</code>.</li>
 </ol>
 
 <div class="keep">
-<h3>Laikipia, sample WL_3LT07414 (BD₁ = 1.055 g/cm³): never reaches the cap (densest point 1.57 g/cm³)</h3>
+<h3>Laikipia, sample WL_3LT07414 (BD₁ = 1.07 g/cm³): swollen at the wet end, at the 1.6 cap by 1500 kPa</h3>
 <table>
 <thead><tr><th class="n">h (kPa)</th><th class="n">pF</th><th class="n">θ one density</th><th class="n">w (g/g)</th><th class="n">v (cm³/g)</th><th class="n">BD(w) (g/cm³)</th><th class="n">θ new</th><th class="n">new / one</th></tr></thead>
 <tbody>
-<tr><td class="n">0.00</td><td class="n">–</td><td class="n">0.572</td><td class="n">0.542</td><td class="n">0.919</td><td class="n">1.088</td><td class="n">0.590</td><td class="n">1.03</td></tr>
-<tr><td class="n">0.98</td><td class="n">1.00</td><td class="n">0.535</td><td class="n">0.507</td><td class="n">0.884</td><td class="n">1.131</td><td class="n">0.573</td><td class="n">1.07</td></tr>
-<tr><td class="n">5.51</td><td class="n">1.75</td><td class="n">0.518</td><td class="n">0.491</td><td class="n">0.868</td><td class="n">1.152</td><td class="n">0.565</td><td class="n">1.09</td></tr>
-<tr><td class="n">7.79</td><td class="n">1.90</td><td class="n">0.486</td><td class="n">0.461</td><td class="n">0.838</td><td class="n">1.193</td><td class="n">0.550</td><td class="n">1.13</td></tr>
-<tr><td class="n">9.81</td><td class="n">2.00</td><td class="n">0.457</td><td class="n">0.433</td><td class="n">0.810</td><td class="n">1.234</td><td class="n">0.534</td><td class="n">1.17</td></tr>
-<tr><td class="n">13.85</td><td class="n">2.15</td><td class="n">0.446</td><td class="n">0.423</td><td class="n">0.800</td><td class="n">1.250</td><td class="n">0.528</td><td class="n">1.18</td></tr>
-<tr><td class="n">19.57</td><td class="n">2.30</td><td class="n">0.414</td><td class="n">0.392</td><td class="n">0.769</td><td class="n">1.300</td><td class="n">0.510</td><td class="n">1.23</td></tr>
-<tr><td class="n">21.95</td><td class="n">2.35</td><td class="n">0.367</td><td class="n">0.348</td><td class="n">0.725</td><td class="n">1.379</td><td class="n">0.480</td><td class="n">1.31</td></tr>
-<tr><td class="n">31.01</td><td class="n">2.50</td><td class="n">0.314</td><td class="n">0.297</td><td class="n">0.675</td><td class="n">1.482</td><td class="n">0.441</td><td class="n">1.40</td></tr>
-<tr><td class="n">49.15</td><td class="n">2.70</td><td class="n">0.307</td><td class="n">0.291</td><td class="n">0.669</td><td class="n">1.496</td><td class="n">0.436</td><td class="n">1.42</td></tr>
-<tr><td class="n">69.43</td><td class="n">2.85</td><td class="n">0.303</td><td class="n">0.288</td><td class="n">0.665</td><td class="n">1.504</td><td class="n">0.433</td><td class="n">1.43</td></tr>
-<tr><td class="n">491.50</td><td class="n">3.70</td><td class="n">0.296</td><td class="n">0.281</td><td class="n">0.658</td><td class="n">1.519</td><td class="n">0.427</td><td class="n">1.44</td></tr>
-<tr><td class="n">1554.25</td><td class="n">4.20</td><td class="n">0.274</td><td class="n">0.260</td><td class="n">0.637</td><td class="n">1.570</td><td class="n">0.407</td><td class="n">1.49</td></tr>
+<tr><td class="n">0.00</td><td class="n">–</td><td class="n">0.703</td><td class="n">0.657</td><td class="n">1.034</td><td class="n">0.967</td><td class="n">0.635</td><td class="n">0.90</td></tr>
+<tr><td class="n">0.98</td><td class="n">1.00</td><td class="n">0.630</td><td class="n">0.589</td><td class="n">0.966</td><td class="n">1.035</td><td class="n">0.610</td><td class="n">0.97</td></tr>
+<tr><td class="n">5.51</td><td class="n">1.75</td><td class="n">0.600</td><td class="n">0.560</td><td class="n">0.938</td><td class="n">1.066</td><td class="n">0.598</td><td class="n">1.00</td></tr>
+<tr><td class="n">7.79</td><td class="n">1.90</td><td class="n">0.544</td><td class="n">0.509</td><td class="n">0.886</td><td class="n">1.128</td><td class="n">0.574</td><td class="n">1.05</td></tr>
+<tr><td class="n">9.81</td><td class="n">2.00</td><td class="n">0.496</td><td class="n">0.464</td><td class="n">0.841</td><td class="n">1.189</td><td class="n">0.551</td><td class="n">1.11</td></tr>
+<tr><td class="n">13.85</td><td class="n">2.15</td><td class="n">0.479</td><td class="n">0.448</td><td class="n">0.825</td><td class="n">1.212</td><td class="n">0.543</td><td class="n">1.13</td></tr>
+<tr><td class="n">19.57</td><td class="n">2.30</td><td class="n">0.430</td><td class="n">0.402</td><td class="n">0.779</td><td class="n">1.283</td><td class="n">0.516</td><td class="n">1.20</td></tr>
+<tr><td class="n">21.95</td><td class="n">2.35</td><td class="n">0.365</td><td class="n">0.341</td><td class="n">0.719</td><td class="n">1.391</td><td class="n">0.475</td><td class="n">1.30</td></tr>
+<tr><td class="n">31.01</td><td class="n">2.50</td><td class="n">0.297</td><td class="n">0.278</td><td class="n">0.655</td><td class="n">1.526</td><td class="n">0.424</td><td class="n">1.43</td></tr>
+<tr><td class="n">49.15</td><td class="n">2.70</td><td class="n">0.290</td><td class="n">0.271</td><td class="n">0.648</td><td class="n">1.543</td><td class="n">0.418</td><td class="n">1.44</td></tr>
+<tr><td class="n">69.43</td><td class="n">2.85</td><td class="n">0.285</td><td class="n">0.266</td><td class="n">0.644</td><td class="n">1.553</td><td class="n">0.414</td><td class="n">1.45</td></tr>
+<tr><td class="n">491.50</td><td class="n">3.70</td><td class="n">0.277</td><td class="n">0.259</td><td class="n">0.636</td><td class="n">1.573</td><td class="n">0.407</td><td class="n">1.47</td></tr>
+<tr><td class="n">1554.25</td><td class="n">4.20</td><td class="n">0.251</td><td class="n">0.234</td><td class="n">0.612</td><td class="n">1.600</td><td class="n">0.375</td><td class="n">1.50</td></tr>
 </tbody>
 </table>
+<p class="note">The values equal the published volumetric series for this core. At saturation θ₁ (0.703) is above
+the porosity of the core's own density (0.60): the core had swollen, so the shrinking density there (0.97 g/cm³)
+is below BD₁ and θ falls; from pF 1.75 on, θ rises.</p>
 </div>
 
 <div class="keep">
@@ -137,43 +143,43 @@ up to 1500 kPa.</p>
 <figure>
 <img src="tomejil_shrinkage_vs_laikipia.png" alt="Two vertisols converted with a shrinking bulk density">
 <figcaption>Laikipia (top) and Tomejil (bottom): the one-density and shrinking-density curves (a, d) and the density each uses
-(b, e), cap 1.75 g/cm³; (c) how much the conversion changes θ across all 86 Laikipia samples and all 54 Tomejil rings.</figcaption>
+(b, e), cap 1.6 g/cm³ for Laikipia and 1.75 for Tomejil; (c) how much the conversion changes θ across all 70 Laikipia samples
+and all 54 Tomejil rings.</figcaption>
 </figure>
 
 <h2>How the two compare</h2>
 <table class="two">
 <colgroup><col style="width:44%"><col style="width:28%"><col style="width:28%"></colgroup>
-<thead><tr><th></th><th class="n">Laikipia (86 samples)</th><th class="n">Tomejil (54 rings)</th></tr></thead>
+<thead><tr><th></th><th class="n">Laikipia (70 samples, cap 1.6)</th><th class="n">Tomejil (54 rings, cap 1.75)</th></tr></thead>
 <tbody>
-<tr><td>One density</td><td class="n">the sample's own, median 1.05 g/cm³</td><td class="n">treatment mean, 1.085 / 1.125 g/cm³</td></tr>
-<tr><td>Shrinking density at the wettest point (median)</td><td class="n">1.09 g/cm³</td><td class="n">1.16 g/cm³</td></tr>
-<tr><td>Shrinking density at 1500 kPa (median)</td><td class="n">1.54 g/cm³</td><td class="n">1.75 g/cm³</td></tr>
-<tr><td>Samples at the 1.75 cap by 1500 kPa</td><td class="n">5 of 86</td><td class="n">36 of 54</td></tr>
-<tr><td>θ new / θ one density, wettest point</td><td class="n">1.03</td><td class="n">1.05 [1.01–1.08]</td></tr>
-<tr><td>… at pF 2 (98 cm)</td><td class="n">1.22 [1.17–1.27]</td><td class="n">1.25 [1.20–1.29]</td></tr>
-<tr><td>… at pF 2.5 (33 kPa)</td><td class="n">1.33 [1.28–1.38]</td><td class="n">1.32 [1.27–1.35]</td></tr>
-<tr><td>… at pF 3.7 (490 kPa)</td><td class="n">1.43 [1.38–1.49]</td><td class="n">1.50 [1.46–1.54]</td></tr>
-<tr><td>… at pF 4.2 (1500 kPa)</td><td class="n">1.48 [1.41–1.55]</td><td class="n">1.58 [1.56–1.61]</td></tr>
+<tr><td>One density</td><td class="n">the core's KALRO density, median 1.07 g/cm³</td><td class="n">treatment mean, 1.085 / 1.125 g/cm³</td></tr>
+<tr><td>Shrinking density at the wettest point (median)</td><td class="n">1.01 g/cm³</td><td class="n">1.16 g/cm³</td></tr>
+<tr><td>Shrinking density at 1500 kPa (median)</td><td class="n">1.60 g/cm³</td><td class="n">1.75 g/cm³</td></tr>
+<tr><td>Samples at the cap by 1500 kPa</td><td class="n">68 of 68 with a 1500 kPa point</td><td class="n">36 of 54</td></tr>
+<tr><td>θ new / θ one density, wettest point</td><td class="n">0.99 [0.94–1.01]</td><td class="n">1.05 [1.01–1.08]</td></tr>
+<tr><td>… at pF 2 (98 cm)</td><td class="n">1.26 [1.17–1.34]</td><td class="n">1.25 [1.20–1.29]</td></tr>
+<tr><td>… at pF 2.5 (33 kPa)</td><td class="n">1.39 [1.26–1.50]</td><td class="n">1.32 [1.27–1.35]</td></tr>
+<tr><td>… at pF 3.7 (490 kPa)</td><td class="n">1.48 [1.35–1.60]</td><td class="n">1.50 [1.46–1.54]</td></tr>
+<tr><td>… at pF 4.2 (1500 kPa)</td><td class="n">1.50 [1.37–1.62]</td><td class="n">1.58 [1.56–1.61]</td></tr>
 <tr><td>Texture as a new source, one density: clays read as clay; predicted vs measured clay</td>
-<td class="n">77.0 %; 43.0 % vs 51.5 %</td><td class="n">81.5 %; 39.8 % vs 55.6 %</td></tr>
-<tr><td>… shrinking density (cap 1.75)</td><td class="n">93.2 %; 51.3 % vs 51.5 %</td><td class="n">100 %; 53.2 % vs 55.6 %</td></tr>
+<td class="n">57.6 %; 40.0 % vs 54.1 %</td><td class="n">85.2 %; 39.9 % vs 55.6 %</td></tr>
+<tr><td>… shrinking density</td><td class="n">100 %; 46.1 % vs 54.1 %</td><td class="n">100 %; 53.4 % vs 55.6 %</td></tr>
 <tr><td>Water left at 330 cm, as a share of saturation (reference clays: 82 %), one → shrinking density</td>
-<td class="n" colspan="2" style="text-align:center">64–65 % → 80–81 % in both soils</td></tr>
-<tr><td>Ks, kNN median, one → shrinking density</td><td class="n">3.1 → 0.093 cm/h</td><td class="n">2.3 → 0.080 cm/h</td></tr>
-<tr><td>Ks, physical estimate, one → shrinking density</td><td class="n">5.5 → 1.34 cm/h</td><td class="n">6.3 → 1.72 cm/h</td></tr>
-<tr><td>kNN and physical Ks within a factor of 10 of each other, one → shrinking density</td><td class="n">98 % → 43 %</td><td class="n">91 % → 6 %</td></tr>
-<tr><td>Within a factor of 10 of the field permeameter (Laikipia, median 24.8 cm/h), kNN; physical, one → shrinking density</td><td class="n">47 % → 13 %; 51 % → 45 %</td><td class="n">not measured</td></tr>
+<td class="n">50 % → 73 %</td><td class="n">65 % → 81 %</td></tr>
+<tr><td>Ks, kNN median, one → shrinking density</td><td class="n">4.8 → 0.85 cm/h</td><td class="n">2.3 → 0.093 cm/h</td></tr>
+<tr><td>Ks, physical estimate, one → shrinking density</td><td class="n">14.4 → 3.19 cm/h</td><td class="n">6.3 → 1.72 cm/h</td></tr>
+<tr><td>kNN and physical Ks within a factor of 10 of each other, one → shrinking density</td><td class="n">97 % → 79 %</td><td class="n">93 % → 17 %</td></tr>
+<tr><td>Within a factor of 10 of the SATURO infiltrometer (Laikipia, 26 samples, median 14.0 cm/h), kNN; physical, one → shrinking density</td><td class="n">92 % → 54 %; 96 % → 92 %</td><td class="n">not measured</td></tr>
 </tbody>
 </table>
 <p class="note">Medians, with the 25–75 % range in brackets. Laikipia's wettest point is saturation (h = 0), Tomejil's
 h = 1 cm. Texture and Ks: each soil predicted as a new source (its own table removed from the reference) with
-the current tool (<code>test_caps.py</code>). The shrinking-density curves are the ones the tool's reference now holds,
-so these rows match the tool's own validation of both soils.</p>
+the current tool (<code>test_caps.py</code>). The shrinking-density curves are the ones the tool's reference holds
+(for Laikipia, the published volumetric series), so these rows match the tool's own validation of both soils.</p>
 
 <h2>How general is the cap?</h2>
-<p>An earlier version of this note used 1.6 g/cm³, the dry-end density of one Spanish vertisol, which may be
-contested for Laikipia. The cap used here, 1.75 g/cm³, rests on a general basis in
-the US National Cooperative Soil Survey Soil Characterization Database (KSSL): every natural clod is weighed and
+<p>The two caps used here, 1.6 g/cm³ for Laikipia (as published) and 1.75 g/cm³ for Tomejil, can be checked
+against a general source, the US National Cooperative Soil Survey Soil Characterization Database (KSSL): every natural clod is weighed and
 measured at 33 kPa and again oven-dry (Saran-coated clod method; Grossman et al. 1968; Soil Survey Staff 2014a), the
 measurement behind the coefficient of linear extensibility (COLE) used to recognize Vertisols (Soil Survey Staff
 2014b). In the model of step 3, the oven-dry clod density is the cap: the density a clod reaches once it has stopped
@@ -193,54 +199,54 @@ shrinking. Drawn from the database's horizons with both densities:</p>
 <p class="note">Densities in g/cm³; COLE computed as (oven-dry / 33 kPa density)<sup>1/3</sup> − 1. Of the
 Vertisols with clay 45–65 %, 92 % dry denser than 1.6 g/cm³ and 80 % denser than 1.7. Across them the oven-dry
 density rises with the 33 kPa density (oven-dry ≈ 0.615 × BD₃₃ + 1.011, r = 0.50), which gives a per-sample
-cap: 1.66 for WL_3LT07414 (BD₁ 1.055), 1.70 and 1.68 for the Tomejil treatments.</p>
-<p>1.6 and 1.75 bracket the truth. The oven-dry density is an upper bound for where normal shrinkage ends, since
+cap: 1.67 for WL_3LT07414 (BD₁ 1.07), 1.70 and 1.68 for the Tomejil treatments.</p>
+<p>1.6 and 1.75 bracket the likely value. The oven-dry density is an upper bound for where normal shrinkage ends, since
 real clods keep shrinking slowly through the residual phase before they are fully dry (the long normal phase of
 Texas Vertisols in Yule and Ritchie 1980 is one measured example); the model of step 3 has no residual phase, so a
 1.75 cap would push the dry end slightly too high, and 1.6 errs the other way. The texture result does not depend
 on which is used (each soil predicted as a new source, its own table removed from the reference;
 <code>test_caps.py</code>):</p>
 <table>
-<thead><tr><th>Shrinkage cap</th><th class="n">Laikipia: exact class</th><th class="n">Laikipia: clays read as clay (n = 74)</th>
-<th class="n">Laikipia: predicted clay (51.5 %)</th><th class="n">Tomejil: rings read as clay (n = 54)</th>
+<thead><tr><th>Shrinkage cap</th><th class="n">Laikipia: exact class</th><th class="n">Laikipia: clays read as clay (n = 66)</th>
+<th class="n">Laikipia: predicted clay (54.1 %)</th><th class="n">Tomejil: rings read as clay (n = 54)</th>
 <th class="n">Tomejil: predicted clay (55.6 %)</th></tr></thead>
 <tbody>
-<tr><td>none (one density)</td><td class="n">66.3 %</td><td class="n">77.0 %</td><td class="n">43.0 %</td><td class="n">81.5 %</td><td class="n">39.8 %</td></tr>
-<tr><td>1.4</td><td class="n">81.4 %</td><td class="n">94.6 %</td><td class="n">47.7 %</td><td class="n">92.6 %</td><td class="n">49.2 %</td></tr>
-<tr><td>1.6 (Tomejil's dry density)</td><td class="n">81.4 %</td><td class="n">94.6 %</td><td class="n">51.1 %</td><td class="n">100 %</td><td class="n">53.2 %</td></tr>
-<tr><td>1.75 (KSSL median; the examples above)</td><td class="n">80.2 %</td><td class="n">93.2 %</td><td class="n">51.3 %</td><td class="n">100 %</td><td class="n">53.2 %</td></tr>
-<tr><td>per sample (0.615 × BD₁ + 1.011)</td><td class="n">80.2 %</td><td class="n">93.2 %</td><td class="n">51.3 %</td><td class="n">100 %</td><td class="n">53.4 %</td></tr>
+<tr><td>none (one density)</td><td class="n">54.3 %</td><td class="n">57.6 %</td><td class="n">40.0 %</td><td class="n">85.2 %</td><td class="n">39.9 %</td></tr>
+<tr><td>1.4</td><td class="n">57.1 %</td><td class="n">60.6 %</td><td class="n">40.0 %</td><td class="n">96.3 %</td><td class="n">49.2 %</td></tr>
+<tr><td>1.6 (Laikipia, as published; Tomejil's dry density)</td><td class="n">94.3 %</td><td class="n">100 %</td><td class="n">46.1 %</td><td class="n">100 %</td><td class="n">53.4 %</td></tr>
+<tr><td>1.75 (KSSL median; Tomejil above)</td><td class="n">94.3 %</td><td class="n">100 %</td><td class="n">47.3 %</td><td class="n">100 %</td><td class="n">53.4 %</td></tr>
+<tr><td>per sample (0.615 × BD₁ + 1.011)</td><td class="n">92.9 %</td><td class="n">98.5 %</td><td class="n">46.8 %</td><td class="n">100 %</td><td class="n">53.6 %</td></tr>
 </tbody>
 </table>
-<p class="note">Raising the cap from 1.6 to 1.75 changes only the points drier than about pF 3.7, where the curves are
-already flat: single samples' predicted clay moves by up to 6.3 points (Laikipia) and 3.3 (Tomejil), but the means
-move by 0.13 point or less, one Laikipia sample changes class and every Tomejil ring keeps its class. A cap of 1.4, below the shrinkage limit of most
-vertisols, already loses part of the gain.</p>
+<p class="note">Raising the cap from 1.6 to 1.75 changes only the dry end, where the curves are already flat:
+single samples' predicted clay moves by up to 8.4 points (Laikipia) and 3.9 (Tomejil), the means by 1.2 points or
+less, one Laikipia sample changes class and every Tomejil ring keeps its class. A cap of 1.4, below the shrinkage
+limit of most vertisols, loses most of the gain for Laikipia (57 % exact) and part of it for Tomejil.</p>
 
 <h2>What the two examples show</h2>
 <ul>
-<li><strong>The correction behaves the same in both soils.</strong> Both start near 1.1–1.2 g/cm³ when saturated, so
-the wet end rises only 3–5 %; through the pressure-plate range θ rises by about a quarter at pF 2 and a third at
-33 kPa, and by about half at 1500 kPa (48 % for Laikipia, 58 % for Tomejil, median).</li>
-<li><strong>They differ at the dry end.</strong> Tomejil's curves dry further (w = 0.18 at 1500 kPa for DD30), past the
-shrinkage limit (w = 0.194), so 36 of its 54 rings reach the 1.75 cap by 1500 kPa and their dry-end ratio is the cap
-over the treatment density (1.75 / 1.125 = 1.56, 1.75 / 1.085 = 1.61). Laikipia's driest points (w ≈ 0.26 for
-WL_3LT07414) are still above the limit, and only 5 of 86 samples reach the cap.</li>
-<li><strong>Texture improves in both, by the same amount.</strong> With one density both soils read too coarse and
-seemed to lose water steeply just below saturation (64–65 % of their saturated water left at 330 cm, against
-82 % for the reference clays); with the shrinking density both hold 80–81 % like the other clays, almost every
-clay is recognized and the predicted clay matches the measured mean. Any density that rises with drying helps,
-and the result hardly depends on the cap (next section).</li>
+<li><strong>The correction behaves alike through the pressure-plate range.</strong> θ rises by about a quarter at
+pF 2, by a third or more at 33 kPa, and by about half at 1500 kPa (50 % for Laikipia, 58 % for Tomejil, median).</li>
+<li><strong>They differ at the wet end.</strong> Near saturation the Laikipia cores had swollen beyond their ring
+density (θ₁ above the porosity of BD₁ in 42 of the 70 samples), so the shrinking density there is below BD₁ and θ
+falls slightly (median ratio 0.99, 0.90 for WL_3LT07414). Tomejil's rings sit on the shrinkage line, and θ rises by 5 %.</li>
+<li><strong>Both reach their cap at the dry end.</strong> Every Laikipia sample with a 1500 kPa point reaches 1.6
+(WL_3LT07414: w = 0.234 at 1500 kPa, below the limit of 0.248), and 36 of the 54 Tomejil rings reach 1.75.</li>
+<li><strong>Texture improves in both.</strong> With one density both soils read too coarse and seemed to lose water
+steeply just below saturation (50 % and 65 % of their saturated water left at 330 cm, against 82 % for the
+reference clays). With the shrinking density they hold 73 % and 81 %, and every clay in both soils is read as clay.
+The predicted clay matches the measured mean for Tomejil (53 % against 56 %) but stays below it for Laikipia (46 %
+against 54 %). The result hardly depends on whether the cap is 1.6 or 1.75 (previous section).</li>
 <li><strong>Ks falls in both, and is low confidence either way.</strong> Under normal shrinkage the water lost near
-saturation is volume lost, not pores draining, so the curve shows almost no large draining pores: the kNN Ks
-drops about 30-fold and the physical estimate about 4-fold, further below the dry-season field values (Laikipia:
-Saturo 13.5 cm/h, modified Philip–Dunne 25.4 cm/h), and the two estimates then agree within a factor of 10 for only
-43 % of the Laikipia samples and 6 % of the Tomejil rings (98 % and 91 % with one density). Against the Laikipia
-field permeameter the kNN falls from 47 % to 13 % of samples within a factor of 10, while the physical estimate stays near
-half (51 % → 45 %). The low values may describe the swollen matrix, while field values
-are dominated by cracks; neither conversion gives a true pore-size distribution for a swelling clay.</li>
-<li><strong>The agreement is partly built in.</strong> Both use the same formula and cap, and their one-density values
-are similar wet-state densities. The independent support is the texture result, reached separately in each soil.</li>
+saturation is volume lost, not pores draining, so the curve shows few large draining pores: the kNN Ks drops about
+6-fold for Laikipia and 25-fold for Tomejil, and the physical estimate about 4-fold. The two estimates then agree
+within a factor of 10 for 79 % of the Laikipia samples and 17 % of the Tomejil rings (97 % and 93 % with one
+density). Against the SATURO infiltrometer on 26 Laikipia samples (median 14.0 cm/h), the kNN falls from 92 % to
+54 % of samples within a factor of 10, while the physical estimate stays at 92 % (96 % with one density). The low
+kNN values may describe the swollen matrix, while field values carry cracks and macropores; neither conversion
+gives a true pore-size distribution for a swelling clay.</li>
+<li><strong>The agreement is partly built in.</strong> Both use the same formula, and their one-density values are
+similar wet-state densities. The independent support is the texture result, reached separately in each soil.</li>
 </ul>
 
 <div class="box">
@@ -292,7 +298,9 @@ in a cultivated vertisol. <em>Soil Science Society of America Journal</em> 81: 1
 <li>Vanderlinden, K., Pachepsky, Y., Pedrera-Parrilla, A., Martínez, G., Espejo-Pérez, A., Perea, F. and
 Giráldez, J. (2021). Water retention and field soil water states in a vertisol under long-term direct drill
 and conventional tillage. <em>European Journal of Soil Science</em> 72: 667–678. doi:10.1111/ejss.12967</li>
-<li>Willard et al. (under review). Laikipia soils (Kenya); data shared by the authors, unpublished.</li>
+<li>Willard, L., Muñoz-Carpena, R., Venort, T., Gitonga, J., Maltais-Landry, G., Caylor, K. and Palm, C. (2026). A
+multi-domain field dataset to evaluate agricultural impacts at the edge of a Kenyan savanna. HydroShare,
+doi:10.4211/hs.99080b48206e4b2c82e716516d463a61 (data descriptor in review, <em>Scientific Data</em>).</li>
 <li>Yule, D.F. and Ritchie, J.T. (1980). Soil shrinkage relationships of Texas Vertisols: I. Small cores; II. Large
 cores. <em>Soil Science Society of America Journal</em> 44: 1285–1291 and 1291–1295.</li>
 </ul>

@@ -1,11 +1,12 @@
 """Donana sands through the Laikipia shrinkage conversion.
 
-Same steps as data/willard_raw/corrected/make_shrinkage_version.py:
-w = theta / BD_sample, BD(w) = min(cap, 1 / (1/2.65 + w)), theta' = w * BD(w).
+Same steps as the published Laikipia volumetric series (Willard et al. 2026,
+HydroShare): w = theta / BD_sample, BD(w) = min(cap, 1 / (1/2.65 + w)),
+theta' = w * BD(w).
 BD_sample = 1.70 (mean of the 47 Donana rings, 1.59-1.80). Two caps: the
 Laikipia/Tomejil 1.6 (a vertisol's shrinkage limit) and the sands' own
-measured density 1.70. Panel c compares theta'/theta with the 86 Laikipia
-samples (SWCC_shrinkage_summary.csv).
+measured density 1.70. Panel c compares theta'/theta with the 70 published
+Laikipia curves (cap 1.6, KALRO density; see test_caps.samples).
 """
 import os
 import sys
@@ -83,11 +84,16 @@ a2.legend(fontsize=8.3, loc="center right", bbox_to_anchor=(1.0, 0.36), frameon=
 a2.set_title("b  density used for the conversion", loc="left", fontsize=10.5)
 w_sat = (1 - BD / RHO_S) / BD
 a2.text(-0.55, 1.03, f"saturated sand: w = {w_sat:.3f}, already on the shrinkage line\n"
-        f"(Laikipia clays at saturation: w ≈ 0.4–0.6, density 1.0–1.3)",
+        f"(Laikipia clays at saturation: w ≈ 0.5–0.7, density 0.9–1.2)",
         ha="left", fontsize=8.3, color="#444444")
 
 # c: theta'/theta, all Donana layers against all Laikipia samples
-lk = pd.read_csv("data/willard_raw/corrected/SWCC_shrinkage_summary.csv")
+sys.path.insert(0, HERE)
+import test_caps as tc                                       # noqa: E402
+lk = pd.concat([pd.DataFrame({"SampleID": sid, "pF": np.round(np.where(
+    h_ > 0, np.log10(np.maximum(h_, 1e-9) / 0.0980665), 0.0), 2),
+    "ratio": np.minimum(1.6, 1.0 / (1.0 / 2.65 + w_)) / bd1_})
+    for sid, h_, w_, bd1_, _, _ in tc.samples("laikipia")], ignore_index=True)
 q = lk.groupby("pF").ratio.quantile([0.25, 0.5, 0.75]).unstack()
 a3.fill_between(q.index, q[0.25], q[0.75], color=BROWN, alpha=0.18, lw=0)
 a3.plot(q.index, q[0.5], "o-", color=BROWN, lw=2, ms=5,
