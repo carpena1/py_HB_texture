@@ -179,9 +179,9 @@
     <p class="eyebrow">py_HB_texture</p>
     <h1>From measured retention curves to texture and&nbsp;K<sub>s</sub></h1>
     <p class="lead">
-      How thirteen source databases become one reference table, how a single soil
-      water characteristic curve is turned into a texture class and a
-      conductivity estimate, and what each validation level actually proves.
+      How fifteen source databases become one reference table. How one soil
+      water characteristic curve becomes a texture class and a conductivity
+      estimate. And what each validation level proves.
     </p>
   </div>
 
@@ -191,16 +191,17 @@
       <h2>Building the reference</h2>
     </div>
     <p>
-      Each source ships something different — published van Genuchten
-      parameters, raw retention points, gravimetric water contents — so each
-      gets its own <code>prepare_*.py</code>. What they share is the output
-      schema: one row per soil layer, carrying the fitted parameters, measured
-      sand/silt/clay, K<sub>s</sub> where it exists, and provenance.
+      Each source ships something different: published van Genuchten
+      parameters, raw retention points or gravimetric water contents. So each
+      source gets its own <code>prepare_*.py</code>. All of them write the
+      same schema: one row per soil layer, with the fitted parameters, the
+      measured sand, silt and clay, K<sub>s</sub> where it exists, and the
+      provenance.
     </p>
   </div>
 
   <figure>
-    <svg viewBox="0 0 1040 1334" role="img" aria-label="Thirteen source databases pass through per-source preparation scripts into derivative CSV tables; GSHP, KSSL, Hohenbrink, Zanjanrood, Arizona, the Canary Islands, the Yellow River Basin, the restricted EU-HYDI, Laikipia, the Andalusian soils and the Australian CSIRO cores (NatSoil and Boorowa) form the default merged reference of 21,546 layers, with UNSODA and sDB added only in the all set.">
+    <svg viewBox="0 0 1040 1522" role="img" aria-label="Fifteen source databases pass through per-source preparation scripts into derivative CSV tables; GSHP, KSSL, Hohenbrink, Zanjanrood, Arizona, the Canary Islands, the Yellow River Basin, the restricted EU-HYDI, Laikipia, the Andalusian soils and the Australian CSIRO cores (NatSoil and Boorowa), Fujii et al. (Japan and Southeast Asia) and Ksat-SSIR-DB (Brazil) form the default merged reference of 21,720 layers, with UNSODA and sDB added only in the all set.">
       <defs>
         <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
           <path d="M 0 1 L 9 5 L 0 9 z" fill="currentColor"/>
@@ -366,21 +367,61 @@
 <line x1="556" y1="1027" x2="592" y2="1027" marker-end="url(#ara)"/>
 <line x1="792" y1="1027" x2="844" y2="1027" marker-end="url(#ara)"/>
 </g>
+<!-- Japan and Southeast Asia -->
+<rect x="16" y="1082" width="184" height="78" rx="3" fill="none" stroke="currentColor" opacity=".85"/>
+<text x="28" y="1104" font-size="13" font-weight="600" fill="currentColor">Japan, SE Asia</text>
+<text x="28" y="1122" font-size="11" fill="var(--muted)">Fujii et al. 2023, Dryad</text>
+<text x="28" y="1138" font-size="11" fill="var(--muted)">59 cores, 23 forest/farm sites</text>
+<text x="28" y="1152" font-size="11" fill="currentColor">CC0 public domain</text>
+<rect x="256" y="1082" width="300" height="78" rx="3" fill="var(--sunken)" stroke="currentColor" opacity=".85"/>
+<text x="268" y="1102" font-size="11.5" font-family="IBM Plex Mono, monospace" fill="var(--accent)">prepare_fujii.py</text>
+<text x="268" y="1120" font-size="11" fill="currentColor">points to pF 4.2; pF 5.5 and 7 dropped</text>
+<text x="268" y="1137" font-size="11" fill="var(--accent)">sheets joined on site and depth</text>
+<text x="268" y="1152" font-size="11" fill="var(--muted)">class re-derived from the fractions</text>
+<rect x="596" y="1082" width="196" height="78" rx="3" fill="none" stroke="var(--accent)"/>
+<text x="608" y="1106" font-size="11" font-family="IBM Plex Mono, monospace" fill="var(--accent)">fujii_reference</text>
+<text x="608" y="1126" font-size="13" font-weight="600" fill="currentColor">59</text>
+<text x="608" y="1146" font-size="11" fill="var(--muted)">51 with K<tspan baseline-shift="sub" font-size="8">s</tspan></text>
+<g stroke="currentColor" fill="none" opacity=".55"><line x1="200" y1="1121" x2="252" y2="1121" marker-end="url(#ar)"/></g>
+<g stroke="var(--accent)" fill="none">
+<line x1="556" y1="1121" x2="592" y2="1121" marker-end="url(#ara)"/>
+<line x1="792" y1="1121" x2="844" y2="1121" marker-end="url(#ara)"/>
+</g>
+<!-- Brazil -->
+<rect x="16" y="1176" width="184" height="78" rx="3" fill="none" stroke="currentColor" opacity=".85"/>
+<text x="28" y="1198" font-size="13" font-weight="600" fill="currentColor">Ksat-SSIR-DB (Brazil)</text>
+<text x="28" y="1216" font-size="11" fill="var(--muted)">Ottoni et al. 2025, SGB</text>
+<text x="28" y="1232" font-size="11" fill="var(--muted)">2,579 rows; 215 with a curve</text>
+<text x="28" y="1246" font-size="11" fill="currentColor">public database</text>
+<rect x="256" y="1176" width="300" height="78" rx="3" fill="var(--sunken)" stroke="currentColor" opacity=".85"/>
+<text x="268" y="1196" font-size="11.5" font-family="IBM Plex Mono, monospace" fill="var(--accent)">prepare_ksatssir.py</text>
+<text x="268" y="1214" font-size="11" fill="currentColor">all five points: 0, 6, 10, 33, 1500 kPa</text>
+<text x="268" y="1231" font-size="11" fill="var(--accent)">100 rows at HYBRAS v1 sites left out</text>
+<text x="268" y="1246" font-size="11" fill="var(--muted)">lab K<tspan baseline-shift="sub" font-size="8">s</tspan> on rings only, mm/h &#8594; cm/h</text>
+<rect x="596" y="1176" width="196" height="78" rx="3" fill="none" stroke="var(--accent)"/>
+<text x="608" y="1200" font-size="11" font-family="IBM Plex Mono, monospace" fill="var(--accent)">ksatssir_reference</text>
+<text x="608" y="1220" font-size="13" font-weight="600" fill="currentColor">115</text>
+<text x="608" y="1240" font-size="11" fill="var(--muted)">95 with K<tspan baseline-shift="sub" font-size="8">s</tspan></text>
+<g stroke="currentColor" fill="none" opacity=".55"><line x1="200" y1="1215" x2="252" y2="1215" marker-end="url(#ar)"/></g>
+<g stroke="var(--accent)" fill="none">
+<line x1="556" y1="1215" x2="592" y2="1215" marker-end="url(#ara)"/>
+<line x1="792" y1="1215" x2="844" y2="1215" marker-end="url(#ara)"/>
+</g>
 <!-- UNSODA -->
-        <rect x="16" y="1082" width="184" height="58" rx="3" fill="none" stroke="currentColor" opacity=".5"/>
-        <text x="28" y="1104" font-size="13" font-weight="600" fill="currentColor" opacity=".75">UNSODA 2.0 (worldwide)</text>
-        <text x="28" y="1122" font-size="11" fill="var(--muted)">790 soils</text>
-        <rect x="256" y="1082" width="300" height="58" rx="3" fill="var(--sunken)" stroke="currentColor" opacity=".5"/>
-        <text x="268" y="1102" font-size="11.5" font-family="IBM Plex Mono, monospace" fill="var(--muted)">prepare_unsoda.py</text>
-        <text x="268" y="1120" font-size="11" fill="var(--muted)">fit vG to measured points, cm &#8594; kPa</text>
+        <rect x="16" y="1270" width="184" height="58" rx="3" fill="none" stroke="currentColor" opacity=".5"/>
+        <text x="28" y="1292" font-size="13" font-weight="600" fill="currentColor" opacity=".75">UNSODA 2.0 (worldwide)</text>
+        <text x="28" y="1310" font-size="11" fill="var(--muted)">790 soils</text>
+        <rect x="256" y="1270" width="300" height="58" rx="3" fill="var(--sunken)" stroke="currentColor" opacity=".5"/>
+        <text x="268" y="1290" font-size="11.5" font-family="IBM Plex Mono, monospace" fill="var(--muted)">prepare_unsoda.py</text>
+        <text x="268" y="1308" font-size="11" fill="var(--muted)">fit vG to measured points, cm &#8594; kPa</text>
 
         <!-- sDB -->
-        <rect x="16" y="1156" width="184" height="58" rx="3" fill="none" stroke="currentColor" opacity=".5"/>
-        <text x="28" y="1178" font-size="13" font-weight="600" fill="currentColor" opacity=".75">sDB (Belgium)</text>
-        <text x="28" y="1196" font-size="11" fill="var(--muted)">PANGAEA, CC-BY-3.0</text>
-        <rect x="256" y="1156" width="300" height="58" rx="3" fill="var(--sunken)" stroke="currentColor" opacity=".5"/>
-        <text x="268" y="1176" font-size="11.5" font-family="IBM Plex Mono, monospace" fill="var(--muted)">prepare_sdb.py</text>
-        <text x="268" y="1194" font-size="11" fill="var(--muted)">fit vG to measured points</text>
+        <rect x="16" y="1344" width="184" height="58" rx="3" fill="none" stroke="currentColor" opacity=".5"/>
+        <text x="28" y="1366" font-size="13" font-weight="600" fill="currentColor" opacity=".75">sDB (Belgium)</text>
+        <text x="28" y="1384" font-size="11" fill="var(--muted)">PANGAEA, CC-BY-3.0</text>
+        <rect x="256" y="1344" width="300" height="58" rx="3" fill="var(--sunken)" stroke="currentColor" opacity=".5"/>
+        <text x="268" y="1364" font-size="11.5" font-family="IBM Plex Mono, monospace" fill="var(--muted)">prepare_sdb.py</text>
+        <text x="268" y="1382" font-size="11" fill="var(--muted)">fit vG to measured points</text>
 
         <!-- derivative tables -->
         <g font-size="11" font-family="IBM Plex Mono, monospace">
@@ -426,41 +467,41 @@
           <text x="608" y="844" font-size="13" font-family="IBM Plex Sans, sans-serif" font-weight="600" fill="currentColor">1,030</text>
           <text x="608" y="864" font-size="11" font-family="IBM Plex Sans, sans-serif" fill="var(--muted)">1,015 with K<tspan baseline-shift="sub" font-size="8">s</tspan></text>
 
-          <rect x="596" y="1082" width="196" height="58" rx="3" fill="none" stroke="currentColor" opacity=".5"/>
-          <text x="608" y="1104" fill="var(--muted)">unsoda_reference</text>
-          <text x="608" y="1124" font-size="13" font-family="IBM Plex Sans, sans-serif" font-weight="600" fill="var(--muted)">581</text>
+          <rect x="596" y="1270" width="196" height="58" rx="3" fill="none" stroke="currentColor" opacity=".5"/>
+          <text x="608" y="1292" fill="var(--muted)">unsoda_reference</text>
+          <text x="608" y="1312" font-size="13" font-family="IBM Plex Sans, sans-serif" font-weight="600" fill="var(--muted)">581</text>
 
-          <rect x="596" y="1156" width="196" height="58" rx="3" fill="none" stroke="currentColor" opacity=".5"/>
-          <text x="608" y="1178" fill="var(--muted)">sdb_reference</text>
-          <text x="608" y="1198" font-size="13" font-family="IBM Plex Sans, sans-serif" font-weight="600" fill="var(--muted)">165</text>
+          <rect x="596" y="1344" width="196" height="58" rx="3" fill="none" stroke="currentColor" opacity=".5"/>
+          <text x="608" y="1366" fill="var(--muted)">sdb_reference</text>
+          <text x="608" y="1386" font-size="13" font-family="IBM Plex Sans, sans-serif" font-weight="600" fill="var(--muted)">165</text>
         </g>
 
         <!-- reference sets -->
-        <rect x="848" y="48" width="176" height="1018" rx="3" fill="var(--accent-w)" stroke="var(--accent)"/>
+        <rect x="848" y="48" width="176" height="1206" rx="3" fill="var(--accent-w)" stroke="var(--accent)"/>
         <text x="862" y="72" font-size="11.5" font-family="IBM Plex Mono, monospace" fill="var(--accent)">merged</text>
         <text x="862" y="90" font-size="10.5" font-family="IBM Plex Mono, monospace" fill="var(--muted)">(default)</text>
-        <text x="862" y="130" font-size="28" font-weight="600" fill="currentColor">21,546</text>
+        <text x="862" y="130" font-size="28" font-weight="600" fill="currentColor">21,720</text>
         <text x="862" y="152" font-size="11" fill="var(--muted)">layers</text>
-        <text x="862" y="182" font-size="11" fill="currentColor">11,100 carry a measured</text>
+        <text x="862" y="182" font-size="11" fill="currentColor">11,246 carry a measured</text>
         <text x="862" y="197" font-size="11" fill="currentColor">saturated conductivity</text>
         <text x="862" y="226" font-size="11" fill="var(--muted)">7,862 European layers</text>
         <text x="862" y="241" font-size="11" fill="var(--muted)">(900 + 483 + 6,479)</text>
         <text x="862" y="270" font-size="11" fill="var(--muted)">12 USDA classes;</text>
-        <text x="862" y="285" font-size="11" fill="var(--muted)">sand is 22 % of rows,</text>
+        <text x="862" y="285" font-size="11" fill="var(--muted)">sand is 21 % of rows,</text>
         <text x="862" y="300" font-size="11" fill="var(--muted)">silt under 0.4 %</text>
         <text x="862" y="336" font-size="11" fill="currentColor">Without the restricted</text>
         <text x="862" y="351" font-size="11" fill="currentColor">EU-HYDI and Boorowa</text>
         <text x="862" y="366" font-size="11" fill="currentColor">tables, merged:</text>
-        <text x="862" y="381" font-size="11" fill="currentColor">the 14,692</text>
+        <text x="862" y="381" font-size="11" fill="currentColor">the 14,866</text>
         <text x="862" y="396" font-size="11" fill="var(--muted)">(--reference public)</text>
 
-        <rect x="848" y="1082" width="176" height="132" rx="3" fill="none" stroke="currentColor" opacity=".5"/>
-        <text x="862" y="1104" font-size="11.5" font-family="IBM Plex Mono, monospace" fill="var(--muted)">all</text>
-        <text x="862" y="1134" font-size="20" font-weight="600" fill="var(--muted)">22,292</text>
-        <text x="862" y="1158" font-size="11" fill="var(--muted)">adds UNSODA and sDB;</text>
-        <text x="862" y="1173" font-size="11" fill="var(--muted)">both largely duplicated</text>
-        <text x="862" y="1188" font-size="11" fill="var(--muted)">inside GSHP already,</text>
-        <text x="862" y="1203" font-size="11" fill="var(--muted)">so not in the default</text>
+        <rect x="848" y="1270" width="176" height="132" rx="3" fill="none" stroke="currentColor" opacity=".5"/>
+        <text x="862" y="1292" font-size="11.5" font-family="IBM Plex Mono, monospace" fill="var(--muted)">all</text>
+        <text x="862" y="1322" font-size="20" font-weight="600" fill="var(--muted)">22,466</text>
+        <text x="862" y="1346" font-size="11" fill="var(--muted)">adds UNSODA and sDB;</text>
+        <text x="862" y="1361" font-size="11" fill="var(--muted)">both largely duplicated</text>
+        <text x="862" y="1376" font-size="11" fill="var(--muted)">inside GSHP already,</text>
+        <text x="862" y="1391" font-size="11" fill="var(--muted)">so not in the default</text>
       </g>
 
       <g stroke="currentColor" fill="none" opacity=".55">
@@ -473,8 +514,8 @@
         <line x1="200" y1="651" x2="252" y2="651" marker-end="url(#ar)"/>
         <line x1="200" y1="745" x2="252" y2="745" marker-end="url(#ar)"/>
         <line x1="200" y1="839" x2="252" y2="839" marker-end="url(#ar)"/>
-        <line x1="200" y1="1111" x2="252" y2="1111" marker-end="url(#ar)" opacity=".6"/>
-        <line x1="200" y1="1185" x2="252" y2="1185" marker-end="url(#ar)" opacity=".6"/>
+        <line x1="200" y1="1299" x2="252" y2="1299" marker-end="url(#ar)" opacity=".6"/>
+        <line x1="200" y1="1373" x2="252" y2="1373" marker-end="url(#ar)" opacity=".6"/>
       </g>
       <g stroke="var(--accent)" fill="none">
         <line x1="556" y1="87"  x2="592" y2="87"  marker-end="url(#ara)"/>
@@ -497,39 +538,46 @@
         <line x1="792" y1="839" x2="844" y2="839" marker-end="url(#ara)"/>
       </g>
       <g stroke="currentColor" fill="none" opacity=".4">
-        <line x1="556" y1="1111" x2="592" y2="1111" marker-end="url(#ar)"/>
-        <line x1="556" y1="1185" x2="592" y2="1185" marker-end="url(#ar)"/>
-        <line x1="792" y1="1111" x2="844" y2="1111" marker-end="url(#ar)"/>
-        <line x1="792" y1="1185" x2="844" y2="1185" marker-end="url(#ar)"/>
+        <line x1="556" y1="1299" x2="592" y2="1299" marker-end="url(#ar)"/>
+        <line x1="556" y1="1373" x2="592" y2="1373" marker-end="url(#ar)"/>
+        <line x1="792" y1="1299" x2="844" y2="1299" marker-end="url(#ar)"/>
+        <line x1="792" y1="1373" x2="844" y2="1373" marker-end="url(#ar)"/>
       </g>
 
-      <rect x="256" y="1238" width="768" height="76" rx="3" fill="none" stroke="currentColor" opacity=".35" stroke-dasharray="3 3"/>
-      <text x="270" y="1260" font-size="11.5" font-family="IBM Plex Mono, monospace" fill="currentColor" opacity=".8">free_m.py &#8212; shared by every preparation script</text>
-      <text x="270" y="1280" font-size="11" font-family="IBM Plex Sans, sans-serif" fill="var(--muted)">Also writes an unconstrained companion fit (&#952;r, &#952;s, &#945;, n, m) alongside the</text>
-      <text x="270" y="1297" font-size="11" font-family="IBM Plex Sans, sans-serif" fill="var(--muted)">Mualem one, refitting measured points where a source ships them.</text>
+      <rect x="256" y="1426" width="768" height="76" rx="3" fill="none" stroke="currentColor" opacity=".35" stroke-dasharray="3 3"/>
+      <text x="270" y="1448" font-size="11.5" font-family="IBM Plex Mono, monospace" fill="currentColor" opacity=".8">free_m.py &#8212; shared by every preparation script</text>
+      <text x="270" y="1468" font-size="11" font-family="IBM Plex Sans, sans-serif" fill="var(--muted)">Also writes an unconstrained companion fit (&#952;r, &#952;s, &#945;, n, m) alongside the</text>
+      <text x="270" y="1485" font-size="11" font-family="IBM Plex Sans, sans-serif" fill="var(--muted)">Mualem one, refitting measured points where a source ships them.</text>
     </svg>
     <figcaption>
-      Each source needs a different correction before its curves are comparable.
-      KSSL's wettest measurement is 6 kPa, so nothing constrains saturation and a
-      raw fit puts &#945; five to sixteen times too low — the anchor at
-      &#952;(0) = 0.95 &#215; porosity fixes it. Hohenbrink has the opposite problem:
-      199 HYPROP points on the wet limb against three on the dry one, so an
-      unthinned least-squares fit would weight the curve 98:2 away from the part
-      that carries texture. EU-HYDI brings the sample-level HYPRES data, but
-      many of its contributors shipped only two or four retention points per
-      sample — too few to fit a curve — which is why Greece and most of Spain
-      drop out, and Poland's texture has to be summed from raw size classes.
-      Its table is built locally from consortium-restricted data and never
-      distributed. Laikipia's sandbox did not saturate its cores, so only
-      saturation, anchored on porosity, and the pressure plates are kept; its
-      table is the project's own and distributed. The Andalusian rings
-      (K. Vanderlinden, IFAPA) are gravimetric, made volumetric with each
-      Setenil ring's density and, for the Tomejil vertisol, with a density that
-      follows shrinkage; their tables are distributed with K. Vanderlinden's
-      agreement. A checkout without the restricted tables runs on the public 14,692. The Arizona, Canary Islands and
-      Yellow River tables are public; the Yellow River curves are published
-      only as fits, so they are rebuilt from 1 to 1000 kPa and refitted; the Canary points are read from the thesis's vector
-      figures and checked against its own tables.
+      Each source needs a different correction before its curves are
+      comparable. KSSL's wettest measurement is at 6 kPa, so nothing
+      constrains saturation, and a raw fit puts &#945; five to sixteen times
+      too low. An anchor at &#952;(0) = 0.95 &#215; porosity fixes it.
+      Hohenbrink has the opposite problem: 199 HYPROP points on the wet limb
+      against three on the dry limb. An unthinned least-squares fit would
+      weight the curve 98:2 away from the part that carries texture. EU-HYDI
+      brings the sample-level HYPRES data. But many of its contributors
+      shipped only two or four retention points per sample, too few to fit a
+      curve. So Greece and most of Spain drop out, and Poland's texture must
+      be summed from raw size classes. Its table is built locally from
+      consortium-restricted data and never distributed. Laikipia uses the
+      published curves (HydroShare), made volumetric with a density that
+      follows shrinkage (cap 1.6). The 16 samples with possibly incomplete
+      dispersion are left out, and the table is the project's own and
+      distributed. The Andalusian rings (K. Vanderlinden, IFAPA) are
+      gravimetric. They are made volumetric with the density of each Setenil
+      ring and, for the Tomejil vertisol, with a density that follows
+      shrinkage. Their tables are distributed with K. Vanderlinden's
+      agreement. The Arizona, Canary Islands and Yellow River tables are
+      public. The Yellow River curves are published only as fits, so they are
+      rebuilt from 1 to 1000 kPa and refitted. The Canary points are read
+      from the vector figures of the thesis and checked against its own
+      tables. The two newest sources are public too: Fujii et al. (Japan and
+      Southeast Asia, CC0) and Ksat-SSIR-DB (Brazil). In Ksat-SSIR-DB, 100
+      rows from three theses sit at HYBRAS v1 sites that GSHP already holds,
+      so they are left out. A checkout without the restricted tables runs on
+      the public 14,866.
     </figcaption>
   </figure>
 
@@ -550,19 +598,21 @@
 
     <h3 style="margin-top:34px">Where the reference actually comes from</h3>
     <p>
-      Coverage is the reason several findings in this project point the same
-      way: before EU-HYDI, three quarters of the reference sat in North America
-      and nearly half of it came from one Florida contributor. EU-HYDI
-      (Weynants et al. 2013), shared for this work under consortium terms,
-      adds 6,797 European layers from 21
-      laboratories in 16 countries and takes Europe
-      from 1,261 layers to 7,740 (7,862 with the Andalusian soils that joined
-      later).
+      Coverage explains why several findings in this project point the same
+      way. Before EU-HYDI, three quarters of the reference sat in North
+      America, and almost half of it came from one Florida contributor.
+      EU-HYDI (Weynants et al. 2013), shared for this work under consortium
+      terms, adds 6,797 European layers from 21 laboratories in 16 countries.
+      It takes Europe from 1,261 layers to 7,740 (7,862 with the Andalusian
+      soils that joined later). In October 2026, Fujii et al. and
+      Ksat-SSIR-DB added 51 georeferenced layers in Japan, Thailand and
+      Indonesia and 115 in Brazil, two regions where the reference is
+      thin.
     </p>
   </div>
 
   <figure>
-    <svg viewBox="0 12 1040 547" role="img" aria-label="Equal Earth map of 20,893 georeferenced reference layers, binned into 2-degree cells with circle area proportional to count. Europe holds 7,862 layers, up from 1,383 before EU-HYDI, Boorowa was added.">
+    <svg viewBox="0 12 1040 547" role="img" aria-label="Equal Earth map of 21,061 georeferenced reference layers, binned into 2-degree cells with circle area proportional to count. Europe holds 7,862 layers, up from 1,383 before EU-HYDI, Boorowa was added.">
       <g fill="none" stroke="currentColor" stroke-width=".5" opacity=".16">
         <path d="M71.5 435.1L81.6 435.1L91.7 435.1L101.8 435.1L111.8 435.1L121.9 435.1L132.0 435.1L142.1 435.1L152.2 435.1L162.2 435.1L172.3 435.1L182.4 435.1L192.5 435.1L202.5 435.1L212.6 435.1L222.7 435.1L232.8 435.1L242.9 435.1L252.9 435.1L263.0 435.1L273.1 435.1L283.2 435.1L293.2 435.1L303.3 435.1L313.4 435.1L323.5 435.1L333.6 435.1L343.6 435.1L353.7 435.1L363.8 435.1L373.9 435.1L383.9 435.1L394.0 435.1L404.1 435.1L414.2 435.1L424.3 435.1L434.3 435.1L444.4 435.1L454.5 435.1L464.6 435.1L474.6 435.1L484.7 435.1L494.8 435.1L504.9 435.1L515.0 435.1L525.0 435.1L535.1 435.1L545.2 435.1L555.3 435.1L565.4 435.1L575.4 435.1L585.5 435.1L595.6 435.1L605.7 435.1L615.7 435.1L625.8 435.1L635.9 435.1L646.0 435.1L656.1 435.1L666.1 435.1L676.2 435.1L686.3 435.1L696.4 435.1L706.4 435.1L716.5 435.1L726.6 435.1L736.7 435.1L746.8 435.1L756.8 435.1L766.9 435.1L777.0 435.1L787.1 435.1L797.1 435.1L807.2 435.1L817.3 435.1L827.4 435.1L837.5 435.1L847.5 435.1L857.6 435.1L867.7 435.1L877.8 435.1L887.8 435.1L897.9 435.1L908.0 435.1L918.1 435.1L928.2 435.1L938.2 435.1L948.3 435.1L958.4 435.1L968.5 435.1"/>
         <path d="M14.0 290.3L25.4 290.3L36.7 290.3L48.1 290.3L59.5 290.3L70.9 290.3L82.2 290.3L93.6 290.3L105.0 290.3L116.3 290.3L127.7 290.3L139.1 290.3L150.4 290.3L161.8 290.3L173.2 290.3L184.6 290.3L195.9 290.3L207.3 290.3L218.7 290.3L230.0 290.3L241.4 290.3L252.8 290.3L264.2 290.3L275.5 290.3L286.9 290.3L298.3 290.3L309.6 290.3L321.0 290.3L332.4 290.3L343.8 290.3L355.1 290.3L366.5 290.3L377.9 290.3L389.2 290.3L400.6 290.3L412.0 290.3L423.3 290.3L434.7 290.3L446.1 290.3L457.5 290.3L468.8 290.3L480.2 290.3L491.6 290.3L502.9 290.3L514.3 290.3L525.7 290.3L537.1 290.3L548.4 290.3L559.8 290.3L571.2 290.3L582.5 290.3L593.9 290.3L605.3 290.3L616.7 290.3L628.0 290.3L639.4 290.3L650.8 290.3L662.1 290.3L673.5 290.3L684.9 290.3L696.2 290.3L707.6 290.3L719.0 290.3L730.4 290.3L741.7 290.3L753.1 290.3L764.5 290.3L775.8 290.3L787.2 290.3L798.6 290.3L810.0 290.3L821.3 290.3L832.7 290.3L844.1 290.3L855.4 290.3L866.8 290.3L878.2 290.3L889.6 290.3L900.9 290.3L912.3 290.3L923.7 290.3L935.0 290.3L946.4 290.3L957.8 290.3L969.1 290.3L980.5 290.3L991.9 290.3L1003.3 290.3L1014.6 290.3L1026.0 290.3"/>
@@ -851,6 +901,7 @@
         <circle cx="251.8" cy="148.8" r="3.08"/>
         <circle cx="262.2" cy="129.5" r="2.65"/>
         <circle cx="266.0" cy="123.3" r="1.60"/>
+        <circle cx="278.1" cy="105.6" r="1.60"/>
         <circle cx="245.2" cy="175.9" r="1.60"/>
         <circle cx="247.9" cy="169.0" r="1.60"/>
         <circle cx="250.7" cy="162.2" r="1.73"/>
@@ -949,21 +1000,31 @@
         <circle cx="341.9" cy="123.3" r="3.54"/>
         <circle cx="337.0" cy="431.8" r="1.87"/>
         <circle cx="336.0" cy="411.6" r="1.73"/>
+        <circle cx="320.8" cy="309.2" r="2.00"/>
         <circle cx="344.2" cy="142.2" r="1.60"/>
+        <circle cx="326.4" cy="309.2" r="2.45"/>
+        <circle cx="354.3" cy="301.6" r="2.45"/>
         <circle cx="359.9" cy="301.6" r="3.32"/>
+        <circle cx="365.7" cy="309.2" r="2.45"/>
         <circle cx="381.3" cy="404.6" r="9.90"/>
         <circle cx="380.0" cy="397.6" r="2.00"/>
+        <circle cx="371.1" cy="301.6" r="1.60"/>
         <circle cx="386.5" cy="404.6" r="4.12"/>
         <circle cx="384.2" cy="390.5" r="3.32"/>
         <circle cx="382.1" cy="376.1" r="3.32"/>
         <circle cx="381.2" cy="368.9" r="2.24"/>
         <circle cx="379.6" cy="354.2" r="2.24"/>
-        <circle cx="388.5" cy="383.4" r="3.67"/>
+        <circle cx="377.1" cy="316.8" r="2.35"/>
+        <circle cx="388.5" cy="383.4" r="4.42"/>
         <circle cx="385.1" cy="354.2" r="6.36"/>
+        <circle cx="382.3" cy="301.6" r="2.00"/>
         <circle cx="392.9" cy="376.1" r="6.16"/>
         <circle cx="392.1" cy="368.9" r="4.53"/>
         <circle cx="388.1" cy="309.2" r="2.55"/>
-        <circle cx="396.8" cy="361.5" r="1.60"/>
+        <circle cx="388.0" cy="301.6" r="1.60"/>
+        <circle cx="387.9" cy="294.1" r="1.87"/>
+        <circle cx="396.8" cy="361.5" r="3.32"/>
+        <circle cx="393.6" cy="301.6" r="1.60"/>
         <circle cx="403.7" cy="376.1" r="3.00"/>
         <circle cx="403.0" cy="368.9" r="1.60"/>
         <circle cx="408.4" cy="368.9" r="1.60"/>
@@ -1200,12 +1261,13 @@
         <circle cx="776.6" cy="169.0" r="1.60"/>
         <circle cx="773.9" cy="162.2" r="3.00"/>
         <circle cx="739.9" cy="100.0" r="1.60"/>
+        <circle cx="796.5" cy="219.0" r="1.73"/>
         <circle cx="781.8" cy="169.0" r="2.55"/>
         <circle cx="779.1" cy="162.2" r="3.32"/>
         <circle cx="776.2" cy="155.4" r="4.18"/>
         <circle cx="773.2" cy="148.8" r="1.60"/>
         <circle cx="763.3" cy="129.5" r="1.60"/>
-        <circle cx="803.5" cy="226.4" r="1.60"/>
+        <circle cx="803.5" cy="226.4" r="2.35"/>
         <circle cx="796.5" cy="197.2" r="1.60"/>
         <circle cx="787.0" cy="169.0" r="3.67"/>
         <circle cx="784.2" cy="162.2" r="4.00"/>
@@ -1244,6 +1306,7 @@
         <circle cx="771.0" cy="100.0" r="1.60"/>
         <circle cx="766.4" cy="94.6" r="1.60"/>
         <circle cx="728.9" cy="59.1" r="1.60"/>
+        <circle cx="843.3" cy="294.1" r="1.73"/>
         <circle cx="815.0" cy="162.2" r="2.74"/>
         <circle cx="811.7" cy="155.4" r="2.35"/>
         <circle cx="808.3" cy="148.8" r="1.60"/>
@@ -1253,6 +1316,7 @@
         <circle cx="775.4" cy="100.0" r="1.60"/>
         <circle cx="770.7" cy="94.6" r="1.60"/>
         <circle cx="823.3" cy="411.6" r="1.60"/>
+        <circle cx="848.9" cy="294.1" r="2.74"/>
         <circle cx="816.8" cy="155.4" r="3.00"/>
         <circle cx="813.3" cy="148.8" r="1.60"/>
         <circle cx="789.1" cy="111.3" r="1.60"/>
@@ -1280,12 +1344,16 @@
         <circle cx="821.3" cy="111.3" r="1.60"/>
         <circle cx="793.2" cy="79.5" r="2.00"/>
         <circle cx="771.1" cy="62.7" r="1.60"/>
-        <circle cx="866.3" cy="162.2" r="1.60"/>
+        <circle cx="869.9" cy="169.0" r="1.60"/>
+        <circle cx="866.3" cy="162.2" r="2.45"/>
         <circle cx="774.8" cy="62.7" r="1.60"/>
         <circle cx="789.8" cy="70.6" r="1.60"/>
         <circle cx="778.6" cy="62.7" r="1.60"/>
         <circle cx="876.5" cy="418.4" r="2.24"/>
         <circle cx="880.3" cy="411.6" r="2.12"/>
+        <circle cx="876.5" cy="162.2" r="1.60"/>
+        <circle cx="873.5" cy="148.8" r="1.60"/>
+        <circle cx="869.1" cy="142.2" r="1.60"/>
         <circle cx="882.7" cy="425.2" r="3.24"/>
         <circle cx="886.8" cy="418.4" r="1.60"/>
         <circle cx="859.5" cy="123.3" r="1.60"/>
@@ -1322,7 +1390,7 @@
       <g font-family="IBM Plex Sans, sans-serif" font-size="11.5">
         <path d="M473.3 60.9L476.7 60.9L480.0 60.9L483.4 60.9L486.7 60.9L490.1 60.9L493.4 60.9L496.8 60.9L500.1 60.9L503.5 60.9L506.8 60.9L510.2 60.9L513.5 60.9L516.9 60.9L520.2 60.9L523.6 60.9L526.9 60.9L530.3 60.9L533.7 60.9L537.0 60.9L540.4 60.9L543.7 60.9L547.1 60.9L550.4 60.9L553.8 60.9L557.1 60.9L560.5 60.9L563.8 60.9L567.2 60.9L570.5 60.9L573.9 60.9L577.2 60.9L580.6 60.9L583.9 60.9L587.3 60.9L590.7 60.9L594.0 60.9L597.4 60.9L600.7 60.9L604.1 60.9L604.1 60.9L605.5 63.9L607.0 67.1L608.6 70.5L610.2 74.1L611.7 77.8L613.3 81.7L614.9 85.7L616.4 89.9L618.0 94.2L619.5 98.7L621.0 103.3L622.5 107.9L623.9 112.7L625.3 117.6L626.7 122.6L628.0 127.7L629.3 132.9L630.5 138.1L631.7 143.5L632.8 148.9L634.0 154.4L635.0 159.9L636.0 165.6L636.0 165.6L631.4 165.6L626.8 165.6L622.2 165.6L617.5 165.6L612.9 165.6L608.3 165.6L603.6 165.6L599.0 165.6L594.4 165.6L589.8 165.6L585.1 165.6L580.5 165.6L575.9 165.6L571.2 165.6L566.6 165.6L562.0 165.6L557.4 165.6L552.7 165.6L548.1 165.6L543.5 165.6L538.8 165.6L534.2 165.6L529.6 165.6L525.0 165.6L520.3 165.6L515.7 165.6L511.1 165.6L506.4 165.6L501.8 165.6L497.2 165.6L492.6 165.6L487.9 165.6L483.3 165.6L478.7 165.6L474.0 165.6L469.4 165.6L464.8 165.6L460.2 165.6L455.5 165.6L455.5 165.6L456.1 159.9L456.7 154.4L457.3 148.9L458.0 143.5L458.6 138.1L459.3 132.9L460.0 127.7L460.7 122.6L461.5 117.6L462.3 112.7L463.1 107.9L463.9 103.3L464.7 98.7L465.6 94.2L466.4 89.9L467.3 85.7L468.2 81.7L469.0 77.8L469.9 74.1L470.8 70.5L471.6 67.1L472.5 63.9L473.3 60.9Z" fill="none" stroke="currentColor" stroke-width="1.1" stroke-dasharray="4 3" opacity=".75"/>
         <text x="456" y="52" fill="currentColor" font-weight="600">Europe &#183; 1,383 &#8594; 7,862 layers</text>
-        <text x="636" y="182" text-anchor="end" fill="var(--muted)">37.6 % of the reference</text>
+        <text x="636" y="182" text-anchor="end" fill="var(--muted)">37.3 % of the reference</text>
       </g>
       <g font-family="IBM Plex Sans, sans-serif" font-size="11" fill="currentColor">
         <line x1="302" y1="192" x2="302" y2="228" stroke="currentColor" opacity=".55"/>
@@ -1342,6 +1410,10 @@
         <text x="830" y="208">Yellow River Basin 1,030</text>
         <line x1="279" y1="149" x2="238" y2="120" stroke="currentColor" opacity=".55"/>
         <text x="234" y="116" text-anchor="end">KSSL, across the US 2,263</text>
+        <line x1="321" y1="308" x2="300" y2="318" stroke="currentColor" opacity=".55"/>
+        <text x="296" y="322" text-anchor="end">Brazil, Ksat-SSIR-DB 115</text>
+        <line x1="849" y1="297" x2="878" y2="318" stroke="currentColor" opacity=".55"/>
+        <text x="882" y="322">Japan, SE Asia (Fujii) 53</text>
       </g>
       <g font-family="IBM Plex Sans, sans-serif" font-size="11" fill="var(--muted)">
         <circle cx="22.2" cy="522.6" r="2.24" fill="currentColor" fill-opacity=".12" stroke="currentColor" stroke-opacity=".5"/>
@@ -1354,25 +1426,27 @@
       </g>
       <g font-family="IBM Plex Sans, sans-serif" font-size="11.5" fill="currentColor">
         <circle cx="640" cy="515" r="6" fill="var(--accent)" fill-opacity=".45" stroke="var(--accent)"/>
-        <text x="654" y="519">Public reference &#183; 14,357 georeferenced layers</text>
+        <text x="654" y="519">Public reference &#183; 14,525 georeferenced layers</text>
         <circle cx="640" cy="537" r="6" fill="var(--add)" fill-opacity=".5" stroke="var(--add)"/>
         <text x="654" y="541">EU-HYDI, Boorowa &#183; +6,536</text>
       </g>
     </svg>
     <figcaption>
       Equal Earth projection, so circle areas compare across latitudes.
-      Samples are binned into 2&#176; cells, with circle area proportional to
-      the number of layers. Teal is the public reference (14,357 of its
-      14,692 layers carry coordinates; UNSODA and sDB publish
-      none, the 21 Arizona soils have none, and 30 of the 70 Laikipia soils, from large
-      farms, have none); orange-red is EU-HYDI (6,479 of 6,797 layers georeferenced)
-      and the 57 CSIRO Boorowa cores. The 122 Andalusian curves (Setenil, Tomejil,
-      Lebrija and Do&#241;ana) and the Laikipia soils are part of the public reference.
-      EU-HYDI is consortium-restricted and Boorowa
-      non-commercial only: both are part
-      of the default reference wherever their tables have been built locally,
-      are never distributed, and appear here only as cell counts. 3 layers south of 58&#176;S, in Antarctica, fall outside the mapped area and are not drawn.
-      Land outline: Natural Earth 110 m, public domain.
+      Samples are binned into 2&#176; cells, and circle area is proportional
+      to the number of layers. Teal is the public reference: 14,525 of its
+      14,866 layers carry coordinates. (UNSODA and sDB publish none, the 21
+      Arizona soils have none, 30 of the 70 Laikipia soils, from large farms,
+      have none, and 6 of the Fujii horizons have none.) Orange-red is
+      EU-HYDI (6,479 of 6,797 layers georeferenced) and the 57 CSIRO Boorowa
+      cores. The 122 Andalusian curves (Setenil, Tomejil, Lebrija and
+      Do&#241;ana), the Laikipia soils and the Fujii and Ksat-SSIR-DB layers
+      are part of the public reference. EU-HYDI is consortium-restricted, and
+      Boorowa is for non-commercial use only. Both are part of the default
+      reference wherever their tables have been built locally. They are never
+      distributed, and they appear here only as cell counts. 3 layers south of
+      58&#176;S, in Antarctica, fall outside the mapped area and are not
+      drawn. Land outline: Natural Earth 110 m, public domain.
     </figcaption>
   </figure>
 
@@ -1382,36 +1456,38 @@
         <tr><th>Region</th><th class="num">Public reference</th><th class="num">Default reference</th><th class="num">Added</th></tr>
       </thead>
       <tbody>
-        <tr><td>North America</td><td class="num">9,256</td><td class="num">9,256</td><td class="num">+0</td></tr>
+        <tr><td>North America</td><td class="num">9,258</td><td class="num">9,258</td><td class="num">+0</td></tr>
         <tr><td>Europe</td><td class="num">1,383</td><td class="num">7,862</td><td class="num">+6,479</td></tr>
-        <tr><td>Asia</td><td class="num">2,370</td><td class="num">2,653</td><td class="num">+283</td></tr>
-        <tr><td>South America</td><td class="num">639</td><td class="num">639</td><td class="num">+0</td></tr>
+        <tr><td>Asia</td><td class="num">2,421</td><td class="num">2,704</td><td class="num">+283</td></tr>
+        <tr><td>South America</td><td class="num">754</td><td class="num">754</td><td class="num">+0</td></tr>
         <tr><td>Africa</td><td class="num">777</td><td class="num">789</td><td class="num">+12</td></tr>
         <tr><td>Australasia</td><td class="num">239</td><td class="num">296</td><td class="num">+57</td></tr>
-        <tr><td><strong>Georeferenced</strong></td><td class="num">14,357</td><td class="num">20,893</td><td class="num">+6,536</td></tr>
+        <tr><td><strong>Georeferenced</strong></td><td class="num">14,525</td><td class="num">21,061</td><td class="num">+6,536</td></tr>
       </tbody>
     </table>
     <p>
-      Europe goes from 9.6 % of the georeferenced
-      reference to 37.6 %, and the Nordic gap is largely
-      closed: in Europe above 58&#176;N the reference now holds 1,333 layers against
-      160 before, 199 of them above 62&#176;N against 22. What EU-HYDI cannot fill is the south. Greece
-      and most of Spain contributed only two retention points per sample —
-      field capacity and wilting point — which is too few to fit a curve, so
-      Spain, Greece and the Balkans stay thin. Florida still supplies
-      27 % of all georeferenced layers. Regional boxes
-      overlap slightly at their edges (the Asia box takes in western Russia and
-      Ukraine, the Africa box the far south of Spain, where the Setenil rings
-      sit), so the regions sum to a little more than the total.
+      Europe goes from 9.5 % of the georeferenced reference to 37.3 %, and the
+      Nordic gap is largely closed. In Europe above 58&#176;N, the reference
+      now holds 1,333 layers, against 160 before; 199 of them are above
+      62&#176;N, against 22. EU-HYDI cannot fill the south. Greece and most of
+      Spain contributed only two retention points per sample (field capacity
+      and wilting point). That is too few to fit a curve, so Spain, Greece and
+      the Balkans stay thin. Florida still supplies 27 % of all georeferenced
+      layers. The regional boxes overlap slightly at their edges: the Asia box
+      takes in western Russia and Ukraine, and the Africa box takes in the far
+      south of Spain, where the Setenil rings sit. So the regions sum to a
+      little more than the total. East of 90&#176;E the Asia box reaches
+      11&#176;S, so that it counts Indonesia.
     </p>
 
     <h3 style="margin-top:34px">What the European data does for accuracy</h3>
     <p>
       Coverage is not accuracy. The rows below are paired: the same targets,
-      predicted from the public reference and then with EU-HYDI added, under
-      profile- or laboratory-grouped folds so that neither model ever sees the
-      target. Sixty targets per class, both models, exact texture class
-      (<span class="m">dev/verify_euhydi.py</span>, October 2026).
+      predicted from the public reference and then with EU-HYDI added. The
+      folds are grouped by profile or by laboratory, so neither model ever
+      sees the target. There are sixty targets per class, both models, exact
+      texture class (<span class="m">dev/verify_euhydi.py</span>, October
+      2026).
     </p>
     <table>
       <thead>
@@ -1427,32 +1503,32 @@
       </tbody>
     </table>
     <p>
-      Six thousand European layers from twenty-one laboratories help a European
-      soil from a laboratory the reference has never seen a little: +3.2 points
-      with the neighbour vote (p=0.02), +1.3 with the classifier (not
-      significant). European soils whose laboratory is already in the public
-      tables gain little (+1.9 and +0.7 points, neither significant), and
-      non-European soils do not move. What helps most is the target's own
-      laboratory. With it present — only the target's profile held out — exact
-      class rises by 5.4 points for the kNN (p=0.0001) and 2.9 for the hybrid
-      (p=0.10), and K<sub>s</sub> goes from essentially unpredictable
-      (&rho; = 0.10) to modest (&rho; = 0.30).
+      Six thousand European layers from twenty-one laboratories help a little
+      for a European soil from a laboratory the reference has never seen:
+      +3.2 points with the neighbour vote (p=0.02), and +1.3 with the
+      classifier (not significant). European soils whose laboratory is
+      already in the public tables gain little (+1.9 and +0.7 points, neither
+      significant). Non-European soils do not move. What helps most is the
+      target's own laboratory. With it present (only the target's profile
+      held out), exact class rises by 5.4 points for the kNN (p=0.0001) and
+      2.9 for the hybrid (p=0.10). K<sub>s</sub> goes from essentially
+      unpredictable (&rho; = 0.10) to modest (&rho; = 0.30).
     </p>
     <p>
-      That changes how the earlier regional evidence reads. Removing Europe
-      from the reference cost European soils 9 points while removing the same
-      number of non-European layers cost nothing — but removing Europe also
-      removed each target's own laboratory. The gap that looked regional is at
-      least largely a laboratory gap: measurement protocol, not geography. It is
-      also why adding more laboratories stopped helping after the second or
-      third.
+      This changes how the earlier regional evidence reads. Removing Europe
+      from the reference cost European soils 9 points, while removing the
+      same number of non-European layers cost nothing. But removing Europe
+      also removed the target's own laboratory. So the gap that looked
+      regional is, at least largely, a laboratory gap: measurement protocol,
+      not geography. This is also why more laboratories stopped helping after
+      the second or third.
     </p>
     <p>
-      For in-situ sensors this points at a more useful experiment than more
+      For in-situ sensors, this points to a more useful experiment than more
       external data. A sensor network is, in effect, one laboratory with one
-      protocol, so a modest set of cores characterised within the same network
-      may buy more than any quantity of data from elsewhere. That is a
-      hypothesis these results suggest, not one they test.
+      protocol. So a modest set of cores characterised within the same
+      network may give more than any quantity of data from elsewhere. These
+      results suggest this hypothesis; they do not test it.
     </p>
 
     <div class="stage">
@@ -1461,9 +1537,9 @@
     </div>
     <p>
       The input is two columns: suction in kPa and water content. Everything
-      downstream flows from a four-parameter fit, and the fit's own uncertainty
-      is carried through to the answer rather than discarded — 300 draws from
-      the fit covariance each vote through their own neighbourhood.
+      downstream comes from a four-parameter fit. The fit's own uncertainty is
+      carried through to the answer, not discarded: 300 draws from the fit
+      covariance each vote through their own neighbourhood.
     </p>
   </div>
 
@@ -1559,23 +1635,25 @@
       <text x="30" y="458" font-size="11" font-family="IBM Plex Sans, sans-serif" fill="var(--muted)">a confidence flag: when the two agree the answer is right 48 % of the time, when they disagree, 27 %.</text>
     </svg>
     <figcaption>
-      Both halves see the same 300 draws, so fit uncertainty propagates through
-      the class probabilities and the intervals alike. Only the texture class
-      comes from the classifier; switching to <span class="m">--model knn</span>
-      changes that one output and leaves every other number bit-identical.
-      The sample type is the one required extra input — undisturbed by default, as for
-      an in-situ sensor. The classifier sees it, and for an undisturbed sample
-      K<sub>s</sub> is taken only from undisturbed neighbours, because the large
-      pores that control K<sub>s</sub> survive only in intact soil. Disturbed
-      samples use every soil: the reference holds only 45 disturbed layers
-      with a measured K<sub>s</sub>. Depth and bulk density are optional; the
+      Both halves see the same 300 draws, so fit uncertainty propagates
+      through the class probabilities and the intervals alike. Only the
+      texture class comes from the classifier. Switching to
+      <span class="m">--model knn</span> changes that one output, and every
+      other number stays bit-identical. The sample type is the one required
+      extra input; it is undisturbed by default, as for an in-situ sensor. The
+      classifier sees it. For an undisturbed sample, K<sub>s</sub> comes only
+      from undisturbed neighbours, because the large pores that control
+      K<sub>s</sub> survive only in intact soil. Disturbed samples use every
+      soil, because the reference holds only 45 disturbed layers with a
+      measured K<sub>s</sub>. Depth and bulk density are optional. The
       classifier uses both, and bulk density also joins the neighbour search,
-      which lowers the K<sub>s</sub> error slightly when your source is in
-      the reference. So is the soil's andic
-      state (<span class="m">--andic yes/no</span>): the classifier uses it,
-      and the neighbours match on it for the class vote and the fractions but
-      not for K<sub>s</sub>, since, when this was tested, the only andic soils
-      with a measured K<sub>s</sub> came from one source.
+      which lowers the K<sub>s</sub> error slightly when your source is in the
+      reference. The andic state of the soil
+      (<span class="m">--andic yes/no</span>) is optional too. The classifier
+      uses it, and the neighbours match on it for the class vote and the
+      fractions. They do not match on it for K<sub>s</sub>: when this was
+      tested, the only andic soils with a measured K<sub>s</sub> came from one
+      source.
     </figcaption>
   </figure>
 
@@ -1585,14 +1663,14 @@
       <h2>What the validation proves</h2>
     </div>
     <p>
-      Almost every accuracy number in soil pedotransfer work is quoted from
-      leave-one-out on a pooled database, and it can be optimistic: layers from
+      Almost every accuracy number in pedotransfer work comes from
+      leave-one-out on a pooled database, and it can be optimistic. Layers from
       one contributing laboratory share a measurement protocol, so a soil is
-      easier to recognise among its own laboratory's curves. Holding out a
-      test soil's other horizons costs little — horizons of one profile are
-      genuinely different samples — but holding out its laboratory costs about
-      ten points from the curve alone, and fourteen once depth and bulk
-      density are supplied, and that is the number a new data source should
+      easier to recognise among the curves of its own laboratory. Holding out
+      the other horizons of a test soil costs little, because horizons of one
+      profile are truly different samples. But holding out its laboratory
+      costs about ten points from the curve alone, and fourteen with depth
+      and bulk density. That is the number a new data source should
       expect.
     </p>
   </div>
@@ -1641,56 +1719,58 @@
       </g>
     </svg>
     <figcaption>
-      Paired on the same 1,680 test soils (150 per class, every silt) that carry
-      depth and bulk density, predicted as the shipped tool runs them
-      (<span class="m">verify_holdout.py</span>, October 2026). The Cover &amp; Hart (1967)
-      bound brackets Bayes error from nearest-neighbour error, so it is
-      model-free: roughly 54 % exact class in-distribution and 44 % against an
-      unseen laboratory is the hard limit for <em>any</em> method using the four
-      van Genuchten parameters alone. The gap between 29 % and that limit is what
-      better data can still buy. Depth and bulk density are further inputs, so
-      that bound does not cover them; they lift the score most where the
+      Paired on the same 1,680 test soils (150 per class, every silt) that
+      carry depth and bulk density, predicted as the shipped tool runs them
+      (<span class="m">verify_holdout.py</span>, October 2026, on the
+      reference before Fujii and Ksat-SSIR-DB joined). The Cover &amp; Hart
+      (1967) bound brackets the Bayes error from the nearest-neighbour error,
+      so it does not depend on a model. About 54 % exact class within the
+      reference's distribution, and 44 % against an unseen laboratory, is the
+      hard limit for <em>any</em> method that uses the four van Genuchten
+      parameters alone. The gap between 29 % and that limit is what better
+      data can still buy. Depth and bulk density are further inputs, so the
+      bound does not cover them. They raise the score most where the
       laboratory is already in the reference.
     </figcaption>
   </figure>
 
   <div class="col">
     <p>
-      Each verification script targets one link in the chain.
+      Each verification script tests one link in the chain.
       <span class="m">verify_carsel_parrish</span> and
-      <span class="m">verify_rosetta</span> test against foreign parameter sets,
-      <span class="m">verify_gshp</span> against real soils held out of the
-      reference, <span class="m">verify_source_blocked</span> against an unseen
-      laboratory, and <span class="m">verify_ceiling</span> establishes the limit
-      above. Every one of them scores conductivity alongside texture through
-      <span class="m">ksat_metrics.py</span>, which is how the next point came to
-      light.
+      <span class="m">verify_rosetta</span> test against foreign parameter
+      sets. <span class="m">verify_gshp</span> tests against real soils held
+      out of the reference, <span class="m">verify_source_blocked</span>
+      against an unseen laboratory, and <span class="m">verify_ceiling</span>
+      sets the limit above. Every one of them also scores conductivity,
+      through <span class="m">ksat_metrics.py</span>. That is how the next
+      point came to light.
     </p>
 
     <div class="note">
       <p>
         <strong>Conductivity transfers less well than texture.</strong>
-        Predicting the Hohenbrink cores from a reference that does <em>not</em>
-        contain them under-predicts K<sub>s</sub> by 0.56 orders of magnitude —
-        a factor of about 3.6 — with 20 % of soils inside a factor of two and
-        interval coverage of 51 % against a nominal 90 %. Texture on those same
-        soils holds up at 33 % exact.
+        Predict the Hohenbrink cores from a reference that does <em>not</em>
+        contain them: K<sub>s</sub> is too low by 0.56 orders of magnitude (a
+        factor of about 3.6). Only 20 % of soils are within a factor of two,
+        and the interval coverage is 51 %, against a nominal 90 %. Texture on
+        the same soils holds up at 33 % exact.
       </p>
       <p>
-        Part of it is the reference population. Hohenbrink's median
-        K<sub>s</sub> is 20.9 cm/h against GSHP's 10.5 — a factor of two.
-        Intact cores measured with a KSAT device carry macropore and
-        aggregation flow, which a lookup matched on the retention curve cannot
-        fully see.
+        Part of the cause is the reference population. Hohenbrink's median
+        K<sub>s</sub> is 20.9 cm/h, against 10.5 for GSHP: a factor of two.
+        Intact cores measured with a KSAT device carry flow through
+        macropores and aggregates. A lookup matched on the retention curve
+        cannot fully see that flow.
       </p>
     </div>
 
     <p>
-      Putting the cores' own source into the reference recovers much of it. The rows
-      below are paired: the same 560 cores, predicted first from a reference
-      without their source and then with it, held out by site so no core
-      predicts itself. The last four rows show what adding those cores does to
-      everyone else.
+      Putting the cores' own source into the reference recovers much of the
+      loss. The rows below are paired: the same 560 cores, predicted first
+      from a reference without their source and then with it. They are held
+      out by site, so no core predicts itself. The last four rows show what
+      adding those cores does to everyone else.
     </p>
 
     <table>
@@ -1708,49 +1788,50 @@
     </table>
 
     <p>
-      Bias is log<sub>10</sub> cm/h; coverage is the share of measured values
-      falling inside the reported 5&ndash;95 % band, against a nominal 90 %.
-      With their own source in the reference the cores' bias falls from
-      &minus;0.56 to &minus;0.16 and coverage rises from 51 % to 65 %. For
-      everyone else the cores change K<sub>s</sub> very little — European
-      coverage 66 % to 69 %, non-European soils unchanged — so they stay in the
-      default reference for the soils they represent.
+      Bias is in log<sub>10</sub> cm/h. Coverage is the share of measured
+      values inside the reported 5&ndash;95 % band, against a nominal 90 %.
+      With their own source in the reference, the bias of the cores falls
+      from &minus;0.56 to &minus;0.16, and coverage rises from 51 % to 65 %.
+      For everyone else, the cores change K<sub>s</sub> very little (European
+      coverage 66 % to 69 %, non-European soils unchanged). So they stay in
+      the default reference, for the soils they represent.
     </p>
 
     <p>
-      Read positively, the tests support the premise the tool rests on and
-      answer the practical question directly. Conductivity is read mainly from
-      the wet end of the curve: a model given only suctions up to 100 cm
-      predicts K<sub>s</sub> better than one given only the dry end (0.47
-      against 0.58 dex, p&lt;0.001), while texture is spread along the whole
-      curve. An unseen laboratory costs both halves about a quarter of their
-      skill: texture keeps 72 % of its kappa and K<sub>s</sub> 73 % of its rank
-      correlation; what K<sub>s</sub> loses more of is its level, because
+      Read positively, the tests support the premise of the tool and answer
+      the practical question directly. Conductivity is read mainly from the
+      wet end of the curve. A model given only suctions up to 100 cm predicts
+      K<sub>s</sub> better than one given only the dry end (0.47 against 0.58
+      dex, p&lt;0.001). Texture, in contrast, is spread along the whole curve.
+      An unseen laboratory costs both halves about a quarter of their skill:
+      texture keeps 72 % of its kappa, and K<sub>s</sub> 73 % of its rank
+      correlation. K<sub>s</sub> loses more of its level, because
       laboratories differ systematically in measured K<sub>s</sub>.
     </p>
 
     <p>
-      For a sensor network whose protocol the reference has never seen, with
-      depth and bulk density from installation, the tool reads 32 % of soils to
-      the exact class and 58 % to the texture group, against 12 % and 32 % from
-      depth and bulk density alone, and puts the physical K<sub>s</sub> within a
-      factor of 10 of the measured core for 75 % of soils (52 % without the
-      curve). Replicate cores of one soil differ by a median factor of 3.3, so
-      no method can do better than about a factor of 2.3 on a single core; once
-      a network's own verified sites are in the reference, in quantity, the
-      tool reaches 44 % exact, 66 % group and a K<sub>s</sub> error of
-      &times;2.4. The statistics, the confidence signals and the figures are in
-      the README section <em>Is it predictive?</em>
-      (<span class="m">verify_predictive.py</span>,
+      Take a sensor network whose protocol the reference has never seen, with
+      depth and bulk density from installation. The tool reads 32 % of its
+      soils to the exact class and 58 % to the texture group, against 12 % and
+      32 % from depth and bulk density alone. It puts the physical
+      K<sub>s</sub> within a factor of 10 of the measured core for 75 % of
+      soils (52 % without the curve). Replicate cores of one soil differ by a
+      median factor of 3.3, so no method can do better than about a factor of
+      2.3 on a single core. Once the network's own verified sites are in the
+      reference, in quantity, the tool reaches 44 % exact, 66 % group and a
+      K<sub>s</sub> error of &times;2.4. The statistics, the confidence
+      signals and the figures are in the README section <em>Is it
+      predictive?</em> (<span class="m">verify_predictive.py</span>,
       <span class="m">verify_network.py</span>).
     </p>
 
     <footer>
-      Reference counts as of the merged default, October 2026.
+      Reference counts as of the merged default, 31 October 2026.
       Sources: GSHP (Gupta et al. 2022), NCSS/KSSL (USDA-NRCS), Hohenbrink et al.
       (2023), EU-HYDI (Weynants et al. 2013), Babaeian et al. (2015; Arizona, shared
       data), Armas-Espinel (2013), Tong et al. (2024), Willard et al. (2026, HydroShare),
-      Vanderlinden et al. (2017, 2021), UNSODA 2.0, sDB (Vereecken et al. 2017).
+      Vanderlinden et al. (2017, 2021), Fujii et al. (2023, Dryad), Ottoni et al.
+      (2025, Ksat-SSIR-DB), UNSODA 2.0, sDB (Vereecken et al. 2017).
       Code and data: github.com/carpena1/py_HB_texture
     </footer>
   </div>

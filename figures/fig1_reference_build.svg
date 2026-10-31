@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- py_HB_texture, written from figures/workflow.html by figures/make_workflow_md.py -->
-<svg xmlns="http://www.w3.org/2000/svg" width="1040" height="1334" viewBox="0 0 1040 1334" role="img" aria-label="Thirteen source databases pass through per-source preparation scripts into derivative CSV tables; GSHP, KSSL, Hohenbrink, Zanjanrood, Arizona, the Canary Islands, the Yellow River Basin, the restricted EU-HYDI, Laikipia, the Andalusian soils and the Australian CSIRO cores (NatSoil and Boorowa) form the default merged reference of 21,546 layers, with UNSODA and sDB added only in the all set.">
+<svg xmlns="http://www.w3.org/2000/svg" width="1040" height="1522" viewBox="0 0 1040 1522" role="img" aria-label="Fifteen source databases pass through per-source preparation scripts into derivative CSV tables; GSHP, KSSL, Hohenbrink, Zanjanrood, Arizona, the Canary Islands, the Yellow River Basin, the restricted EU-HYDI, Laikipia, the Andalusian soils and the Australian CSIRO cores (NatSoil and Boorowa), Fujii et al. (Japan and Southeast Asia) and Ksat-SSIR-DB (Brazil) form the default merged reference of 21,720 layers, with UNSODA and sDB added only in the all set.">
       <defs>
         <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
           <path d="M 0 1 L 9 5 L 0 9 z" fill="#141A1D"/>
@@ -166,21 +166,61 @@
 <line x1="556" y1="1027" x2="592" y2="1027" marker-end="url(#ara)"/>
 <line x1="792" y1="1027" x2="844" y2="1027" marker-end="url(#ara)"/>
 </g>
+<!-- Japan and Southeast Asia -->
+<rect x="16" y="1082" width="184" height="78" rx="3" fill="none" stroke="#141A1D" opacity=".85"/>
+<text x="28" y="1104" font-size="13" font-weight="600" fill="#141A1D">Japan, SE Asia</text>
+<text x="28" y="1122" font-size="11" fill="#5C6A70">Fujii et al. 2023, Dryad</text>
+<text x="28" y="1138" font-size="11" fill="#5C6A70">59 cores, 23 forest/farm sites</text>
+<text x="28" y="1152" font-size="11" fill="#141A1D">CC0 public domain</text>
+<rect x="256" y="1082" width="300" height="78" rx="3" fill="#EAEEEC" stroke="#141A1D" opacity=".85"/>
+<text x="268" y="1102" font-size="11.5" font-family="IBM Plex Mono, monospace" fill="#0E6E73">prepare_fujii.py</text>
+<text x="268" y="1120" font-size="11" fill="#141A1D">points to pF 4.2; pF 5.5 and 7 dropped</text>
+<text x="268" y="1137" font-size="11" fill="#0E6E73">sheets joined on site and depth</text>
+<text x="268" y="1152" font-size="11" fill="#5C6A70">class re-derived from the fractions</text>
+<rect x="596" y="1082" width="196" height="78" rx="3" fill="none" stroke="#0E6E73"/>
+<text x="608" y="1106" font-size="11" font-family="IBM Plex Mono, monospace" fill="#0E6E73">fujii_reference</text>
+<text x="608" y="1126" font-size="13" font-weight="600" fill="#141A1D">59</text>
+<text x="608" y="1146" font-size="11" fill="#5C6A70">51 with K<tspan baseline-shift="sub" font-size="8">s</tspan></text>
+<g stroke="#141A1D" fill="none" opacity=".55"><line x1="200" y1="1121" x2="252" y2="1121" marker-end="url(#ar)"/></g>
+<g stroke="#0E6E73" fill="none">
+<line x1="556" y1="1121" x2="592" y2="1121" marker-end="url(#ara)"/>
+<line x1="792" y1="1121" x2="844" y2="1121" marker-end="url(#ara)"/>
+</g>
+<!-- Brazil -->
+<rect x="16" y="1176" width="184" height="78" rx="3" fill="none" stroke="#141A1D" opacity=".85"/>
+<text x="28" y="1198" font-size="13" font-weight="600" fill="#141A1D">Ksat-SSIR-DB (Brazil)</text>
+<text x="28" y="1216" font-size="11" fill="#5C6A70">Ottoni et al. 2025, SGB</text>
+<text x="28" y="1232" font-size="11" fill="#5C6A70">2,579 rows; 215 with a curve</text>
+<text x="28" y="1246" font-size="11" fill="#141A1D">public database</text>
+<rect x="256" y="1176" width="300" height="78" rx="3" fill="#EAEEEC" stroke="#141A1D" opacity=".85"/>
+<text x="268" y="1196" font-size="11.5" font-family="IBM Plex Mono, monospace" fill="#0E6E73">prepare_ksatssir.py</text>
+<text x="268" y="1214" font-size="11" fill="#141A1D">all five points: 0, 6, 10, 33, 1500 kPa</text>
+<text x="268" y="1231" font-size="11" fill="#0E6E73">100 rows at HYBRAS v1 sites left out</text>
+<text x="268" y="1246" font-size="11" fill="#5C6A70">lab K<tspan baseline-shift="sub" font-size="8">s</tspan> on rings only, mm/h &#8594; cm/h</text>
+<rect x="596" y="1176" width="196" height="78" rx="3" fill="none" stroke="#0E6E73"/>
+<text x="608" y="1200" font-size="11" font-family="IBM Plex Mono, monospace" fill="#0E6E73">ksatssir_reference</text>
+<text x="608" y="1220" font-size="13" font-weight="600" fill="#141A1D">115</text>
+<text x="608" y="1240" font-size="11" fill="#5C6A70">95 with K<tspan baseline-shift="sub" font-size="8">s</tspan></text>
+<g stroke="#141A1D" fill="none" opacity=".55"><line x1="200" y1="1215" x2="252" y2="1215" marker-end="url(#ar)"/></g>
+<g stroke="#0E6E73" fill="none">
+<line x1="556" y1="1215" x2="592" y2="1215" marker-end="url(#ara)"/>
+<line x1="792" y1="1215" x2="844" y2="1215" marker-end="url(#ara)"/>
+</g>
 <!-- UNSODA -->
-        <rect x="16" y="1082" width="184" height="58" rx="3" fill="none" stroke="#141A1D" opacity=".5"/>
-        <text x="28" y="1104" font-size="13" font-weight="600" fill="#141A1D" opacity=".75">UNSODA 2.0 (worldwide)</text>
-        <text x="28" y="1122" font-size="11" fill="#5C6A70">790 soils</text>
-        <rect x="256" y="1082" width="300" height="58" rx="3" fill="#EAEEEC" stroke="#141A1D" opacity=".5"/>
-        <text x="268" y="1102" font-size="11.5" font-family="IBM Plex Mono, monospace" fill="#5C6A70">prepare_unsoda.py</text>
-        <text x="268" y="1120" font-size="11" fill="#5C6A70">fit vG to measured points, cm &#8594; kPa</text>
+        <rect x="16" y="1270" width="184" height="58" rx="3" fill="none" stroke="#141A1D" opacity=".5"/>
+        <text x="28" y="1292" font-size="13" font-weight="600" fill="#141A1D" opacity=".75">UNSODA 2.0 (worldwide)</text>
+        <text x="28" y="1310" font-size="11" fill="#5C6A70">790 soils</text>
+        <rect x="256" y="1270" width="300" height="58" rx="3" fill="#EAEEEC" stroke="#141A1D" opacity=".5"/>
+        <text x="268" y="1290" font-size="11.5" font-family="IBM Plex Mono, monospace" fill="#5C6A70">prepare_unsoda.py</text>
+        <text x="268" y="1308" font-size="11" fill="#5C6A70">fit vG to measured points, cm &#8594; kPa</text>
 
         <!-- sDB -->
-        <rect x="16" y="1156" width="184" height="58" rx="3" fill="none" stroke="#141A1D" opacity=".5"/>
-        <text x="28" y="1178" font-size="13" font-weight="600" fill="#141A1D" opacity=".75">sDB (Belgium)</text>
-        <text x="28" y="1196" font-size="11" fill="#5C6A70">PANGAEA, CC-BY-3.0</text>
-        <rect x="256" y="1156" width="300" height="58" rx="3" fill="#EAEEEC" stroke="#141A1D" opacity=".5"/>
-        <text x="268" y="1176" font-size="11.5" font-family="IBM Plex Mono, monospace" fill="#5C6A70">prepare_sdb.py</text>
-        <text x="268" y="1194" font-size="11" fill="#5C6A70">fit vG to measured points</text>
+        <rect x="16" y="1344" width="184" height="58" rx="3" fill="none" stroke="#141A1D" opacity=".5"/>
+        <text x="28" y="1366" font-size="13" font-weight="600" fill="#141A1D" opacity=".75">sDB (Belgium)</text>
+        <text x="28" y="1384" font-size="11" fill="#5C6A70">PANGAEA, CC-BY-3.0</text>
+        <rect x="256" y="1344" width="300" height="58" rx="3" fill="#EAEEEC" stroke="#141A1D" opacity=".5"/>
+        <text x="268" y="1364" font-size="11.5" font-family="IBM Plex Mono, monospace" fill="#5C6A70">prepare_sdb.py</text>
+        <text x="268" y="1382" font-size="11" fill="#5C6A70">fit vG to measured points</text>
 
         <!-- derivative tables -->
         <g font-size="11" font-family="IBM Plex Mono, monospace">
@@ -226,41 +266,41 @@
           <text x="608" y="844" font-size="13" font-family="IBM Plex Sans, sans-serif" font-weight="600" fill="#141A1D">1,030</text>
           <text x="608" y="864" font-size="11" font-family="IBM Plex Sans, sans-serif" fill="#5C6A70">1,015 with K<tspan baseline-shift="sub" font-size="8">s</tspan></text>
 
-          <rect x="596" y="1082" width="196" height="58" rx="3" fill="none" stroke="#141A1D" opacity=".5"/>
-          <text x="608" y="1104" fill="#5C6A70">unsoda_reference</text>
-          <text x="608" y="1124" font-size="13" font-family="IBM Plex Sans, sans-serif" font-weight="600" fill="#5C6A70">581</text>
+          <rect x="596" y="1270" width="196" height="58" rx="3" fill="none" stroke="#141A1D" opacity=".5"/>
+          <text x="608" y="1292" fill="#5C6A70">unsoda_reference</text>
+          <text x="608" y="1312" font-size="13" font-family="IBM Plex Sans, sans-serif" font-weight="600" fill="#5C6A70">581</text>
 
-          <rect x="596" y="1156" width="196" height="58" rx="3" fill="none" stroke="#141A1D" opacity=".5"/>
-          <text x="608" y="1178" fill="#5C6A70">sdb_reference</text>
-          <text x="608" y="1198" font-size="13" font-family="IBM Plex Sans, sans-serif" font-weight="600" fill="#5C6A70">165</text>
+          <rect x="596" y="1344" width="196" height="58" rx="3" fill="none" stroke="#141A1D" opacity=".5"/>
+          <text x="608" y="1366" fill="#5C6A70">sdb_reference</text>
+          <text x="608" y="1386" font-size="13" font-family="IBM Plex Sans, sans-serif" font-weight="600" fill="#5C6A70">165</text>
         </g>
 
         <!-- reference sets -->
-        <rect x="848" y="48" width="176" height="1018" rx="3" fill="#D5E7E7" stroke="#0E6E73"/>
+        <rect x="848" y="48" width="176" height="1206" rx="3" fill="#D5E7E7" stroke="#0E6E73"/>
         <text x="862" y="72" font-size="11.5" font-family="IBM Plex Mono, monospace" fill="#0E6E73">merged</text>
         <text x="862" y="90" font-size="10.5" font-family="IBM Plex Mono, monospace" fill="#5C6A70">(default)</text>
-        <text x="862" y="130" font-size="28" font-weight="600" fill="#141A1D">21,546</text>
+        <text x="862" y="130" font-size="28" font-weight="600" fill="#141A1D">21,720</text>
         <text x="862" y="152" font-size="11" fill="#5C6A70">layers</text>
-        <text x="862" y="182" font-size="11" fill="#141A1D">11,100 carry a measured</text>
+        <text x="862" y="182" font-size="11" fill="#141A1D">11,246 carry a measured</text>
         <text x="862" y="197" font-size="11" fill="#141A1D">saturated conductivity</text>
         <text x="862" y="226" font-size="11" fill="#5C6A70">7,862 European layers</text>
         <text x="862" y="241" font-size="11" fill="#5C6A70">(900 + 483 + 6,479)</text>
         <text x="862" y="270" font-size="11" fill="#5C6A70">12 USDA classes;</text>
-        <text x="862" y="285" font-size="11" fill="#5C6A70">sand is 22 % of rows,</text>
+        <text x="862" y="285" font-size="11" fill="#5C6A70">sand is 21 % of rows,</text>
         <text x="862" y="300" font-size="11" fill="#5C6A70">silt under 0.4 %</text>
         <text x="862" y="336" font-size="11" fill="#141A1D">Without the restricted</text>
         <text x="862" y="351" font-size="11" fill="#141A1D">EU-HYDI and Boorowa</text>
         <text x="862" y="366" font-size="11" fill="#141A1D">tables, merged:</text>
-        <text x="862" y="381" font-size="11" fill="#141A1D">the 14,692</text>
+        <text x="862" y="381" font-size="11" fill="#141A1D">the 14,866</text>
         <text x="862" y="396" font-size="11" fill="#5C6A70">(--reference public)</text>
 
-        <rect x="848" y="1082" width="176" height="132" rx="3" fill="none" stroke="#141A1D" opacity=".5"/>
-        <text x="862" y="1104" font-size="11.5" font-family="IBM Plex Mono, monospace" fill="#5C6A70">all</text>
-        <text x="862" y="1134" font-size="20" font-weight="600" fill="#5C6A70">22,292</text>
-        <text x="862" y="1158" font-size="11" fill="#5C6A70">adds UNSODA and sDB;</text>
-        <text x="862" y="1173" font-size="11" fill="#5C6A70">both largely duplicated</text>
-        <text x="862" y="1188" font-size="11" fill="#5C6A70">inside GSHP already,</text>
-        <text x="862" y="1203" font-size="11" fill="#5C6A70">so not in the default</text>
+        <rect x="848" y="1270" width="176" height="132" rx="3" fill="none" stroke="#141A1D" opacity=".5"/>
+        <text x="862" y="1292" font-size="11.5" font-family="IBM Plex Mono, monospace" fill="#5C6A70">all</text>
+        <text x="862" y="1322" font-size="20" font-weight="600" fill="#5C6A70">22,466</text>
+        <text x="862" y="1346" font-size="11" fill="#5C6A70">adds UNSODA and sDB;</text>
+        <text x="862" y="1361" font-size="11" fill="#5C6A70">both largely duplicated</text>
+        <text x="862" y="1376" font-size="11" fill="#5C6A70">inside GSHP already,</text>
+        <text x="862" y="1391" font-size="11" fill="#5C6A70">so not in the default</text>
       </g>
 
       <g stroke="#141A1D" fill="none" opacity=".55">
@@ -273,8 +313,8 @@
         <line x1="200" y1="651" x2="252" y2="651" marker-end="url(#ar)"/>
         <line x1="200" y1="745" x2="252" y2="745" marker-end="url(#ar)"/>
         <line x1="200" y1="839" x2="252" y2="839" marker-end="url(#ar)"/>
-        <line x1="200" y1="1111" x2="252" y2="1111" marker-end="url(#ar)" opacity=".6"/>
-        <line x1="200" y1="1185" x2="252" y2="1185" marker-end="url(#ar)" opacity=".6"/>
+        <line x1="200" y1="1299" x2="252" y2="1299" marker-end="url(#ar)" opacity=".6"/>
+        <line x1="200" y1="1373" x2="252" y2="1373" marker-end="url(#ar)" opacity=".6"/>
       </g>
       <g stroke="#0E6E73" fill="none">
         <line x1="556" y1="87"  x2="592" y2="87"  marker-end="url(#ara)"/>
@@ -297,14 +337,14 @@
         <line x1="792" y1="839" x2="844" y2="839" marker-end="url(#ara)"/>
       </g>
       <g stroke="#141A1D" fill="none" opacity=".4">
-        <line x1="556" y1="1111" x2="592" y2="1111" marker-end="url(#ar)"/>
-        <line x1="556" y1="1185" x2="592" y2="1185" marker-end="url(#ar)"/>
-        <line x1="792" y1="1111" x2="844" y2="1111" marker-end="url(#ar)"/>
-        <line x1="792" y1="1185" x2="844" y2="1185" marker-end="url(#ar)"/>
+        <line x1="556" y1="1299" x2="592" y2="1299" marker-end="url(#ar)"/>
+        <line x1="556" y1="1373" x2="592" y2="1373" marker-end="url(#ar)"/>
+        <line x1="792" y1="1299" x2="844" y2="1299" marker-end="url(#ar)"/>
+        <line x1="792" y1="1373" x2="844" y2="1373" marker-end="url(#ar)"/>
       </g>
 
-      <rect x="256" y="1238" width="768" height="76" rx="3" fill="none" stroke="#141A1D" opacity=".35" stroke-dasharray="3 3"/>
-      <text x="270" y="1260" font-size="11.5" font-family="IBM Plex Mono, monospace" fill="#141A1D" opacity=".8">free_m.py &#8212; shared by every preparation script</text>
-      <text x="270" y="1280" font-size="11" font-family="IBM Plex Sans, sans-serif" fill="#5C6A70">Also writes an unconstrained companion fit (&#952;r, &#952;s, &#945;, n, m) alongside the</text>
-      <text x="270" y="1297" font-size="11" font-family="IBM Plex Sans, sans-serif" fill="#5C6A70">Mualem one, refitting measured points where a source ships them.</text>
+      <rect x="256" y="1426" width="768" height="76" rx="3" fill="none" stroke="#141A1D" opacity=".35" stroke-dasharray="3 3"/>
+      <text x="270" y="1448" font-size="11.5" font-family="IBM Plex Mono, monospace" fill="#141A1D" opacity=".8">free_m.py &#8212; shared by every preparation script</text>
+      <text x="270" y="1468" font-size="11" font-family="IBM Plex Sans, sans-serif" fill="#5C6A70">Also writes an unconstrained companion fit (&#952;r, &#952;s, &#945;, n, m) alongside the</text>
+      <text x="270" y="1485" font-size="11" font-family="IBM Plex Sans, sans-serif" fill="#5C6A70">Mualem one, refitting measured points where a source ships them.</text>
     </svg>

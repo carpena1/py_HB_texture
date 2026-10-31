@@ -52,7 +52,10 @@ BAKE = {"var(--accent)": "#0E6E73", "var(--add)": "#B8471E",
         "currentColor": "#141A1D"}
 REGIONS = {"North America": (-170, -52, 15, 72),
            "Europe": (*EU_BBOX["lon"], *EU_BBOX["lat"]),
-           "Asia": (32, 150, 5, 78), "South America": (-82, -34, -56, 13),
+           # Two boxes, so Southeast Asia (Indonesia, Fujii et al.) is
+           # counted: east of 90 E Asia reaches 11 S, meeting Australasia.
+           "Asia": [(32, 150, 5, 78), (90, 150, -11, 4.99)],
+           "South America": (-82, -34, -56, 13),
            # Two boxes, so Africa stops taking in Iran and eastern Arabia:
            # east of 43 E only the Horn, south of 12 N, is African.
            "Africa": [(-18, 43, -35, 37), (43.01, 52, -35, 12)],
@@ -198,6 +201,7 @@ def main():
     # called out as one.
     and_n = int(sum(src.get(f"Vanderlinden_{s}", 0)
                     for s in ("Setenil", "Tomejil", "Lebrija", "Donana")))
+    ksb_n = int(src[src.index.astype(str).str.startswith("KsatSSIR_")].sum())
     callouts = f'''
         <line x1="302" y1="192" x2="302" y2="228" stroke="currentColor" opacity=".55"/>
         <text x="296" y="243" text-anchor="end">Florida &#8212; {fl:,} layers,</text>
@@ -215,7 +219,11 @@ def main():
         <line x1="802" y1="162" x2="826" y2="196" stroke="currentColor" opacity=".55"/>
         <text x="830" y="208">Yellow River Basin {int(src.get("Tong_YellowRiver", 0)):,}</text>
         <line x1="279" y1="149" x2="238" y2="120" stroke="currentColor" opacity=".55"/>
-        <text x="234" y="116" text-anchor="end">KSSL, across the US {int(src.get("KSSL", 0)):,}</text>'''
+        <text x="234" y="116" text-anchor="end">KSSL, across the US {int(src.get("KSSL", 0)):,}</text>
+        <line x1="321" y1="308" x2="300" y2="318" stroke="currentColor" opacity=".55"/>
+        <text x="296" y="322" text-anchor="end">Brazil, Ksat-SSIR-DB {ksb_n:,}</text>
+        <line x1="849" y1="297" x2="878" y2="318" stroke="currentColor" opacity=".55"/>
+        <text x="882" y="322">Japan, SE Asia (Fujii) {int(src.get("Fujii_Dryad", 0)):,}</text>'''
 
     ly = bot + 34
     size_leg, lx = [], 20.0

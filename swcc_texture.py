@@ -48,7 +48,8 @@ REFERENCE_CSV = os.path.join(DATA_DIR, "gshp_reference.csv")
 # are selected -- despite KSSL carrying no Ksat of its own.
 REFERENCE_SETS = {
     # Laikipia, Arizona, the Canary Islands and the Yellow River Basin joined
-    # the default in 2026-09, after EU-HYDI. Where a restricted table has not
+    # the default in 2026-09, after EU-HYDI; Fujii (Japan and Southeast Asia)
+    # and Ksat-SSIR-DB (Brazil) on 2026-10-31. Where a restricted table has not
     # been built, the default quietly becomes "public" -- see
     # RESTRICTED_TABLES.
     "merged": ["gshp_reference.csv", "kssl_reference.csv",
@@ -58,6 +59,7 @@ REFERENCE_SETS = {
                "tong_reference.csv", "setenil_reference.csv",
                "tomejil_reference.csv", "lebrija_reference.csv",
                "donana_reference.csv", "natsoil_reference.csv",
+               "fujii_reference.csv", "ksatssir_reference.csv",
                "boorowa_reference.csv", "local_reference.csv"],
     # The distributed tables: what a fresh clone has.
     "public": ["gshp_reference.csv", "kssl_reference.csv",
@@ -66,7 +68,8 @@ REFERENCE_SETS = {
                "willard_reference.csv", "tong_reference.csv",
                "setenil_reference.csv", "tomejil_reference.csv",
                "lebrija_reference.csv", "donana_reference.csv",
-               "natsoil_reference.csv"],
+               "natsoil_reference.csv", "fujii_reference.csv",
+               "ksatssir_reference.csv"],
     "gshp": ["gshp_reference.csv"],
     "kssl": ["kssl_reference.csv"],
     "hohenbrink": ["hohenbrink_reference.csv"],
@@ -139,6 +142,22 @@ REFERENCE_SETS = {
     # core; public file, distribution not yet decided; independent test
     # with verify_external.py.
     "kansas": ["kansas_reference.csv"],
+    # Fujii et al., Dryad (CC0; prepare_fujii.py): 59 undisturbed cores from
+    # Japan, Indonesia, Thailand and Canada, retention to pF 4.2 and Ks. As a
+    # new source 39.0 % exact (always "clay" 35.6 %), Ks from the kNN 16x too
+    # low (forest soils). In the default since 2026-10-31: verify_join_effect.py
+    # on 1,733 reference soils finds no harm to the rest (+0.7 pp exact for a
+    # new site, p=0.33; +0.6 pp for a new source, p=0.44; Ks +0.0015 dex,
+    # p=0.25).
+    "fujii": ["fujii_reference.csv"],
+    # Ksat-SSIR-DB, Brazil (Ottoni et al. 2025; prepare_ksatssir.py): 115 rows
+    # with retention at 0-1500 kPa, the HYBRAS v1 sites left out. As a new
+    # source 52.2 % exact (always "clay" 53.0 %), 57.4 % with its own soils in
+    # the reference. In the default since 2026-10-31: verify_join_effect.py on
+    # 1,733 reference soils finds no harm to the rest (-0.7 pp exact for a new
+    # site, p=0.39; -0.1 pp for a new source, p=1.00) and Ks slightly better
+    # (-0.0094 dex, p=0.005).
+    "ksatssir": ["ksatssir_reference.csv"],
     # The NatSoil projects measured by Sedigraph (Morphology, RAALS,
     # CSIRO_LW): read poorly as a new source, so a test set only.
     "natsoil_other": ["natsoil_other_reference.csv"],
@@ -149,6 +168,7 @@ REFERENCE_SETS = {
             "tong_reference.csv", "setenil_reference.csv",
             "tomejil_reference.csv", "lebrija_reference.csv",
             "donana_reference.csv", "natsoil_reference.csv",
+            "fujii_reference.csv", "ksatssir_reference.csv",
             "boorowa_reference.csv", "unsoda_reference.csv", "sdb_reference.csv",
             "local_reference.csv"],
 }
@@ -945,6 +965,11 @@ def estimate(h, theta, ref=None, n_mc=300, k=30, seed=0, depth=None,
             bulk_density=bulk_density, andic=andic_code)
 
     frac_vals = np.array(frac_vals); frac_w = np.array(frac_w)
+    # A reference layer may carry a class but no fractions (Donana's El
+    # Acebuche topsoil, "practically all sand"): it votes on the class above
+    # but is left out here, or one such neighbour makes every fraction NaN.
+    has_frac = np.isfinite(frac_vals).all(axis=1)
+    frac_vals, frac_w = frac_vals[has_frac], frac_w[has_frac]
     frac_mean = (frac_vals * frac_w[:, None]).sum(axis=0) / frac_w.sum()
     frac_lo = [_wpercentile(frac_vals[:, j], frac_w, 5) for j in range(3)]
     frac_hi = [_wpercentile(frac_vals[:, j], frac_w, 95) for j in range(3)]
@@ -1088,7 +1113,7 @@ def main():
     ap.add_argument("--reference", choices=sorted(REFERENCE_SETS),
                     default=DEFAULT_REFERENCE,
                     help="reference table. merged (default) = every table "
-                         "of the default reference (21,546 layers; see README, "
+                         "of the default reference (21,720 layers; see README, "
                          "Reference data). EU-HYDI (consortium-restricted) and "
                          "Boorowa (CC BY-NC-SA) are built locally with "
                          "prepare_euhydi.py and prepare_boorowa.py and never "

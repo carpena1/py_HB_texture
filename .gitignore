@@ -141,3 +141,8 @@ data/natsoil_raw/
 # independent test, distribution not yet decided, so raw file and table stay local.
 data/kansas_raw/
 data/kansas_reference.csv
+# Raw downloads of Fujii et al. (Dryad, CC0) and Ksat-SSIR-DB (SGB, 2024 v3),
+# rebuilt with prepare_fujii.py and prepare_ksatssir.py; the derived tables are
+# distributed.
+data/fujii_raw/
+data/ksatssir_raw/
