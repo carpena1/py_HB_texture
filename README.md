@@ -10,6 +10,11 @@ The tool fits a van Genuchten curve to the data and compares it with about
 measured on undisturbed soil — typically in-situ sensors — and the reference
 can grow with your own lab-verified sites.
 
+For a visual overview, read [WORKFLOW.md](WORKFLOW.md). It shows in four
+figures how the reference is built from its sources, where its soils come
+from, how one curve becomes a prediction, and what each validation level
+proves. This README gives the details.
+
 ## What to expect
 
 The tool always searches the whole reference. How well it does depends on
@@ -1179,7 +1184,9 @@ joins the reference), `verify_volcanic.py`, `verify_andic_knn.py` and
 parallel, one process per core).
 
 **Figures** — `figures/workflow.html` (how the reference is built, how a
-prediction is made, what the validation proves) with its SVGs, and
+prediction is made, what the validation proves) with its SVGs;
+`figures/make_workflow_md.py` writes `WORKFLOW.md` and the standalone figure
+SVGs from it, so edit the page and rerun the script; and
 `figures/make_coverage_map.py`, `figures/make_class_distribution.py` and
 `figures/make_predictive_figures.py` (the figures of "Is it predictive?").
 

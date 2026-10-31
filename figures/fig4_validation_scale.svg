@@ -1,64 +1,44 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- py_HB_texture. Land outline: Natural Earth 110 m, public domain. -->
-<svg xmlns="http://www.w3.org/2000/svg" width="1040" height="300" viewBox="0 0 1040 300" role="img" aria-label="A scale of exact-class accuracy showing chance at 8.3 percent, the source-blocked estimate at 29 percent, profile-level leave-one-out at 37 percent, and the model-free Cover and Hart ceiling at 53 percent.">
-      <defs>
-        <marker id="ar3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-          <path d="M 0 1 L 9 5 L 0 9 z" fill="#141A1D"/>
-        </marker>
-      </defs>
-
+<!-- py_HB_texture, written from figures/workflow.html by figures/make_workflow_md.py -->
+<svg xmlns="http://www.w3.org/2000/svg" width="1040" height="340" viewBox="0 0 1040 340" role="img" aria-label="Exact-class accuracy on the same 1,680 test soils. A new site whose laboratory is in the reference: 39.7 percent from the curve alone, 45.5 percent with depth and bulk density. An unseen laboratory: 29.3 and 31.9 percent. Chance is 8.3 percent; the Cover and Hart ceiling for the curve alone is 54 and 44 percent.">
       <text x="16" y="26" font-size="11" font-family="IBM Plex Mono, monospace" letter-spacing="1.4" fill="#5C6A70">EXACT TEXTURE CLASS, 12 USDA CLASSES</text>
-
-      <!-- axis -->
-      <line x1="60" y1="176" x2="984" y2="176" stroke="#141A1D" opacity=".35"/>
-      <g font-family="IBM Plex Mono, monospace" font-size="11" fill="#5C6A70" text-anchor="middle">
-        <text x="60" y="200">0 %</text>
-        <text x="368" y="200">20 %</text>
-        <text x="676" y="200">40 %</text>
-        <text x="984" y="200">60 %</text>
+      <g font-family="IBM Plex Sans, sans-serif" font-size="11.5" fill="#141A1D">
+        <rect x="640" y="15" width="14" height="12" fill="#141A1D" opacity=".28"/>
+        <text x="660" y="26">curve alone</text>
+        <rect x="760" y="15" width="14" height="12" fill="#0E6E73" opacity=".85"/>
+        <text x="780" y="26">+ depth and bulk density</text>
       </g>
-      <g stroke="#141A1D" opacity=".25">
-        <line x1="60" y1="170" x2="60" y2="182"/>
-        <line x1="368" y1="170" x2="368" y2="182"/>
-        <line x1="676" y1="170" x2="676" y2="182"/>
-        <line x1="984" y1="170" x2="984" y2="182"/>
-      </g>
-
-      <!-- unreachable band beyond ceiling -->
-      <rect x="879" y="120" width="105" height="56" fill="#141A1D" opacity=".07"/>
-
-      <!-- markers: x = 60 + pct*15.4 -->
       <g font-family="IBM Plex Sans, sans-serif">
-        <!-- chance -->
-        <line x1="188" y1="120" x2="188" y2="176" stroke="#141A1D" opacity=".5" stroke-dasharray="3 3"/>
-        <text x="188" y="110" font-size="12" text-anchor="middle" fill="#5C6A70">8.3 %</text>
-        <text x="188" y="92" font-size="11.5" text-anchor="middle" fill="#5C6A70">chance</text>
-
-        <!-- source blocked -->
-        <line x1="502" y1="120" x2="502" y2="176" stroke="#0E6E73" stroke-width="2"/>
-        <circle cx="502" cy="176" r="4" fill="#0E6E73"/>
-        <text x="502" y="110" font-size="15" font-weight="600" text-anchor="middle" fill="#141A1D">29 %</text>
-        <text x="502" y="90" font-size="11.5" text-anchor="middle" fill="#0E6E73">unseen laboratory</text>
-        <text x="502" y="74" font-size="11" text-anchor="middle" fill="#5C6A70">source-blocked</text>
-
-        <!-- profile LOO -->
-        <line x1="633" y1="120" x2="633" y2="176" stroke="#141A1D" stroke-width="2" opacity=".75"/>
-        <circle cx="633" cy="176" r="4" fill="#141A1D" opacity=".75"/>
-        <text x="633" y="110" font-size="15" font-weight="600" text-anchor="middle" fill="#141A1D">37 %</text>
-        <text x="633" y="90" font-size="11.5" text-anchor="middle" fill="#5C6A70">profile-level leave-one-out</text>
-        <text x="633" y="74" font-size="11" text-anchor="middle" fill="#5C6A70">same labs, different site</text>
-
-        <!-- ceiling -->
-        <line x1="879" y1="120" x2="879" y2="176" stroke="#141A1D" opacity=".5" stroke-dasharray="3 3"/>
-        <text x="879" y="110" font-size="12" text-anchor="middle" fill="#5C6A70">53 %</text>
-        <text x="879" y="92" font-size="11.5" text-anchor="middle" fill="#5C6A70">Cover &amp; Hart ceiling</text>
-        <text x="931" y="146" font-size="10.5" text-anchor="middle" fill="#5C6A70">unreachable</text>
+        <text x="60" y="60" font-size="12.5" font-weight="600" fill="#141A1D">New site, its laboratory already in the reference</text>
+        <text x="60" y="160" font-size="12.5" font-weight="600" fill="#0E6E73">Unseen laboratory</text>
+        <text x="198" y="160" font-size="11" fill="#5C6A70">its whole contributing source held out</text>
+        <rect x="60" y="68" width="611.4" height="20" fill="#141A1D" opacity=".28"/>
+        <text x="679.4" y="83" font-size="13" fill="#141A1D">39.7 %</text>
+        <rect x="60" y="92" width="700.7" height="20" fill="#0E6E73" opacity=".85"/>
+        <text x="768.7" y="107" font-size="13" font-weight="600" fill="#141A1D">45.5 %</text>
+        <rect x="60" y="168" width="451.2" height="20" fill="#141A1D" opacity=".28"/>
+        <text x="519.2" y="183" font-size="13" fill="#141A1D">29.3 %</text>
+        <rect x="60" y="192" width="491.3" height="20" fill="#0E6E73" opacity=".85"/>
+        <text x="559.3" y="207" font-size="13" font-weight="600" fill="#141A1D">31.9 %</text>
+        <line x1="887.0" y1="64" x2="887.0" y2="116" stroke="#141A1D" opacity=".55" stroke-dasharray="3 3"/>
+        <text x="893.0" y="94" font-size="11" fill="#5C6A70">ceiling 54 %</text>
+        <line x1="733.0" y1="164" x2="733.0" y2="216" stroke="#141A1D" opacity=".55" stroke-dasharray="3 3"/>
+        <text x="739.0" y="194" font-size="11" fill="#5C6A70">ceiling 44 %</text>
+        <line x1="187.8" y1="64" x2="187.8" y2="120" stroke="#141A1D" opacity=".4" stroke-dasharray="2 4"/>
+        <line x1="187.8" y1="166" x2="187.8" y2="226" stroke="#141A1D" opacity=".4" stroke-dasharray="2 4"/>
+        <text x="187.8" y="262" font-size="11" text-anchor="middle" fill="#5C6A70">chance 8.3 %</text>
       </g>
-
-      <!-- leakage arrow -->
-      <line x1="627" y1="228" x2="508" y2="228" stroke="#141A1D" opacity=".7" marker-end="url(#ar3)"/>
-      <text x="584" y="220" font-size="12" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" fill="#141A1D">&#8722;8.5 points of protocol leakage</text>
-      <text x="600" y="248" font-size="11" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" fill="#5C6A70">what disappears when a whole contributing laboratory is held out</text>
-
-      <text x="60" y="284" font-size="11" font-family="IBM Plex Sans, sans-serif" fill="#5C6A70">The ceiling is a property of the four coordinates, not of the database — no amount of additional data moves it.</text>
+      <!-- axis -->
+      <line x1="60" y1="226" x2="984" y2="226" stroke="#141A1D" opacity=".35"/>
+      <g font-family="IBM Plex Mono, monospace" font-size="11" fill="#5C6A70" text-anchor="middle">
+        <text x="60" y="244">0 %</text>
+        <text x="368" y="244">20 %</text>
+        <text x="676" y="244">40 %</text>
+        <text x="984" y="244">60 %</text>
+      </g>
+      <g font-family="IBM Plex Sans, sans-serif" font-size="11.5" fill="#141A1D">
+        <text x="60" y="290">Holding out the laboratory costs 10.4 points from the curve alone and 13.6 with depth and bulk density:</text>
+        <text x="60" y="306">those inputs help far more once the laboratory's own soils are in the reference.</text>
+        <text x="60" y="330" font-size="11" fill="#5C6A70">Dashed: the Cover &amp; Hart ceiling for the curve's four van Genuchten parameters. With depth and bulk density as inputs the bound differs and is not computed.</text>
+      </g>
     </svg>
