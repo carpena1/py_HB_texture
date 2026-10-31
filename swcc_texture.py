@@ -216,7 +216,8 @@ ANDIC_LAMBDA = 1.5
 # Ks is the weighted median of the KS_K nearest reference layers that carry a
 # measured Ks (2026-10). Before, it came from the k = 30 nearest layers of any
 # kind, of which only those with a Ks voted: about 14 for a new source, since
-# half the reference (KSSL) has none. Searching Ks-bearing layers only at
+# about half the reference layers have no Ks (KSSL, the largest such source,
+# has none at all). Searching Ks-bearing layers only at
 # k = 30 lowered the median error for a new source from 0.77 to 0.72 dex
 # (p = 3e-12), and 15 such neighbours scored the same as the old lookup, so
 # the gain is the number of votes, not their closeness. k was then chosen out

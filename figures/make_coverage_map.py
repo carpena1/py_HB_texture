@@ -221,9 +221,10 @@ def main():
         <line x1="279" y1="149" x2="238" y2="120" stroke="currentColor" opacity=".55"/>
         <text x="234" y="116" text-anchor="end">KSSL, across the US {int(src.get("KSSL", 0)):,}</text>
         <line x1="321" y1="308" x2="300" y2="318" stroke="currentColor" opacity=".55"/>
-        <text x="296" y="322" text-anchor="end">Brazil, Ksat-SSIR-DB {ksb_n:,}</text>
+        <text x="296" y="322" text-anchor="end">Ksat-SSIR-DB (Brazil) {ksb_n:,}</text>
         <line x1="849" y1="297" x2="878" y2="318" stroke="currentColor" opacity=".55"/>
-        <text x="882" y="322">Japan, SE Asia (Fujii) {int(src.get("Fujii_Dryad", 0)):,}</text>'''
+        <text x="882" y="322">Fujii et al.</text>
+        <text x="882" y="336">(Japan, SE Asia) {int(src.get("Fujii_Dryad", 0)):,}</text>'''
 
     ly = bot + 34
     size_leg, lx = [], 20.0

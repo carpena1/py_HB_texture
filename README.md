@@ -110,9 +110,10 @@ predictor would put only 42 % of cores within a factor of 2.
 **The curve is what predicts.** For a new network, the curve adds 20 points
 of exact class (95 % interval +14 to +24) to what depth and bulk density
 give. It adds 26 points of texture group (+18 to +33). It also adds 23
-points of Ks within a factor of 10 for the physical estimate (+8 to +30;
-+17, from +4 to +24, for the neighbours), whose rank correlation with the
-measured Ks rises from −0.02 to 0.64. The physical estimate is the better Ks
+points of Ks within a factor of 10 for the physical estimate (+9 to +30),
+and 17 for the neighbour estimate (+4 to +24). The rank correlation of Ks
+with the measured Ks rises from −0.02 (depth and bulk density alone) to
+0.64 for the physical estimate and 0.53 for the neighbours. The physical estimate is the better Ks
 for a new network (×2.7 against ×3.9). Once the network's own verified
 sites are in, the neighbour estimate reaches ×2.4, close to the replicate
 floor. Its 5–95 % band then holds 88 % of the measurements, against a
@@ -981,8 +982,9 @@ density (`--bulk-density`) tightens the first row to 0.36 dex (×2.3), with
 **How many neighbours, and which.** Ks is the weighted median of the 150
 nearest reference layers that carry a measured Ks (`swcc_texture.KS_K`).
 Until 2026-10 it came from the 30 nearest layers of any kind, and only those
-with a Ks voted. That was about 14, because half the reference (KSSL) has
-none. A search of Ks-bearing layers only, at 30, cut the median error for a
+with a Ks voted. That was about 14, because about half the reference
+layers have no measured Ks (10,474 of 21,720; KSSL, with 2,530, is the
+largest source without any). A search of Ks-bearing layers only, at 30, cut the median error for a
 new source from 0.77 to 0.72 dex (p = 3e-12). 15 such neighbours scored the
 same as the old lookup. So what helps is the number of votes, not their
 closeness. The number was then chosen out of fold, as the air-entry cap
