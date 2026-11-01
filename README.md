@@ -438,7 +438,7 @@ every other number identical.
 |---|---|---|---|---|
 | GSHP (Gupta et al. 2022), quality-filtered, without its Australian rows | 9,900 | 6,552 | per contributor | CC BY 4.0, committed |
 | NCSS/KSSL (USDA-NRCS) | 2,530 | 0 | undisturbed | public domain, committed |
-| Hohenbrink et al. (2023), German cores | 560 | 402 | undisturbed | committed |
+| Hohenbrink et al. (2023), mainly German cores (some from Israel, Canada and Japan) | 560 | 402 | undisturbed | committed |
 | Zanjanrood, north-west Iran (Babaeian et al. 2015) | 169 | 169 | undisturbed | committed |
 | Arizona, USA (E. Babaeian, measurements shared with this project) | 21 | 21 | undisturbed | committed |
 | Canary Islands andic soils (Armas Espinel 2013) | 66 | 62 | undisturbed | committed |
