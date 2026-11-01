@@ -4,14 +4,20 @@ characteristic curve (SWCC).
 Framework (see Problem_description.docx):
  1. Fit van Genuchten (vG) parameters (thetar, thetas, alpha, n) to the
     measured (h, theta) data, with the Mualem constraint m = 1 - 1/n.
- 2. Infer USDA texture class, particle fractions (% sand/silt/clay) and
-    saturated hydraulic conductivity Ks (cm/h) by distance-weighted
-    k-nearest-neighbor lookup in the GSHP database (Gupta et al. 2022),
-    using the fitted curve's water content at fixed heads (HEADS_CM) as
-    coordinates -- or the fitted vG parameters for a soil stated andic.
+ 2. Infer the USDA texture class with a gradient-boosted classifier, and
+    the particle fractions (% sand/silt/clay), saturated hydraulic
+    conductivity Ks (cm/h) and a second-opinion class by distance-weighted
+    k-nearest-neighbor lookup. Both use a merged global reference of
+    measured soil layers (GSHP, KSSL, EU-HYDI and others; see README and
+    REFERENCE_SETS), with the fitted curve's water content at fixed heads
+    (HEADS_CM) as coordinates -- or the fitted vG parameters for a soil
+    stated andic.
+ 3. Give a second, physical estimate of Ks from the fitted curve alone
+    (Marshall 1958 capillary bundle), with no neighbors behind it.
 
 Uncertainty: vG fit uncertainty is propagated by Monte Carlo sampling of
-the fit covariance; each draw votes through its own kNN neighborhood.
+the fit covariance; each draw goes to the classifier and to its own kNN
+neighborhood.
 
 Input units: h in kPa (suction, positive); theta as volumetric fraction
 (m3/m3) or percent — auto-detected (any theta > 1 means percent).
