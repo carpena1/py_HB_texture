@@ -564,11 +564,11 @@ does not sleep during the runs.
 
 ```bash
 export OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 VECLIB_MAXIMUM_THREADS=1 MKL_NUM_THREADS=1
-caffeinate -i .venv/bin/python verify_ks_physical.py > ks_physical.log 2>&1              # ~10 min: the source-blocked tables of A3
-caffeinate -i .venv/bin/python verify_external.py nj_ssir26 > nj_external.log 2>&1        # the New Jersey test set, all three designs
+caffeinate -i .venv/bin/python validation/verify_ks_physical.py > ks_physical.log 2>&1              # ~10 min: the source-blocked tables of A3
+caffeinate -i .venv/bin/python validation/verify_external.py nj_ssir26 > nj_external.log 2>&1        # the New Jersey test set, all three designs
 caffeinate -i .venv/bin/python figures/make_external_report.py nj_ssir26                  # its fig6 and ks_variants.csv
 caffeinate -i .venv/bin/python figures/make_external_report.py babaeian_zanjanrood        # the same for Zanjanrood
-.venv/bin/python verify_literature_methods.py > literature_methods.log 2>&1               # seconds: the literature forms (A4 and B3); reads figures/cache/ks_neighbors.csv and predictive.csv
+.venv/bin/python validation/verify_literature_methods.py > literature_methods.log 2>&1               # seconds: the literature forms (A4 and B3); reads figures/cache/ks_neighbors.csv and predictive.csv
 ```
 
 The per-soil reports go to `figures/external/<set>/`. `caffeinate` is for

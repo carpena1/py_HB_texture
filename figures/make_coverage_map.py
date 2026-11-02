@@ -29,6 +29,7 @@ import pandas as pd
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.dirname(HERE))
+sys.path.insert(0, os.path.join(os.path.dirname(HERE), "validation"))
 import swcc_texture as st                     # noqa: E402
 from verify_common import EU_BBOX             # noqa: E402
 

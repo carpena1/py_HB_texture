@@ -22,6 +22,7 @@ import matplotlib.pyplot as plt
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 sys.path.insert(0, ROOT)
+sys.path.insert(0, os.path.join(ROOT, "prepare"))
 os.chdir(ROOT)
 sys.argv = ["x"]
 import prepare_andalusia as pa

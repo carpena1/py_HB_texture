@@ -35,6 +35,7 @@ import pandas as pd
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, ROOT)
+sys.path.insert(0, os.path.join(ROOT, "validation"))
 os.chdir(ROOT)
 
 import swcc_texture as st                      # noqa: E402

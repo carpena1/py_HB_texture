@@ -114,7 +114,7 @@ Coverage is not accuracy. The rows below are paired: the same targets,
 predicted from the public reference and then with EU-HYDI added. The folds are
 grouped by profile or by laboratory, so neither model ever sees the target.
 There are sixty targets per class, both models, exact texture class
-(`dev/verify_euhydi.py`, October 2026).
+(`validation/archive/verify_euhydi.py`, October 2026).
 
 | Targets | Model | Public reference | + EU-HYDI | Change |
 |---|---|---:|---:|---:|

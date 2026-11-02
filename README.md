@@ -1210,7 +1210,7 @@ held out together (278 of the 341), the flag cost 11 points. The Canary
 soils' exact class is scored against a hexametaphosphate texture that
 under-disperses allophane.
 
-Each change below was tested with paired designs. The scripts are in `dev/`.
+Each change below was tested with paired designs. The scripts are in `validation/archive/`.
 
 | change | result | why not adopted |
 |---|---|---|
@@ -1245,26 +1245,31 @@ laboratory in the reference is worth +5 points. That is what
   so the tool finds each one itself) and `13_SiL_UNSODA.csv` (a real
   undisturbed silt loam that is not in the default reference)
 
-**Building the reference** — each script documents where to get its raw
-input: `prepare_gshp.py`, `prepare_kssl.py`, `prepare_hohenbrink.py`,
-`prepare_babaeian_zanjanrood.py`, `prepare_babaeian_az.py`,
-`prepare_armas.py`, `prepare_tong.py`, `prepare_natsoil.py`, `prepare_boorowa.py`, `prepare_nj_ssir26.py`, `prepare_andalusia.py`, `prepare_euhydi.py`, `prepare_willard.py`,
+**`prepare/` — building the reference.** Each script documents where to get
+its raw input and writes one table in `data/`: `prepare_gshp.py`,
+`prepare_kssl.py`, `prepare_hohenbrink.py`, `prepare_babaeian_zanjanrood.py`,
+`prepare_babaeian_az.py`, `prepare_armas.py`, `prepare_tong.py`,
+`prepare_natsoil.py`, `prepare_boorowa.py`, `prepare_nj_ssir26.py`,
+`prepare_andalusia.py`, `prepare_euhydi.py`, `prepare_willard.py`,
 `prepare_fujii.py`, `prepare_ksatssir.py`, `prepare_kansas.py`,
-`prepare_unsoda.py`, `prepare_sdb.py`; `prepare_volcanic.py` (the volcanic and andic fields);
-`free_m.py` (an unconstrained companion fit written alongside the Mualem
-one).
+`prepare_unsoda.py`, `prepare_sdb.py`; `prepare_volcanic.py` (the volcanic and
+andic fields); `free_m.py` (an unconstrained companion fit written alongside
+the Mualem one). Run them from the repository root, for example
+`.venv/bin/python prepare/prepare_kansas.py`.
 
-**Verification** — `verify_holdout.py` (headline accuracy at each hold-out
-level), `verify_hybrid.py`, `verify_ceiling.py`,
-`verify_source_blocked.py` (per-laboratory leakage), `verify_sample_type.py`,
-`verify_ks_neighbors.py` (how many neighbours Ks comes from), `verify_predictive.py`
-and `verify_network.py` (what a new sensor network can expect; proximity, verified
-sites, study units, own-site weighting), `verify_covariates.py`, `verify_external.py` (an outside dataset before it
-joins the reference), `verify_volcanic.py`, `verify_andic_knn.py` and
-`verify_andic.py` (volcanic and andic soils), the benchmarks `verify_carsel_parrish.py`,
-`verify_rosetta.py`, `verify_gshp.py`, `verify_groups.py`, and the shared
-`ksat_metrics.py` and `verify_common.py` (whose `map_folds` runs folds in
-parallel, one process per core).
+**`validation/` — the tests.** The scripts behind the accuracy figures in
+this README, the admission test for new data (`verify_external.py`,
+`verify_join_effect.py`) and the tests that set the tool's design, with the
+shared helpers `verify_common.py` (thread pinning and the process pool that
+runs folds on every core), `verify_groups.py` and `ksat_metrics.py`.
+`validation/README.md` lists every script and the question it answers. Run
+them from the repository root, for example
+`.venv/bin/python validation/verify_holdout.py`. `validation/archive/` keeps
+superseded experiments for the record (see its README).
+
+**`studies/`** — side studies with their own code: `studies/ivg/` fits the
+improved van Genuchten model (`ivg.py`, `ivg_fits.py`) for
+`validation/verify_ivg.py`.
 
 **Figures** — `figures/workflow.html` (how the reference is built, how a
 prediction is made, what the validation proves) with its SVGs;
@@ -1272,8 +1277,6 @@ prediction is made, what the validation proves) with its SVGs;
 SVGs from it, so edit the page and rerun the script; and
 `figures/make_coverage_map.py`, `figures/make_class_distribution.py` and
 `figures/make_predictive_figures.py` (the figures of "Is it predictive?").
-
-**`dev/`** — superseded experiments, kept for the record (see `dev/README.md`).
 
 ## References
 

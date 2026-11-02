@@ -282,7 +282,7 @@ def load_reference_df(name=DEFAULT_REFERENCE):
     if not have or any(f not in RESTRICTED_TABLES for f in missing):
         raise FileNotFoundError(
             f"reference set {name!r} needs {', '.join(missing)}, which is not "
-            f"in this checkout. Build it with the matching prepare_*.py; "
+            f"in this checkout. Build it with the matching prepare/prepare_*.py; "
             f"restricted tables are not distributed.")
     for f in missing:
         if f not in _noted_missing:
